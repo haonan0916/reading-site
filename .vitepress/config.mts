@@ -7,6 +7,9 @@ export default defineConfig({
   title: "前端知识库",
   description: "前端知识总结、面试常见问题、简历文档",
   ignoreDeadLinks: true,
+  head: [
+    ['link', { rel: 'icon', href: `${base}logo.png` }],
+  ],
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
     logo: '/logo.png',
