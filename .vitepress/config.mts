@@ -71,6 +71,10 @@ export default defineConfig({
           {
             text: 'Uniapp',
             link: '/framework/uniapp'
+          },
+          {
+            text: '微信小程序',
+            link: '/framework/微信小程序'
           }
         ]
       },
@@ -143,6 +147,10 @@ export default defineConfig({
           {
             text: 'Uniapp',
             link: '/framework/uniapp'
+          },
+          {
+            text: '微信小程序',
+            link: '/framework/微信小程序'
           }
         ]
       },
