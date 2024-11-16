@@ -1,8 +1,9 @@
 import { defineConfig } from 'vitepress'
+const base = "/reading-site/"
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
-  base: '/vitepress-note/',
+  base,
   title: "前端知识库",
   description: "前端知识总结、面试常见问题、简历文档",
   ignoreDeadLinks: true,
