@@ -3143,5 +3143,257 @@ module.exports = {
 
 
 
-# 对keep-alive的理解，它是如何实现的，具体缓存的是什么？
+# keep-alive
+
+如果需要在组件切换的时候，保存一些组件的状态防止多次渲染，就可以使用 `keep-alive` 组件包裹需要保存的组件。
+
+> [!TIP]
+>
+> `keep-alive` 有三个属性：
+>
+> - `include` 字符串或正则表达式，只有名称匹配的组件会被匹配；
+> - `exclude` 字符串或正则表达式，任何名称匹配的组件都不会被缓存；
+> - `max` 数字，最多可以缓存多少组件实例。
+
+
+
+> [!CAUTION]
+>
+> `keep-alive` 包裹动态组件时，会缓存不活动的组件实例。
+
+
+
+**主要流程**
+
+1. 判断组件 `name` ，不在 `include` 或者在 `exclude` 中，直接返回 `vnode`，说明该组件不被缓存。
+2. 获取组件实例 `key` ，如果有获取实例的 `key`，否则重新生成。
+3. `key` 生成规则，`cid +"::"+ tag` ，仅靠 `cid` 是不够的，因为相同的构造函数可以注册为不同的本地组件。
+4. 如果缓存对象内存在，则直接从缓存对象中获取组件实例给 `vnode` ，不存在则添加到缓存对象中。 
+5. 最大缓存数量，当缓存组件数量超过 `max` 值时，清除 `keys` 数组内**第一个组件**。
+
+
+
+**render函数**
+
+1. 会在 `keep-alive` 组件内部去写自己的内容，所以可以去获取默认 `slot` 的内容，然后根据这个去获取组件。
+2. `keep-alive` 只对第一个组件有效，所以获取第一个子组件。
+3. 和 `keep-alive` 搭配使用的一般有：动态组件 和 `router-view`。
+
+
+
+> [!TIP]
+>
+> `keep-alive` 具体是通过 `cache` 数组缓存所有组件的 `vnode` 实例。当 `cache` 内原有组件被使用时会将该组件 `key` 从 `keys` 数组中删除，然后 `push` 到 `keys` 数组最后，以便**清除最不常用组件**。
+
+
+
+**实现步骤**
+
+1. 获取 `keep-alive` 下第一个子组件的实例对象，通过他去获取这个组件的组件名
+2. 通过当前组件名去匹配原来 `include` 和 `exclude`，判断当前组件是否需要缓存，不需要缓存，直接返回当前组件的实例 `vNode`
+3. 需要缓存，判断他当前是否在缓存数组里面：
+
+- 存在，则将他原来位置上的 `key` 给移除，同时将这个组件的 `key` 放到数组最后面（`LRU`）
+- 不存在，将组件 `key` 放入数组，然后判断当前 `key` 数组是否超过 `max` 所设置的范围，超过，那么削减未使用时间最长的一个组件的 `key` 
+
+4. 最后将这个组件的 `keepAlive` 设置为 `true`
+
+
+
+**keep-alive 本身的创建过程和 patch 过程**
+
+缓存渲染的时候，会根据 `vnode.componentInstance`（首次渲染 `vnode.componentInstance` 为 `undefined`） 和 `keepAlive` 属性判断不会执行组件的 `created、mounted` 等钩子函数，而是对缓存的组件执行 `patch` 过程∶ 直接把缓存的 `DOM` 对象直接插入到目标元素中，完成了数据更新的情况下的渲染过程。
+
+**首次渲染**
+
+- 组件的首次渲染∶判断组件的 `abstract` 属性，才往父组件里面挂载 `DOM`
+- 判断当前 `keepAlive` 和 `componentInstance` 是否存在来判断是否要执行组件 `prepatch` 还是执行创建 `componentlnstance`
+
+`prepatch` 操作就不会在执行组件的 `mounted` 和 `created` 生命周期函数，而是直接将 `DOM` 插入
+
+
+
+> [!TIP]
+>
+> 如果为一个组件包裹了 `keep-alive`，那么它会多出两个生命周期：`deactivated、activated`。同时，`beforeDestroy` 和 `destroyed` 就不会再被触发了，因为组件不会被真正销毁。
+>
+> 当组件被换掉时，会被缓存到内存中、触发 `deactivated` 生命周期；当组件被切回来时，再去缓存里找这个组件、触发 `activated` 钩子函数。
+
+
+
+# $nextTick 原理及作用
+
+`nextTick` 的核心是利用了如 `Promise 、MutationObserver、setImmediate、setTimeout` 的原生 `JavaScript` 方法来模拟对应的微/宏任务的实现，本质是为了利用 `JavaScript` 的这些异步回调任务队列来实现 `Vue` 框架中自己的异步回调队列。
+
+`nextTick` 不仅是 `Vue` 内部的异步队列的调用方法，同时也允许开发者在实际项目中使用这个方法来满足实际应用中对 `DOM` 更新数据时机的后续逻辑处理。
+
+在以下情况下，会用到 `nextTick`：
+
+- 在数据变化后执行的某个操作，而这个操作需要使用随数据变化而变化的 `DOM` 结构的时候，这个操作就需要方法在`nextTick()`的回调函数中。
+- 在 `vue` 生命周期中，如果在 `created()` 钩子进行 `DOM` 操作，也一定要放在`nextTick()`的回调函数中。
+
+> [!IMPORTANT]
+>
+> 因为在 `created()` 钩子函数中，页面的 `DOM`  还未渲染，这时候也没办法操作 `DOM` ，所以，此时如果想要操作 `DOM`，必须将操作的代码放在`nextTick()`的回调函数中。
+
+
+
+# Vue2 重新数组方法
+
+> [!TIP]
+>
+> 重写了数组的原生方法，先获取到数组的 `observer` 监视器对象，如果有新的值，就调用 `observeArray` 对新的值继续观察变化，手动调用 `notify` 通知依赖更新，通知 `watcher `订阅者，执行 `update` 函数。
+
+
+
+# Vue template 到 render 的过程
+
+`vue` 的模版编译过程主要如下：**template -> ast -> render函数**
+
+`vue` 在模版编译版本的代码中会执行 `compileToFunctions` 将 `template` 转化为 `render` 函数：
+
+```js
+// 将模板编译为render函数
+const { render, staticRenderFns } = compileToFunctions(template,options//省略}, this)
+```
+
+
+
+`CompileToFunctions` 中的主要逻辑如下∶
+
+## 1. 调用parse方法将template转化为ast（抽象语法树）
+
+```js
+const ast = parse(template.trim(), options);
+```
+
+- **parse的目标**：把 `tamplate` 转换为 `AST` 树，它是一种用 `JavaScript` 对象的形式来描述整个模板。
+- **解析过程**：利用正则表达式顺序解析模板，当解析到开始标签、闭合标签、文本的时候都会分别执行对应的 回调函数，来达到构造 `AST` 树的目的。
+
+> [!TIP]
+>
+> `AST` 元素节点总共三种类型：`type` 为 `1` 表示普通元素、`2` 为表达式、`3` 为纯文本。
+
+
+
+## 2. **对静态节点做优化**
+
+```js
+optimize(ast,options)
+```
+
+这个过程主要分析出哪些是静态节点，给其打一个标记，为后续更新渲染可以直接跳过静态节点做优化。
+
+深度遍历 `AST`，查看每个子树的节点元素是否为静态节点或者静态节点根。如果为静态节点，他们生成的 `DOM` 永远不会改变，这对运行时模板更新起到了极大的优化作用。
+
+
+
+## 3. 生成代码
+
+```js
+const code = generate(ast, options)
+```
+
+`generate` 将 `ast` 抽象语法树编译成 `render` 字符串并将静态部分放到 `staticRenderFns` 中，最后通过 `new Function(render)` 生成 `render` 函数。
+
+
+
+# Vue 是如何收集依赖的
+
+`Vue` 的依赖收集机制主要基于 `Observer`、`Watcher` 和 `Dep` 三个类。
+
+1. `Observer` 模式用于将数据对象的所有属性转换为响应式属性。每个响应式属性都会被包装成一个 `Dep` 对象，用于追踪依赖。
+
+2. `Watcher` 类用于监听数据的变化，并在数据变化时执行相应的更新操作。每个组件实例和计算属性都会创建一个或多个 `Watcher` 实例。
+
+3. `Dep` 类用于管理依赖关系。每个响应式属性都有一个 `Dep` 实例，用于存储相关的 `Watcher` 实例。
+
+4. 依赖收集过程
+
+   > [!TIP]
+   >
+   > 1. **初始化**：当 Vue 实例创建时，会调用 `observe` 函数将数据对象转换为响应式对象。
+   > 2. **数据访问**：当组件首次渲染时，会访问数据属性。在访问属性时，`Object.defineProperty` 的 `get` 方法会被调用。
+   > 3. **收集依赖**：在 `get` 方法中，`Dep.target` 会被设置为当前的 `Watcher` 实例，然后调用 `dep.depend()` 将 `Watcher` 添加到 `Dep` 的订阅列表中。
+   > 4. **数据变更**：当数据属性发生变化时，`Object.defineProperty` 的 `set` 方法会被调用。
+   > 5. **通知更新**：在 `set` 方法中，调用 `dep.notify()` 通知所有订阅的 `Watcher` 实例，这些 `Watcher` 实例会调用 `update` 方法更新视图。
+
+
+
+# delete 和 Vue.delete 的区别
+
+> [!IMPORTANT]
+>
+> `delete` 和 `Vue.delete` 都是对数组或对象的删除。这两种方法对于**对象**来说没有区别，直接删除对象的属性；但是对于数组来说有区别。`delete` 只是被删除的元素变成了 `empty/undefined` 其他的元素的键值还是不变，数组长度也不变。 `Vue.delete` 是直接删除该元素，长度发生变化。
+
+
+
+# vm.$set 的实现原理
+
+> [!IMPORTANT]
+>
+> - 如果目标是**数组**，直接使用数组的 `splice` 方法触发响应式；
+> - 如果目标是**对象**，会先判断属性是否存在、对象是否是响应式，最终如果要对属性进行响应式处理，则是通过调用 `defineReactive` 方法进行响应式处理（ `defineReactive` 方法就是 `Vue` 在初始化对象时，给对象属性采用 `Object.defineProperty` 动态添加 `getter` 和 `setter` 的功能所调用的方法。）
+
+
+
+# Vue-router 跳转和 location.href 有什么区别
+
+> [!IMPORTANT]
+>
+> `vue-router` 使用 `pushState` 更新路由，不会刷新页面；`location.href` 会触发浏览器，页面刷新；
+> `vue-router` 是路由跳转或同一个页面跳转；`location.href` 是不同页面间跳转；
+> `vue-router` 是异步加载 `this.$nextTick(()=>{获取url});` `location.href` 是同步加载。
+
+
+
+# Vuex
+
+## Vuex 核心流程
+
+> [!TIP]
+>
+> - `vue `组件会触发（`dispatch`）一些事件或动作，也就是图中的 `Actions`;
+> - 在组件中发出的动作，肯定是想获取或者改变数据的，但是在 `vuex` 中，数据是集中管理的，不能直接去更改数据，所以会把这个动作提交（`Commit`）到 `Mutations` 中;
+> - 然后 `Mutations` 就去改变（`Mutate`）`State` 中的数据;
+> - 当 `State` 中的数据被改变之后，就会重新渲染（`Render`）到 `Vue Components` 中去，组件展示更新后的数据，完成一个流程。
+
+
+
+## Vuex 有哪几种属性
+
+> [!IMPORTANT]
+>
+> 有五种，分别是 `State、 Getter、Mutation 、Action、 Module`
+>
+> - `state` => 基本数据(数据源存放地)
+> - `getters` => 从基本数据派生出来的数据
+> - `mutations` => 提交更改数据的方法，同步
+> - `actions` => 像一个装饰器，包裹 `mutations`，使之可以异步。
+> - `modules` => 模块化 `Vuex`
+
+
+
+## 为什么 Vuex 的 mutation 中不能做异步操作
+
+> [!TIP]
+>
+> - `Vuex` 中所有的状态更新的唯一途径都是 `mutation`，异步操作通过 `Action` 来提交 `mutation` 实现，这样可以方便地跟踪每一个状态的变化，从而能够实现一些工具帮助更好地了解我们的应用。
+> - 每个 `mutation` 执行完成后都会对应到一个新的状态变更，这样 `devtools` 就可以打个快照存下来，然后就可以实现 `time-travel` 了。如果 `mutation ` 支持异步操作，就没有办法知道状态是何时更新的，无法很好的进行状态的追踪，给调试带来困难。
+
+
+
+## Vuex的严格模式是什么,有什么作用，如何开启？
+
+在严格模式下，无论何时发生了状态变更且不是由 `mutation` 函数引起的，将会抛出错误。这能保证所有的状态变更都能被调试工具跟踪到。
+
+在 `Vuex.Store` 构造器选项中开启,如下
+
+```js
+const store = new Vuex.Store({
+   strict: true 
+});
+```
+
+
 
