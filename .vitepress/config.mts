@@ -130,6 +130,10 @@ export default defineConfig({
           {
             text: 'TypeScript',
             link: '/basic/ts'
+          },
+          {
+            text: '计算机网络',
+            link: '/basic/计算机网络'
           }
         ]
       },
@@ -165,6 +169,15 @@ export default defineConfig({
             text: '微信小程序',
             link: '/framework/微信小程序'
           }
+        ]
+      },
+      {
+        text: '工程化',
+        items: [
+          {
+            text: 'Git',
+            link: '/engineering/git'
+          },
         ]
       },
       {
