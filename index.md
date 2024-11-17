@@ -4,7 +4,7 @@ layout: home
 
 hero:
   name: "前端知识库"
-  text: "前端知识总结、面试常见问题、简历文档等"
+  text: "记录前端知识、常见问题、学习记录等"
   tagline: My great project tagline
   image: 
     light: /knowledge-light.png

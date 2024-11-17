@@ -1703,3 +1703,162 @@ for (var [k, v] of obj) {
 
 
 
+# JSON 深拷贝的缺点
+
+## 1. 无法处理函数和循环引用
+
+### 1.1 无法处理函数
+
+- **问题**：`JSON.stringify` 和 `JSON.parse` 会**忽略对象中的函数**。
+
+```js
+const obj = {
+    name: 'Alice',
+    sayHello: function() {
+        console.log('Hello');
+    }
+};
+
+const deepCopy = JSON.parse(JSON.stringify(obj));
+console.log(deepCopy.sayHello); // undefined
+```
+
+
+
+### 1.2 无法处理循环引用
+
+-  **问题**：如果对象中有循环引用，`JSON.stringify` 会抛出错误。
+
+```js
+const obj = {};
+obj.self = obj;
+
+try {
+    const copy = JSON.parse(JSON.stringify(obj));
+} catch(err) {
+    console.log(err);
+}
+```
+
+
+
+## 2. 无法处理特殊对象类型
+
+### 2.1 无法处理 Date 对象
+
+- **问题**：`Date` 对象会被转换为字符串。
+
+```js
+const obj = {
+    date: new Date();
+}
+
+const copy = JSON.parse(JSON.stringify(obj));
+console.log(copy.date instanceof Date); // false
+```
+
+
+
+### 2.2 无法处理 RegExp 对象
+
+- **问题**：`RegExp` 对象会被转换为字符串。
+
+```js
+const obj = {
+    regex: /abc/g
+};
+
+const copy = JSON.parse(JSON.stringify(obj));
+console.log(copy.regex instanceof RegExp); // false
+```
+
+
+
+### 2.3 无法处理 Map 和 Set 对象
+
+- **问题**：`Map` 和 `Set` 对象会被转换为普通对象或数组。
+
+```js
+const obj = {
+    map: new Map([['key', 'value']]),
+    set: new Set([1, 2, 3])
+};
+
+const copy = JSON.parse(JSON.stringify(obj));
+console.log(copy.map instanceof Map); // false
+console.log(copy.set instanceof Set); // false
+```
+
+
+
+## 3. 性能问题
+
+### 3.1 序列化和反序列化的开销
+
+- **问题**：`JSON.stringify` 和 `JSON.parse` 需要进行字符串的序列化和反序列化，这在处理大型对象时可能会导致性能问题。
+
+```js
+const largeObj = { /* 很大的对象 */ };
+const startTime = performance.now();
+const copy = JSON.parse(JSON.stringify(largeObj));
+const endTime = performance.now();
+console.log(`Time taken: ${endTime - startTime} ms`);
+```
+
+
+
+## 4. 丢失原型链
+
+### 4.1 无法保留原型链
+
+- **问题**：`JSON.stringify` 和 `JSON.parse` 会创建新的对象，这些对象不会继承原始对象的原型链。
+
+```js
+function Person(name) {
+  this.name = name;
+}
+Person.prototype.greet = function() {
+  console.log(`Hello, my name is ${this.name}`);
+};
+
+const person = new Person('Alice');
+const copy = JSON.parse(JSON.stringify(person));
+copy.greet(); // TypeError: copy.greet is not a function
+```
+
+
+
+## 5. 无法处理 Symbol 类型
+
+- **问题**：`Symbol` 类型的键会被忽略。
+
+```js
+const obj = {
+    [Symbol('key')]: 'value'
+};
+
+const copy = JSON.parse(JSON.stringify(obj));
+console.log(copy); // {}
+```
+
+
+
+## 6. 无法处理不可枚举属性
+
+### 6.1 无法处理不可枚举属性
+
+- **问题**：不可枚举属性不会被复制。
+
+```js
+const obj = {};
+Object.defineProperty(obj, 'hidden', {
+    value: 'value',
+    enumerable: false
+});
+
+const copy = JSON.parse(JSON.stringify(obj));
+console.log(copy.hidden); // undefined
+```
+
+
+
