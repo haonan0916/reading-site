@@ -1862,3 +1862,274 @@ console.log(copy.hidden); // undefined
 
 
 
+# 浏览器的深储存和浅储存
+
+在浏览器中，"深储存"和"浅储存"通常指的是将数据保存到浏览器的存储机制中，这些机制包括 `localStorage`、`sessionStorage` 和 `IndexedDB`。这些存储机制可以用来保存不同类型的数据，以便在用户会话之间或跨页面访问时使用。
+
+### 1. 浅储存
+
+**浅储存**通常指的是将简单的、扁平化的数据（如字符串、数字、布尔值等）直接存储到浏览器的存储机制中。这些数据通常是不可变的，或者不需要复杂的结构。
+
+#### 1.1 `localStorage`
+
+`localStorage` 是一个持久化的存储机制，数据在浏览器关闭后仍然保留。
+
+```js
+// 存储数据
+localStorage.setItem('username', 'Alice');
+
+// 获取数据
+const username = localStorage.getItem('username');
+console.log(username); // Alice
+
+// 删除数据
+localStorage.removeItem('username');
+
+// 清空所有数据
+localStorage.clear();
+```
+
+#### 1.2 `sessionStorage`
+
+`sessionStorage` 是一个会话级别的存储机制，数据在浏览器标签页关闭后会被清除。
+
+```js
+// 存储数据
+sessionStorage.setItem('username', 'Alice');
+
+// 获取数据
+const username = sessionStorage.getItem('username');
+console.log(username); // Alice
+
+// 删除数据
+sessionStorage.removeItem('username');
+
+// 清空所有数据
+sessionStorage.clear();
+```
+
+### 2. 深储存
+
+**深储存**通常指的是将复杂的数据结构（如对象、数组等）存储到浏览器的存储机制中。这些数据需要进行序列化和反序列化，以便在存储和读取时保持其结构和内容。
+
+#### 2.1 `localStorage` 和 `sessionStorage` 的深储存
+
+由于 `localStorage` 和 `sessionStorage` 只能存储字符串，因此需要使用 `JSON.stringify` 和 `JSON.parse` 进行序列化和反序列化。
+
+```js
+// 存储复杂数据
+const user = { name: 'Alice', age: 25 };
+localStorage.setItem('user', JSON.stringify(user));
+
+// 获取复杂数据
+const storedUser = JSON.parse(localStorage.getItem('user'));
+console.log(storedUser); // { name: 'Alice', age: 25 }
+
+// 删除数据
+localStorage.removeItem('user');
+
+// 清空所有数据
+localStorage.clear();
+```
+
+#### 2.2 `IndexedDB`
+
+`IndexedDB` 是一个更强大的客户端存储机制，支持存储结构化数据和索引。它可以用于存储大量的数据，并且提供了事务处理机制。
+
+##### 创建数据库和对象存储
+
+```js
+const request = indexedDB.open('myDatabase', 1);
+
+request.onupgradeneeded = function(event) {
+  const db = event.target.result;
+  const objectStore = db.createObjectStore('users', { keyPath: 'id' });
+  objectStore.createIndex('name', 'name', { unique: false });
+  objectStore.createIndex('age', 'age', { unique: false });
+};
+
+request.onsuccess = function(event) {
+  const db = event.target.result;
+  // 使用数据库
+};
+
+request.onerror = function(event) {
+  console.error('Error opening database:', event.target.error);
+};
+```
+
+##### 存储数据
+
+```js
+function addUser(db, user) {
+  const transaction = db.transaction(['users'], 'readwrite');
+  const store = transaction.objectStore('users');
+  const request = store.add(user);
+
+  request.onsuccess = function(event) {
+    console.log('User added successfully');
+  };
+
+  request.onerror = function(event) {
+    console.error('Error adding user:', event.target.error);
+  };
+}
+
+const user = { id: 1, name: 'Alice', age: 25 };
+addUser(db, user);
+```
+
+##### 获取数据
+
+```js
+function getUser(db, id) {
+  const transaction = db.transaction(['users'], 'readonly');
+  const store = transaction.objectStore('users');
+  const request = store.get(id);
+
+  request.onsuccess = function(event) {
+    const user = event.target.result;
+    console.log(user);
+  };
+
+  request.onerror = function(event) {
+    console.error('Error getting user:', event.target.error);
+  };
+}
+
+getUser(db, 1);
+```
+
+### 总结
+
+- **浅储存**：适用于存储简单的、扁平化的数据，如字符串、数字、布尔值等。使用 `localStorage` 和 `sessionStorage`。
+- **深储存**：适用于存储复杂的、结构化的数据，如对象、数组等。使用 `JSON.stringify` 和 `JSON.parse` 进行序列化和反序列化，或者使用 `IndexedDB` 进行更复杂的存储和查询。
+
+
+
+# 浏览器是如何缓存 url 的
+
+浏览器缓存 `URL` 的机制是为了提高网页加载速度和减少网络流量。浏览器通过多种方式缓存资源，包括 `HTTP` 缓存、浏览器缓存、和服务工作者（`Service Workers`）。以下是对这些缓存机制的详细解释：
+
+### 1. HTTP 缓存
+
+`HTTP` 缓存是最常用的缓存机制，它通过 `HTTP` 头部信息来控制缓存行为。主要涉及以下几个头部字段：
+
+#### 1.1 `Cache-Control`
+
+`Cache-Control` 头部用于控制资源的缓存策略。常见的指令包括：
+
+- `max-age=<seconds>`：指定资源在缓存中的最大有效时间（以秒为单位）。
+- `no-cache`：强制在每次请求时都向服务器验证资源的有效性。
+- `no-store`：禁止缓存资源。
+- `must-revalidate`：要求在缓存过期后必须重新验证资源的有效性。
+
+示例：
+
+```http
+Cache-Control: max-age=3600, must-revalidate
+```
+
+#### 1.2 `Expires`
+
+`Expires` 头部指定资源的过期时间，是一个绝对时间戳。如果同时设置了 `Cache-Control` 和 `Expires`，优先使用 `Cache-Control`。
+
+示例：
+
+```http
+Expires: Wed, 21 Oct 2021 07:28:00 GMT
+```
+
+#### 1.3 `ETag` 和 `If-None-Match`
+
+`ETag` 是一个唯一标识符，用于验证资源是否已更改。`If-None-Match` 头部在请求中包含 `ETag`，服务器根据 `ETag` 判断资源是否已更改。
+
+示例：
+
+```http
+ETag: "1234567890abcdef"
+If-None-Match: "1234567890abcdef"
+```
+
+#### 1.4 `Last-Modified` 和 `If-Modified-Since`
+
+`Last-Modified` 头部指定资源的最后修改时间。`If-Modified-Since` 头部在请求中包含这个时间，服务器根据这个时间判断资源是否已更改。
+
+示例：
+
+```http
+Last-Modified: Wed, 21 Oct 2021 07:28:00 GMT
+If-Modified-Since: Wed, 21 Oct 2021 07:28:00 GMT
+```
+
+### 2. 浏览器缓存
+
+浏览器缓存是浏览器内部的缓存机制，用于**存储静态资源**，如图片、`CSS` 文件和 `JavaScript` 文件。浏览器缓存通常分为两种类型：
+
+#### 2.1 内存缓存
+
+内存缓存（也称为内存缓存或临时缓存）存储在浏览器的内存中，用于存储当前会话期间频繁访问的资源。这些资源在浏览器关闭后会被清除。
+
+#### 2.2 磁盘缓存
+
+磁盘缓存存储在用户的硬盘上，用于存储长时间内可能需要的资源。这些资源在浏览器关闭后仍然保留，直到缓存过期或被清理。
+
+### 3. 服务工作者（Service Workers）
+
+服务工作者是一种客户端脚本，可以拦截和处理网络请求，实现离线访问和自定义缓存策略。
+
+#### 3.1 注册服务工作者
+
+在主页面中注册服务工作者：
+
+```js
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js')
+      .then(registration => {
+        console.log('Service Worker registered with scope:', registration.scope);
+      })
+      .catch(error => {
+        console.error('Service Worker registration failed:', error);
+      });
+  });
+}
+```
+
+#### 3.2 缓存策略
+
+在服务工作者脚本中定义缓存策略：
+
+```js
+const CACHE_NAME = 'my-site-cache-v1';
+const urlsToCache = [
+  '/',
+  '/styles/main.css',
+  '/scripts/app.js'
+];
+
+self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then(cache => {
+        return cache.addAll(urlsTo_cache);
+      })
+  );
+});
+
+self.addEventListener('fetch', event => {
+  event.respondWith(
+    caches.match(event.request)
+      .then(response => {
+        if (response) {
+          return response;
+        }
+        return fetch(event.request);
+      })
+  );
+});
+```
+
+### 总结
+
+浏览器通过多种机制缓存 `URL` 和相关资源，包括 `HTTP` 缓存、浏览器缓存和服务工作者。这些机制共同作用，提高了网页的加载速度和用户体验。选择合适的缓存策略可以显著提升应用的性能和可靠性。

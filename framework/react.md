@@ -3076,9 +3076,7 @@ export const SearchBox: React.FC = () => {
 }
 ```
 
-
-
-# React 
+# React
 
 ## 1. 受控组件与非受控组件
 
@@ -3106,8 +3104,6 @@ export const SearchBox: React.FC = () => {
 >
 > 根据用户输入动态改变 `UI` 等场景都非常适合使用受控组件。
 
-
-
 > [!CAUTION]
 >
 > 当把状态数据，赋值给表单的 `value` 属性，该表单元素受控
@@ -3122,17 +3118,17 @@ import React, {useState} from 'react';
 
 const ControlleredComponent: React.FC = () => {
     const [value, setValue] = useState<string>('');
-    
+  
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setValue(e.target!.value);
     }
-    
+  
     const handleSubmit = (e: xxxx) => {
         e.preventDefault();
         console.log('Submitted value:', value);
         // ...
     }
-    
+  
     return (
     	<>
         	<form onSubmit={handleSubmit}>
@@ -3143,8 +3139,6 @@ const ControlleredComponent: React.FC = () => {
     )
 }
 ```
-
-
 
 ### 非受控组件
 
@@ -3160,21 +3154,19 @@ const ControlleredComponent: React.FC = () => {
 >
 > 当需要操作其他组件的值或当受控组件的控制力过强导致某些简单场景难以实现时，可以考虑使用非受控组件。但请注意，非受控组件的控制力相对较弱，可能不适用于需要即时验证或动态改变 `UI` 的复杂场景。
 
-
-
 ```tsx
 import React, {useState, useRef} from 'react';
 
 const UnControlleredComponent: React.FC = () => {
     const [value, setValue] = useState<string>('');
     const inputRef = useRef<HTMLInputElement>(null);
-    
+  
     const handleSubmit = (e: xxxx) => {
         e.preventDefault();
         console.log(inputRef.current.value);
         // ...
     }
-    
+  
     return (
     	<>
         	<form onSubmit={handleSubmit}>
@@ -3186,19 +3178,13 @@ const UnControlleredComponent: React.FC = () => {
 }
 ```
 
+大部分时候**推荐使用受控组件来实现表单**，因为在受控组件中，表单数据由 `React`组件负责处理
 
-
-
-
-大部分时候**推荐使用受控组件来实现表单**，因为在受控组件中，表单数据由`React`组件负责处理
-
-如果选择非受控组件的话，控制能力较弱，表单数据就由`DOM`本身处理，但更加方便快捷，代码量少
+如果选择非受控组件的话，控制能力较弱，表单数据就由 `DOM`本身处理，但更加方便快捷，代码量少
 
 针对两者的区别，其应用场景如下图所示：
 
 ![img](https://static.vue-js.com/f28aed20-df2f-11eb-ab90-d9ae814b240d.png)
-
-
 
 ## 2. 防止子组件重新渲染的方式
 
@@ -3214,8 +3200,6 @@ const UnControlleredComponent: React.FC = () => {
 > })
 > ```
 >
-> 
->
 > 2. 使用 `useMemo` 和 `useCallback`
 >    - **`useMemo`** 用于缓存计算结果。如果你有一个昂贵的计算过程，可以使用 `useMemo` 来缓存结果，只有当依赖项发生变化时才会重新计算。
 >    - **`useCallback`** 用于缓存函数。它与 `useMemo` 类似，但它专门用于返回一个记忆化的函数。这有助于防止父组件传递的新函数导致子组件不必要的重新渲染。
@@ -3223,16 +3207,14 @@ const UnControlleredComponent: React.FC = () => {
 > ```tsx
 > const ParentComponent: React.FC = () => {
 >     const [count, setCount] = useState<number>(0);
-> 	
+>
 >     const memorizedCallback = useCallback(() => {
 >         // 这个回调函数不会因为count的变化而改变
 >     }, []);
->     
+>   
 >     return <ChildComponent onSomeEvent={memoizedCallback} />;
 > }
 > ```
->
-> 
 >
 > 3. 使用 `shouldComponentUpdate` 生命周期方法（类组件）
 >
@@ -3247,21 +3229,16 @@ const UnControlleredComponent: React.FC = () => {
 >     }
 >     return true;
 >   }
-> 
+>
 >   render() {
 >     // 组件逻辑
 >   }
 > }
 > ```
 >
-> 
->
 > 4. 使用 `PureComponent` 或 `PureComponent` 类
 >
 >    `PureComponent` 是一个React组件基类，它实现了 `shouldComponentUpdate` 方法，进行了浅比较（shallow comparison）。如果组件的props或state没有浅层变化，那么组件就不会重新渲染。
->
->    
->
 > 5. 自定义 `shouldComponentUpdate` 实现
 >
 >    对于更复杂的场景，你可能需要自定义 `shouldComponentUpdate` 方法，以更精确地控制何时重新渲染。
@@ -3269,8 +3246,6 @@ const UnControlleredComponent: React.FC = () => {
 > **总结**
 >
 > 选择哪种方法取决于你的具体需求和组件的复杂性。通常，对于简单的展示组件，`React.memo` 和 `useMemo`/`useCallback` 是最常用的方法。对于复杂的类组件，`PureComponent` 或自定义 `shouldComponentUpdate` 可能更适合。
-
-
 
 ### 代码输出题
 
@@ -3327,17 +3302,18 @@ root.render(<App/>)
 >
 > 代码输出结果为：
 >
-> > App
-> >
-> > A
-> >
-> > B
-> >
-> > C
-> >
-> > D
-> >
-> > A
+>> App
+>>
+>> A
+>>
+>> B
+>>
+>> C
+>>
+>> D
+>>
+>> A
+>>
 >
 > **解释**：
 >
@@ -3350,8 +3326,6 @@ root.render(<App/>)
 > 7. 回到 **App** 组件，最后 `<D/>` 组件被渲染。当 `<D>` 组件被渲染时，`console.log('D')` 被执行，因此我们会在控制台中看到 `"D"` 的输出。
 > 8. 到此为止，初始渲染完成。由于在 **A** 组件中的 `useEffect` 引发了一次状态更新，React 将重新渲染 **A** 组件及其子组件。但是，在重新渲染的过程中，只有 **A** 组件相关的 `console.log` 语句会再次被执行，因为其他组件（如 **B**, **C**, 和 **D**）并没有发生任何变化，它们的状态或属性都没有改变，因此不会重新渲染。
 > 9. 在 **A** 组件重新渲染时，`console.log('A')` 再次被执行，因此我们会再次看到 `"A"` 的输出。而 **A** 组件的子组件不会重新渲染，因此 `"B"`, `"C"`, 和 `"D"` 不会再次出现。
-
-
 
 ## 3. Suspense
 
@@ -3419,29 +3393,26 @@ root.render(<App/>)
 >
 > 正确答案是：
 >
-> > App
-> >
-> > A1
-> >
-> > fallback
-> >
-> > A1
-> >
-> > A2
+>> App
+>>
+>> A1
+>>
+>> fallback
+>>
+>> A1
+>>
+>> A2
+>>
 >
 > 你答对了吗？
 
 我们在讲完 `Suspense` 的用法之后，再来详细分析下上面的输出。
-
-
 
 ### 什么是 Suspense
 
 > [!TIP]
 >
 > `Suspense` 是一个 React 组件，允许你在组件的子组件还在加载数据时显示一个临时或 `fallback` 界面。
-
-
 
 ### 如何使用 Suspense
 
@@ -3468,8 +3439,6 @@ const App = () => {
 
 在这个例子中，`Suspense` 组件会显示 `fallback` 内容（这里是 `Loading...`），直到 `DataComponent` 准备好渲染.
 
-
-
 懒加载组件示例：
 
 ```tsx
@@ -3493,8 +3462,6 @@ export default App;
 
 在这个示例中，`AsyncComponent` 是一个使用 `React.lazy` 动态加载的组件。当 `AsyncComponent` 还在加载时，`Suspense` 会显示 `<div>Loading...</div>` 作为占位内容。
 
-
-
 ### 工作原理
 
 > [!IMPORTANT]
@@ -3508,10 +3475,8 @@ export default App;
 > - 输出 `App` ：`App` 作为第一个输出是毋庸置疑的，`App` 是位于根组件的，根组件会最先渲染，因此，`App` 为第一个输出。
 > - 输出 `A1` ：`<A />` 作为 `<App />` 根组件的唯一的子组件，当执行到 `<A />` 这行代码时，就会去渲染子组件，子组件中 `console.log('A1')` 作为第一个被执行的语句，因此，输出 `A1`。
 > - 输出 `fallback` ：直到此时，我们的 `Suspense` 登场了，`Suspense` 会检查子组件是否正在等待一个 `promise` 而当子组件执行到 `const data = resource.get()` 这个语句时，会等待该方法返回一个 `promise`。因此，`React` 会“挂起”这些组件的渲染，并显示指定的 `fallback` 界面。输出 `fallback`。
-> - 输出 `A1`：我相信大家可能会在这个输出上出错，不明白为什么会输出 `A1` 。原因很简单，就是当子组件的`promise` 被解析后，`React` 会**重新渲染**这些挂起的组件，并用实际的数据替代 `fallback` 界面。因此，就会重新渲染 `A` 组件，输出 `A1`。
+> - 输出 `A1`：我相信大家可能会在这个输出上出错，不明白为什么会输出 `A1` 。原因很简单，就是当子组件的 `promise` 被解析后，`React` 会**重新渲染**这些挂起的组件，并用实际的数据替代 `fallback` 界面。因此，就会重新渲染 `A` 组件，输出 `A1`。
 > - 输出 `A2` ：接上一步，重新渲染 `A` 组件执行到 `console.log('A2')` 时，输出 `A2`。
-
-
 
 ### 数据_fetching 和懒加载
 
@@ -3543,13 +3508,9 @@ const App = () => {
 };
 ```
 
-
-
 ### 嵌套 Suspense
 
 我们可以嵌套多个 `Suspense` 组件来控制渲染顺序。如果某些组件需要不同时间加载数据，我们可以使用嵌套的 `Suspense` 来管理这些加载状态。
-
-
 
 ### 最佳实践和常见错误
 
@@ -3558,8 +3519,6 @@ const App = () => {
 > - 使用 `Suspense` 时，避免在其内部使用 `useEffect`，因为这会破坏 `Suspense` 的目的.
 > - 确保 `fallback` 组件是立即可用的，不应使用动态导入.
 > - 使用 `Error Boundary` 来处理渲染错误，而不是使用 `catch` 来捕获 `promise` 的错误.
-
-
 
 ## 4. React 中的 Props 为什么是只读的？
 
@@ -3575,8 +3534,6 @@ const App = () => {
 >
 > `props`就是汲取了纯函数的思想。`props` 的不可以变性就保证的相同的输入，页面显示的内容是一样的，并且不会产生副作用。
 
-
-
 ## 5. 高阶函数 HOC 的应用
 
 1. 属性代理 —— 条件渲染
@@ -3588,8 +3545,6 @@ function HOC(WrappedComponent) {
     }
 }
 ```
-
-
 
 2. 反向继承
 
@@ -3603,34 +3558,28 @@ const HOC = (WrappedCompoent) => {
 }
 ```
 
- 
-
-
-
 3. 反向继承——实现所谓声明周期的拦截
 
 ```jsx
 function HOC(WrappedComponent) {
     const didMount = WrappedComponent.prototype.componentDidMount;
-    
+  
     return class extends WrappedComponent {
         async componentDidMount() {
             if (didMount) {
                 await didMount.apply(this);
             }
-            
+          
             // 自定义事件处理
-            
+          
         }
-        
+      
         render() {
             return super.render();
         }
     }
 }
 ```
-
-
 
 4. 反向继承——计算组件的渲染时间
 
@@ -3643,21 +3592,21 @@ class Home entends React.Component {
 
 function withTiming(WrappedComponent) {
     let start, end;
-    
+  
     return class extends WrappedComponent {
         constructor(props) {
             super(props);
             start = 0;
             end = 0;
         }
-        
+      
         componentWillMount() {
             if (super.componentWillMount) {
                 super.componentWillMount();
             }
             start = Date.now();
         }
-        
+      
          componentDidMount() {
             if (super.componentDidMount) {
                 super.componentDidMount();
@@ -3669,14 +3618,10 @@ function withTiming(WrappedComponent) {
 }
 ```
 
-
-
 ### 属性代理和反向继承对比
 
-1. 属性代理：从“组合”角度出发，有利于从外部操作 `wrappedComponent`，可以操作 `props`，或者在`wrappedComponent` 外加一些拦截器(如条件渲染等)
+1. 属性代理：从“组合”角度出发，有利于从外部操作 `wrappedComponent`，可以操作 `props`，或者在 `wrappedComponent` 外加一些拦截器(如条件渲染等)
 2. 反向继承：从“继承”角度出发，从内部操作 `wrappedComponent`，可以操作组件内部的 `state`，生命周期和 `render` 等功能更加强大;
-
-
 
 ## 6. React 中的闭包陷阱
 
@@ -3684,8 +3629,8 @@ function withTiming(WrappedComponent) {
 >
 > `React Hooks` 中的闭包陷阱主要发生在两种情况：
 >
-> -  在 `useState` 中使用闭包；
-> - 在 `useEffect` 中使用闭包。 
+> - 在 `useState` 中使用闭包；
+> - 在 `useEffect` 中使用闭包。
 
 ### 6.1 useState 中的闭包陷阱
 
@@ -3759,8 +3704,6 @@ export const Counter: React.FC = () => {
 }
 ```
 
-
-
 ## 7. CSS-in-JS
 
 > [!TIP]
@@ -3778,12 +3721,12 @@ export const Counter: React.FC = () => {
 > ```tsx
 > import styled, { css } from 'styled-components';
 > import { FC } from 'react';
-> 
+>
 > // Button 组件
 > type ButtonPropsType = {
 >     primary?: boolean
 > }
-> 
+>
 > const Button = styled.button`
 > 	background: transparent;
 > 	border-radius: 3px;
@@ -3791,7 +3734,7 @@ export const Counter: React.FC = () => {
 > 	color: red;
 > 	margin: 0 1em;
 > 	padding: 0.25em 1em;
-> 	
+>
 > 	${
 > 		(props: ButtonPropsType) => {
 >             props.primary && css`
@@ -3801,12 +3744,12 @@ export const Counter: React.FC = () => {
 >         }
 > 	}
 > `
-> 
+>
 > // Container 组件
 > const Container = styled.div`
 > 	text-align: center;
 > `
-> 
+>
 > const Demo: FC = () => {
 >     return (
 >     	<div>
@@ -3817,10 +3760,6 @@ export const Counter: React.FC = () => {
 >     )
 > }
 > ```
->
-> 
-
-
 
 ## React 的 fiber 架构
 
@@ -3847,8 +3786,6 @@ export const Counter: React.FC = () => {
 1. **CPU瓶颈**：即应用的计算需求超过了 `CPU` 的处理能力。这里的 `CPU` 瓶颈通常指的是由于大量的 `Virtual DOM` 操作、组件更新或复杂的计算任务导致的 `CPU` 资源消耗过高，主线程（负责 `UI` 渲染的线程）被长时间占用，从而影响应用的响应速度和用户体验。
 2. **I/O瓶颈**：`I/O` 瓶颈主要与网络延迟有关，是客观存在的。前端只能尽量减少其对用户的影响，例如**区分不同操作的优先级**。
 
-
-
 ### Fiber架构的关键概念
 
 #### 1. Fiber节点
@@ -3865,11 +3802,9 @@ export const Counter: React.FC = () => {
 >
 > **这种结构和递归树相比，最重要的优势是在进行虚拟树的对比计算时，过程可以中断和恢复。**
 
-
-
 #### 2. 调度器Scheduler、协调器Reconciler、渲染器Renderer
 
-在 `React` 的架构中，`Scheduler`（调度器）、`Reconciler`（协调器）和`Renderer`（渲染器）共同工作来提供 `React` 组件的渲染和更新。
+在 `React` 的架构中，`Scheduler`（调度器）、`Reconciler`（协调器）和 `Renderer`（渲染器）共同工作来提供 `React` 组件的渲染和更新。
 
 - `Scheduler`（调度器）：根据任务的优先级安排任务执行顺序。
 - `Reconciler`（协调器）：根据新旧虚拟 `DOM` 树的差异确定需要更新的部分。
@@ -3881,21 +3816,15 @@ export const Counter: React.FC = () => {
 
 而 `Scheduler` 就是解决这个问题的。`React` 定义了不同的优先级级别，如 `Immediate`（最高优先级，用于处理用户交互）、`Normal`（默认优先级，一般的更新任务）、`Low`（低优先级，如后台任务）等。调度器可以根据任务的优先级来安排它们的执行顺序，以尽快地响应用户的操作，提升用户体验。
 
-
-
 #### 3. 时间切片 TimeSlice
 
 `Fiber` 架构引入**时间切片（Time Slicing）** 的概念，即将大的渲染任务分解为多个较小的片段，每个片段都可以在**一帧**内完成，这样可以防止长时间的任务阻塞主线程，保持界面的流畅性。
 
 时间切片允许 `React` 在每个片段之间执行其他优先级更高的任务，从而在不同任务之间找到一个平衡点，提高整体的响应性和用户体验。
 
-
-
 #### 4. 双重缓冲Double Buffering
 
 双重缓冲是一种渲染优化技术，其使用**两个Fiber树**来管理渲染，即**当前树 current tree**和**工作树 work-in-progress tree**。当前树代表屏幕上当前显示的内容，而工作树用于准备下一次的渲染更新，用以实现平滑的更新。
-
-
 
 ### React的渲染的两个阶段
 
@@ -3904,26 +3833,22 @@ export const Counter: React.FC = () => {
 - `render` 阶段：`Reconciler` 的工作阶段，这个阶段会调用组件的 `render` 方法
 - `commit` 阶段：`Renderer` 的工作阶段，可以类比 `git commit` 提交，这个阶段会渲染具体的 `UI`。
 
-
-
 ```jsx
 export default function App() {
     const [count, setCount] = useState(0);
-    
+  
     const handleIncrement = () => {
         setCount(prevCount => prevCount + 1);
     }
-    
+  
     return (
     	<div>
         	<h3>{count}</h3>
             <button onClick={handleIncrement}>点击加一</button>
-        </div>	
+        </div>
     );
 }
 ```
-
-
 
 先以这个两个阶段的整体工作流程举例：
 
@@ -3941,25 +3866,21 @@ export default function App() {
 
 > [!TIP]
 >
-> 由于Scheduler和Reconciler都是平台无关的，所以`React`为他们单独发了一个包[react-Reconciler](https://link.juejin.cn/?target=https%3A%2F%2Fwww.npmjs.com%2Fpackage%2Freact-reconciler)
-
-
+> 由于Scheduler和Reconciler都是平台无关的，所以 `React`为他们单独发了一个包[react-Reconciler](https://link.juejin.cn/?target=https%3A%2F%2Fwww.npmjs.com%2Fpackage%2Freact-reconciler)
 
 ### 调度器Scheduler
 
 上面提到，`Fiber` 和 `Scheduler` 都是 `React16` 引入的。`Scheduler` 是用来根据任务的优先级安排任务执行顺序的。
 
-其实部分浏览器的原生 `API` 已经实现了，即`requestIdleCallback`。
+其实部分浏览器的原生 `API` 已经实现了，即 `requestIdleCallback`。
 
-但是由于 *浏览器兼容性* 和 *触发频率受很多因素影响而不稳定* 等问题，`React`放弃使用浏览器原生的API，`React`实现了功能更完备的`requestIdleCallback`Polyfill，即**Scheduler**。除了在空闲时触发回调的功能外，**Scheduler**还提供了多种调度优先级供任务设置。
+但是由于 *浏览器兼容性* 和 *触发频率受很多因素影响而不稳定* 等问题，`React`放弃使用浏览器原生的API，`React`实现了功能更完备的 `requestIdleCallback`Polyfill，即**Scheduler**。除了在空闲时触发回调的功能外，**Scheduler**还提供了多种调度优先级供任务设置。
 
-另外，[Scheduler](https://link.juejin.cn/?target=https%3A%2F%2Fgithub.com%2Ffacebook%2Freact%2Fblob%2F1fb18e22ae66fdb1dc127347e169e73948778e5a%2Fpackages%2Fscheduler%2FREADME.md)是独立于`React`的库，可以用来实现任务调度，而不只是在 `React` 中使用。
+另外，[Scheduler](https://link.juejin.cn/?target=https%3A%2F%2Fgithub.com%2Ffacebook%2Freact%2Fblob%2F1fb18e22ae66fdb1dc127347e169e73948778e5a%2Fpackages%2Fscheduler%2FREADME.md)是独立于 `React`的库，可以用来实现任务调度，而不只是在 `React` 中使用。
 
 > [!TIP]
 >
 > 注：`Polyfill` 是指用于在旧版本浏览器中实现新标准 `API` 的代码填充（或称垫片）。它通常用于解决旧版本浏览器不支持新特性或 `API` 的问题。
-
-
 
 ### 协调器Reconciler与Render阶段
 
@@ -3969,14 +3890,12 @@ export default function App() {
 
 上面说到，在 `React15` 中**Reconciler**是递归处理虚拟 `DOM` 的。而 `React16` 中，更新工作从递归变成了可以中断的循环过程。
 
-- 每次循环都会调用`shouldYield`判断当前是否有剩余时间。如果当前浏览器帧没有剩余时间，`shouldYield`会中止循环，直到浏览器有空闲时间后再继续遍历。
+- 每次循环都会调用 `shouldYield`判断当前是否有剩余时间。如果当前浏览器帧没有剩余时间，`shouldYield`会中止循环，直到浏览器有空闲时间后再继续遍历。
 - `Reconciler` 与 `Renderer` 不再是交替工作。当 `Scheduler` 将任务交给 `Reconciler` 后， `Reconciler` 会**为变化的虚拟 DOM 打上代表增/删/更新的标记**，整个 `Scheduler` 与 `Reconciler` 的工作都在内存中进行。只有当所有组件都完成 `Reconciler` 的工作，才会统一交给 `Renderer`。
-
-
 
 #### Render 阶段
 
-类组件或者函数组件本身就是在 `render` 阶段被调用的。在源码中，`render` 阶段开始于`performSyncWorkOnRoot`或`performConcurrentWorkOnRoot`方法的调用，这取决于本次更新是同步更新还是异步更新。
+类组件或者函数组件本身就是在 `render` 阶段被调用的。在源码中，`render` 阶段开始于 `performSyncWorkOnRoot`或 `performConcurrentWorkOnRoot`方法的调用，这取决于本次更新是同步更新还是异步更新。
 
 1. **performSyncWorkOnRoot**：同步模式
 2. **performConcurrentWorkOnRoot**：并发模式
@@ -4000,13 +3919,13 @@ function workLoopConcurrent() {
 
 对于以上代码的注释：
 
-**workInProgress** ： 当前已创建的`workInProgress fiber`，即在内存中构建的`Fiber树`。
+**workInProgress** ： 当前已创建的 `workInProgress fiber`，即在内存中构建的 `Fiber树`。
 
 **shouldYield**： 如果当前浏览器帧没有剩余时间，`shouldYield`会中止循环，直到浏览器有空闲时间后再继续遍历。*（可以看到上面两种方法的区别是是否调用shouldYield）*
 
-**performUnitOfWork**： 创建下一个`Fiber节点`并赋值给`workInProgress`，并将`workInProgress`与已创建的`Fiber节点`连接起来构成`Fiber树`。
+**performUnitOfWork**： 创建下一个 `Fiber节点`并赋值给 `workInProgress`，并将 `workInProgress`与已创建的 `Fiber节点`连接起来构成 `Fiber树`。
 
-可以看到上面两种方法主要都是在执行`performUnitOfWork`,下面我们详细看一下`performUnitOfWork`。
+可以看到上面两种方法主要都是在执行 `performUnitOfWork`,下面我们详细看一下 `performUnitOfWork`。
 
 #### performUnitOfWork方法
 
@@ -4016,13 +3935,11 @@ function workLoopConcurrent() {
 
 > [!TIP]
 >
-> 作用：传入`当前Fiber节点`，创建`子Fiber节点`。
+> 作用：传入 `当前Fiber节点`，创建 `子Fiber节点`。
 
-首先从`rootFiber`开始向下**深度优先**遍历。为遍历到的每个`Fiber节点`调用**beginWork**方法（此方法后续详细介绍），该方法会根据传入的`Fiber节点`创建`子Fiber节点`，并将这两个`Fiber节点`连接起来。
+首先从 `rootFiber`开始向下**深度优先**遍历。为遍历到的每个 `Fiber节点`调用**beginWork**方法（此方法后续详细介绍），该方法会根据传入的 `Fiber节点`创建 `子Fiber节点`，并将这两个 `Fiber节点`连接起来。
 
 当遍历到叶子节点（即没有子组件的组件）时就会进入“归”阶段。
-
-
 
 #### “归阶段 —— complateWork”
 
@@ -4030,15 +3947,13 @@ function workLoopConcurrent() {
 >
 > 作用：收集一些副作用。
 
-在“归”阶段调用**completeWork**处理`Fiber节点`，主要是收集一些副作用（此方法后续详细介绍）。
+在“归”阶段调用**completeWork**处理 `Fiber节点`，主要是收集一些副作用（此方法后续详细介绍）。
 
-当某个`Fiber节点`执行完`completeWork`，如果其存在`同级Fiber节点`（即`fiber.sibling !== null`），会进入其`同级Fiber`的“递”阶段。
+当某个 `Fiber节点`执行完 `completeWork`，如果其存在 `同级Fiber节点`（即 `fiber.sibling !== null`），会进入其 `同级Fiber`的“递”阶段。
 
-如果不存在`同级Fiber`，会进入`父级 Fiber`的“归”阶段。
+如果不存在 `同级Fiber`，会进入 `父级 Fiber`的“归”阶段。
 
-“递”和“归”阶段会交错执行直到“归”到`rootFiber`。至此，`render阶段`的工作就结束了。
-
-
+“递”和“归”阶段会交错执行直到“归”到 `rootFiber`。至此，`render阶段`的工作就结束了。
 
 #### 图示 “ 递 ” 和 “ 归 ”
 
@@ -4050,27 +3965,23 @@ function workLoopConcurrent() {
 
 > [!TIP]
 >
-> 注：为什么指向父级 fiber( parent FiberNode )的字段叫做 return 而不是 parent？ 因为作为一个工作单元，`return`指节点执行完`completeWork`后会**返回**的下一个节点。子`Fiber节点`及其 `sibling` 节点完成工作后会**返回**其父级节点（`parent FiberNode` ），所以用`return`指代父级节点。
-
-
+> 注：为什么指向父级 fiber( parent FiberNode )的字段叫做 return 而不是 parent？ 因为作为一个工作单元，`return`指节点执行完 `completeWork`后会**返回**的下一个节点。子 `Fiber节点`及其 `sibling` 节点完成工作后会**返回**其父级节点（`parent FiberNode` ），所以用 `return`指代父级节点。
 
 ### 渲染器Renderer与commit阶段
 
-`render` 阶段完成后，开启`commit阶段`工作流程，`Renderer` 在此阶段工作。
+`render` 阶段完成后，开启 `commit阶段`工作流程，`Renderer` 在此阶段工作。
 
 与 `render` 阶段可以被打断不同的是，`commit` 阶段是不可以被打断的，一旦开始就会**同步**执行直到完成渲染工作。
 
 渲染器 `Renderer` 的工作主要就是**将各种副作用（flags 表示）commit 到宿主环境的 UI 中**。整个阶段可以分为三个阶段，分别是 **BeforeMutation 阶段、Mutation 阶段和 Layout 阶段**。
 
-1. **before mutation 阶段**（执行`DOM`操作前）：一些准备工作，如处理DOM节点渲染/删除后的 `autoFocus`、`blur` 逻辑、触发`getSnapshotBeforeUpdate`生命周期方法、调度`useEffect`。
-2. **mutation 阶段**（执行`DOM`操作）：React根据调和阶段的计算结果执行DOM的增删改操作。
-3. **layout 阶段**（执行`DOM`操作后）：执行一些可能需要最终的 DOM 结构信息才能完成的工作，比如测量 DOM 元素的尺寸和位置。
+1. **before mutation 阶段**（执行 `DOM`操作前）：一些准备工作，如处理DOM节点渲染/删除后的 `autoFocus`、`blur` 逻辑、触发 `getSnapshotBeforeUpdate`生命周期方法、调度 `useEffect`。
+2. **mutation 阶段**（执行 `DOM`操作）：React根据调和阶段的计算结果执行DOM的增删改操作。
+3. **layout 阶段**（执行 `DOM`操作后）：执行一些可能需要最终的 DOM 结构信息才能完成的工作，比如测量 DOM 元素的尺寸和位置。
 
 > [!TIP]
 >
-> 注意：在`before mutation阶段`之前和`layout阶段`之后还有一些额外工作，涉及到比如`useEffect`的触发、`优先级相关`的重置、`ref`的绑定/解绑。
-
-
+> 注意：在 `before mutation阶段`之前和 `layout阶段`之后还有一些额外工作，涉及到比如 `useEffect`的触发、`优先级相关`的重置、`ref`的绑定/解绑。
 
 ## Fiber的含义
 
@@ -4086,7 +3997,7 @@ function workLoopConcurrent() {
 
 #### fiber架构
 
-`React16`之前的`Reconciler`采用递归的方式执行，数据保存在递归调用栈中，所以被称为`stack Reconciler`。`React16`的`Reconciler`基于`Fiber节点`实现，被称为`Fiber Reconciler`，各个 `FiberNode` 之间通过链表的形式串联起来。
+`React16`之前的 `Reconciler`采用递归的方式执行，数据保存在递归调用栈中，所以被称为 `stack Reconciler`。`React16`的 `Reconciler`基于 `Fiber节点`实现，被称为 `Fiber Reconciler`，各个 `FiberNode` 之间通过链表的形式串联起来。
 
 ![image.png](https://p9-xtjj-sign.byteimg.com/tos-cn-i-73owjymdk6/926a0b59c883427cbd643c54cc27cf71~tplv-73owjymdk6-jj-mark-v1:0:0:0:0:5o6Y6YeR5oqA5pyv56S-5Yy6IEAg5pys54uX6LaF57qn5b-Z55qE:q75.awebp?rk3s=f64ab15b&x-expires=1732228375&x-signature=OZK099F5qxH5nbnCV%2Bpw%2BCoB5Is%3D) 看一下简化版源码：
 
@@ -4106,7 +4017,7 @@ function FiberNode(tag, pendingProps,key, mode, ) {
 
 #### 静态的数据结构
 
-作为静态的数据结构来说，每个`Fiber节点`对应一个`React element`，保存了该组件的类型（函数组件/类组件/原生组件...）、对应的 `DOM` 节点等信息。
+作为静态的数据结构来说，每个 `Fiber节点`对应一个 `React element`，保存了该组件的类型（函数组件/类组件/原生组件...）、对应的 `DOM` 节点等信息。
 
 ```js
 function FiberNode(tag, pendingProps,key, mode, ) {
@@ -4129,7 +4040,7 @@ function FiberNode(tag, pendingProps,key, mode, ) {
 
 #### 动态的工作单元
 
-作为动态的工作单元来说，每个`Fiber节点`保存了本次更新中该组件改变的状态、要执行的工作（需要被删除/被插入页面中/被更新...）。
+作为动态的工作单元来说，每个 `Fiber节点`保存了本次更新中该组件改变的状态、要执行的工作（需要被删除/被插入页面中/被更新...）。
 
 ```js
 // Props和State 改变相关信息
@@ -4155,7 +4066,7 @@ this.childLanes = NoLanes; // 子Fiber的优先级
 
 ## Fiber双缓冲
 
-对于 `fiber`，我们已经有一些了解了。那么 `fiber`节点构成的 `fiber` 树和页面上的`DOM` 树有什么关系呢？我们经常看到的 `fiber` 双缓冲是什么？
+对于 `fiber`，我们已经有一些了解了。那么 `fiber`节点构成的 `fiber` 树和页面上的 `DOM` 树有什么关系呢？我们经常看到的 `fiber` 双缓冲是什么？
 
 #### 双缓冲的概念
 
@@ -4190,17 +4101,17 @@ current.alternate = workInProgress;
 workInProgress.alternate = current;
 ```
 
-每次状态更新都会产生新的`workInProgress Fiber Tree`，通过`current`与`workInProgress`的替换，完成`DOM`更新。
+每次状态更新都会产生新的 `workInProgress Fiber Tree`，通过 `current`与 `workInProgress`的替换，完成 `DOM`更新。
 
-可以从`首次渲染（mount）`和`更新（update）`这两个阶段来看一下 `FiberTree` 的构建/替换流程。
+可以从 `首次渲染（mount）`和 `更新（update）`这两个阶段来看一下 `FiberTree` 的构建/替换流程。
 
 #### 首次渲染（mount）
 
 首先我们先了解一下几个概念：
 
-- **fiberRootNode**：整个应用的根节点,`fiberRootNode`的`current`会指向当前页面上已渲染内容对应`Fiber树`，即`current Fiber Tree`。
+- **fiberRootNode**：整个应用的根节点,`fiberRootNode`的 `current`会指向当前页面上已渲染内容对应 `Fiber树`，即 `current Fiber Tree`。
 - **hostRootFiber**: 它是一个具体的 `Fiber` 节点实例，具有 `Fiber` 节点的所有属性和方法。通常包含指向宿主环境（如 `DOM`）的引用，并且负责协调 `React` 组件与宿主环境之间的交互。
-- **rootFiber**：一个通用术语，用来指代 `Fiber` 树的根节点，包括`HostRootFiber`，其他类型的根 `Fiber` 等。
+- **rootFiber**：一个通用术语，用来指代 `Fiber` 树的根节点，包括 `HostRootFiber`，其他类型的根 `Fiber` 等。
 - workInProgress Fiber Tree: 内存中构建的树，简写 `WIP FiberTree`。
 - current Fiber Tree: 页面显示的树。
 
@@ -4246,19 +4157,19 @@ function createFiberRoot(){
 
 ![image.png](https://p9-xtjj-sign.byteimg.com/tos-cn-i-73owjymdk6/56a0aba5c21a4b5789b4edfedb2b2ca4~tplv-73owjymdk6-jj-mark-v1:0:0:0:0:5o6Y6YeR5oqA5pyv56S-5Yy6IEAg5pys54uX6LaF57qn5b-Z55qE:q75.awebp?rk3s=f64ab15b&x-expires=1732228375&x-signature=fICic%2FCBedKWOzdYs4trIyNqzlY%3D)
 
-由于是首屏渲染，页面中还没有挂载任何`DOM`，所以`fiberRootNode.current`指向的`rootFiber`没有任何`子Fiber节点`（即 current Fiber Tree 为空）。
+由于是首屏渲染，页面中还没有挂载任何 `DOM`，所以 `fiberRootNode.current`指向的 `rootFiber`没有任何 `子Fiber节点`（即 current Fiber Tree 为空）。
 
 ##### 流程二 （render)
 
-接下来进入`render阶段`，根据组件返回的JSX在内存中以**深度优先原则**依次创建`wip FiberNode`并连接在一起构建Fiber树，即`workInProgress Fiber Tree`。
+接下来进入 `render阶段`，根据组件返回的JSX在内存中以**深度优先原则**依次创建 `wip FiberNode`并连接在一起构建Fiber树，即 `workInProgress Fiber Tree`。
 
 ![image.png](https://p9-xtjj-sign.byteimg.com/tos-cn-i-73owjymdk6/38971a7f061e4a2b995a02fa005909a5~tplv-73owjymdk6-jj-mark-v1:0:0:0:0:5o6Y6YeR5oqA5pyv56S-5Yy6IEAg5pys54uX6LaF57qn5b-Z55qE:q75.awebp?rk3s=f64ab15b&x-expires=1732228375&x-signature=1B%2BvChA%2FwvK6ZfwdPqWorUfoOII%3D)
 
-生成的 wip FiberTree 里面的每一个 FiberNode 会和 current FiberTree 里面的 FiberNode通过`alternate`进行关联。但是目前 currentFiberTree里面只有一个 HostRootFiber，因此就只有这个 HostRootFiber 进行了 alternate 的关联。
+生成的 wip FiberTree 里面的每一个 FiberNode 会和 current FiberTree 里面的 FiberNode通过 `alternate`进行关联。但是目前 currentFiberTree里面只有一个 HostRootFiber，因此就只有这个 HostRootFiber 进行了 alternate 的关联。
 
 ##### 流程三 (commit)
 
-当 wip FiberTree生成完毕后，进入commit阶段，此时 FiberRootNode就会被传递给 Renderer（渲染器），接下来就是进行渲染工作。已构建完的`workInProgress Fiber Tree`在此阶段渲染到页面。
+当 wip FiberTree生成完毕后，进入commit阶段，此时 FiberRootNode就会被传递给 Renderer（渲染器），接下来就是进行渲染工作。已构建完的 `workInProgress Fiber Tree`在此阶段渲染到页面。
 
 渲染工作完毕后，浏览器中就显示了对应的 UI，**此时 FiberRootNode.current 就会指向这颗 wip Fiber Tree，曾经的 wip Fiber Tree 它就会变成 current FiberTree**，完成了双缓存的工作：
 
@@ -4266,11 +4177,11 @@ function createFiberRoot(){
 
 #### 更新（update）
 
-点击`p节点`触发状态改变而更新，这样就进入了update。
+点击 `p节点`触发状态改变而更新，这样就进入了update。
 
 ##### 流程四 （render)
 
-update会开启一次新的`render阶段`并构建一棵新的`workInProgress Fiber Tree`，流程和前面一样。
+update会开启一次新的 `render阶段`并构建一棵新的 `workInProgress Fiber Tree`，流程和前面一样。
 
 新的 wip Fiber Tree 里面的每一个 FiberNode 和 current Fiber Tree 的每一个 FiberNode 通过 `alternate` 属性进行关联。
 
@@ -4278,15 +4189,13 @@ update会开启一次新的`render阶段`并构建一棵新的`workInProgress Fi
 
 ##### 流程五 (commit)
 
-1. 当 wip Fiber Tree 生成完毕后， `workInProgress Fiber Tree`就完成了`render阶段`的构建，进入`commit阶段`渲染到页面上。
+1. 当 wip Fiber Tree 生成完毕后， `workInProgress Fiber Tree`就完成了 `render阶段`的构建，进入 `commit阶段`渲染到页面上。
 
 ![image.png](https://p9-xtjj-sign.byteimg.com/tos-cn-i-73owjymdk6/fa086ffc0034456c83f63bfe2d56936f~tplv-73owjymdk6-jj-mark-v1:0:0:0:0:5o6Y6YeR5oqA5pyv56S-5Yy6IEAg5pys54uX6LaF57qn5b-Z55qE:q75.awebp?rk3s=f64ab15b&x-expires=1732228375&x-signature=EwAXuwlkYOVbEQHTu9qBlyB0zmU%3D)
 
 FiberRootNode 会被传递给 Renderer 进行渲染，此时宿主环境所渲染出来的真实 UI 对应的就是**左边 Fiber Tree** （此时还是wip Fiber Tree) 对应的 DOM 结构，FiberRootNode.current 就会指向左边这棵树，右边的树就再次成为了新的 wip Fiber Tree。
 
 以上两棵fiber树交替并更新DOM的过程这就是fiber双缓冲的原理。
-
-
 
 Diff 算法是 React 中最核心的部分，它决定了 React 在更新时如何高效地复用和更新 FiberNode。
 
@@ -4317,11 +4226,11 @@ key 是 React 中用于标识节点的唯一性的一种机制。在 Diff 算法
 我们经常强调在列表渲染中要使用 key 来提高性能，那么 key 到底是怎么帮助我们识别的呢？看一个简单的例子：
 
 ```jsx
-jsx 代码解读复制代码<div>
+<div>
 	<p key="a">a</p>
 	<span key="b">b</span>
 </div>
-jsx 代码解读复制代码<div>
+<div>
 	<span key="b">b</span>
 	<p key="a">a</p>
 </div>
@@ -4409,14 +4318,14 @@ React 的 diff 算法分为两轮遍历：
 示例：
 
 ```html
-html 代码解读复制代码更新前
+更新前
 <ul>
 	<li key="a">a</li>
 	<li key="b">b</li>
 	<li key="c">c</li>
 	<li key="d">d</li>
 </ul>
-html 代码解读复制代码更新后
+更新后
 <ul>
 	<li key="a">a</li>
 	<li key="b">b</li>
@@ -4429,7 +4338,7 @@ html 代码解读复制代码更新后
 
 ![image.png](https://p3-xtjj-sign.byteimg.com/tos-cn-i-73owjymdk6/0bdc2687ec98442c8bb822b2d11221dd~tplv-73owjymdk6-jj-mark-v1:0:0:0:0:5o6Y6YeR5oqA5pyv56S-5Yy6IEAg5pys54uX6LaF57qn5b-Z55qE:q75.awebp?rk3s=f64ab15b&x-expires=1732076499&x-signature=xWtIJ%2FWnP4Tu75y5BQ2chBSN2%2Fs%3D)
 
-为了方便我们看同级的比较，`ul`部分我们暂时省略。 经过前面对 fiber 双缓冲的学习，我们知道目前可以看到的这些是 `current fiber`，而我们要通过对比创建`workInProgress Fiber`。下面就是对比的过程：
+为了方便我们看同级的比较，`ul`部分我们暂时省略。 经过前面对 fiber 双缓冲的学习，我们知道目前可以看到的这些是 `current fiber`，而我们要通过对比创建 `workInProgress Fiber`。下面就是对比的过程：
 
 ![image.png](https://p3-xtjj-sign.byteimg.com/tos-cn-i-73owjymdk6/ed02d58267ef43c1ba3f84d00480e975~tplv-73owjymdk6-jj-mark-v1:0:0:0:0:5o6Y6YeR5oqA5pyv56S-5Yy6IEAg5pys54uX6LaF57qn5b-Z55qE:q75.awebp?rk3s=f64ab15b&x-expires=1732076499&x-signature=4qZ7tc4iKfkrE8dhHErV%2FuLx%2Fd4%3D)
 
@@ -4447,7 +4356,7 @@ html 代码解读复制代码更新后
 
 第一轮遍历结束后，如果有节点没有遍历到，那么就会进入第二轮遍历。
 
-还是以刚才的例子为例，第一轮遍历结束后，还剩下两个`li`。第二轮遍历中，首先会将剩余的旧的 FiberNode 放入到一个 `map` 里：
+还是以刚才的例子为例，第一轮遍历结束后，还剩下两个 `li`。第二轮遍历中，首先会将剩余的旧的 FiberNode 放入到一个 `map` 里：
 
 ![image.png](https://p3-xtjj-sign.byteimg.com/tos-cn-i-73owjymdk6/da07eb341b1b435fb22a0b9f8a2c9224~tplv-73owjymdk6-jj-mark-v1:0:0:0:0:5o6Y6YeR5oqA5pyv56S-5Yy6IEAg5pys54uX6LaF57qn5b-Z55qE:q75.awebp?rk3s=f64ab15b&x-expires=1732076499&x-signature=4XQS8NZFfGyxIjBGe%2BFI1uuLfp4%3D)
 
@@ -4520,4 +4429,3 @@ JSX 数组遍历完成，map 中还剩下 `li.d`:
 1. **避免不必要的比较**：React 在比较同级节点时，会按照从左到右的顺序进行比较，从而避免出现跨层级的节点移动问题。
 2. **使用 key 属性**：React 使用 key 属性来标识节点的唯一性，从而在比较时能够快速定位到需要更新的节点。
 3. **批量更新**：React 在更新 DOM 时，会将多个更新操作合并为一个，从而减少 DOM 操作的次数。
-
