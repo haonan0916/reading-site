@@ -3822,3 +3822,702 @@ export const Counter: React.FC = () => {
 
 
 
+## React 的 fiber 架构
+
+转载自：[本狗超级忙的](https://juejin.cn/user/2195059366964317/posts)
+
+了解 `React` 的多少都见过这句话：`React16` 之后，改用了**Fiber 架构**。那么，到底什么是 `Fiber` 架构？之前的架构是什么？为什么要使用 `Fiber` 架构代替之前的呢？
+
+### 链式架构（Stack Reconcilation）
+
+在 `React Fiber` 架构之前，`React` 使用的是**栈式架构（Stack Reconcilation）**，它基于**递归**的方式来进行 `Virtual DOM` 的比较和更新。
+
+尽管 `Stack Reconciler` 在初期推动了 `React` 的发展，但随着 `Web` 应用程序的复杂性增加和用户需求的提升，它的同步执行特性在处理大型应用或复杂交互时表现出了一些局限性。
+
+`Stack` 架构在进行两棵虚拟 `DOM` 树对比的时候，**递归遍历**上面的结构。这种同步执行的特性意味着一旦开始更新操作，需要一直执行完所有比较和更新，无法中断或分段处理。
+
+虽然虚拟 `DOM` 是 `JS` 层面的计算，比起真实的 `DOM` 操作已经有了很大的优化，**但是在应用程序中有大量的组件和复杂的数据结构时，递归的比较和更新依然会消耗大量的计算资源和时间**，导致页面在更新过程中出现卡顿现象，直接影响到用户的交互体验。
+
+另一方面， `Stack Reconciler` **没有引入任务优先级的概念**，所有更新任务都按照生成的顺序依次**同步执行**。这意味着如果一个高优先级的更新任务需要立即响应，但此时正在进行的低优先级更新任务还未完成，就会造成用户体验的延迟和不流畅。
+
+*（举个例子：用户在输入时，不到1s的延迟就会觉得很卡;在loading时，几秒等待也能接受。所以前者高优先级，后者低优先级）*
+
+简单总结一下，`Stack Reconciler` 性能限制主要分为两类：
+
+1. **CPU瓶颈**：即应用的计算需求超过了 `CPU` 的处理能力。这里的 `CPU` 瓶颈通常指的是由于大量的 `Virtual DOM` 操作、组件更新或复杂的计算任务导致的 `CPU` 资源消耗过高，主线程（负责 `UI` 渲染的线程）被长时间占用，从而影响应用的响应速度和用户体验。
+2. **I/O瓶颈**：`I/O` 瓶颈主要与网络延迟有关，是客观存在的。前端只能尽量减少其对用户的影响，例如**区分不同操作的优先级**。
+
+
+
+### Fiber架构的关键概念
+
+#### 1. Fiber节点
+
+`Fiber` 节点是 `Fiber` 架构的核心概念之一，它是一种虚拟 `DOM` 的实现方式。
+
+`Fiber` 本质上是一个对象， 使用了**链表结构**。和之前的递归树实现 `Virtual DOM` 不同的是，对象之间使用链表的结构串联。一个 `fiber` 包括了 `child`（第一个子节点）、`sibling`（同级节点）、`return`（上一级节点）等属性。
+
+![image.png](https://p9-xtjj-sign.byteimg.com/tos-cn-i-73owjymdk6/d15e3e4ac2de40da81261d02c83774f5~tplv-73owjymdk6-jj-mark-v1:0:0:0:0:5o6Y6YeR5oqA5pyv56S-5Yy6IEAg5pys54uX6LaF57qn5b-Z55qE:q75.awebp?rk3s=f64ab15b&x-expires=1732242370&x-signature=O39%2F3hbbDbaDSkv1BZWILsw099M%3D)
+
+如上图，`fiber` 的 `child` 指向下一级元素，`sibling` 指向同级元素，`return` 指向上一级元素。
+
+> [!IMPORTANT]
+>
+> **这种结构和递归树相比，最重要的优势是在进行虚拟树的对比计算时，过程可以中断和恢复。**
+
+
+
+#### 2. 调度器Scheduler、协调器Reconciler、渲染器Renderer
+
+在 `React` 的架构中，`Scheduler`（调度器）、`Reconciler`（协调器）和`Renderer`（渲染器）共同工作来提供 `React` 组件的渲染和更新。
+
+- `Scheduler`（调度器）：根据任务的优先级安排任务执行顺序。
+- `Reconciler`（协调器）：根据新旧虚拟 `DOM` 树的差异确定需要更新的部分。
+- `Renderer`（渲染器）：将更新的虚拟 `DOM` 转换为实际的 `UI` 输出。
+
+需要注意的是，**调度器Scheduler组件**是 `React16` 之后新增的组件，负责**管理和调度任务执行**。
+
+前面提到，用户对于不同操作的感知不同，如果在网络延迟客观存在的情况下不对各种操作的优先级区分，细微的延迟就会造成用户体验的不流畅。
+
+而 `Scheduler` 就是解决这个问题的。`React` 定义了不同的优先级级别，如 `Immediate`（最高优先级，用于处理用户交互）、`Normal`（默认优先级，一般的更新任务）、`Low`（低优先级，如后台任务）等。调度器可以根据任务的优先级来安排它们的执行顺序，以尽快地响应用户的操作，提升用户体验。
+
+
+
+#### 3. 时间切片 TimeSlice
+
+`Fiber` 架构引入**时间切片（Time Slicing）** 的概念，即将大的渲染任务分解为多个较小的片段，每个片段都可以在**一帧**内完成，这样可以防止长时间的任务阻塞主线程，保持界面的流畅性。
+
+时间切片允许 `React` 在每个片段之间执行其他优先级更高的任务，从而在不同任务之间找到一个平衡点，提高整体的响应性和用户体验。
+
+
+
+#### 4. 双重缓冲Double Buffering
+
+双重缓冲是一种渲染优化技术，其使用**两个Fiber树**来管理渲染，即**当前树 current tree**和**工作树 work-in-progress tree**。当前树代表屏幕上当前显示的内容，而工作树用于准备下一次的渲染更新，用以实现平滑的更新。
+
+
+
+### React的渲染的两个阶段
+
+`React` 的渲染流程分为两个阶段：
+
+- `render` 阶段：`Reconciler` 的工作阶段，这个阶段会调用组件的 `render` 方法
+- `commit` 阶段：`Renderer` 的工作阶段，可以类比 `git commit` 提交，这个阶段会渲染具体的 `UI`。
+
+
+
+```jsx
+export default function App() {
+    const [count, setCount] = useState(0);
+    
+    const handleIncrement = () => {
+        setCount(prevCount => prevCount + 1);
+    }
+    
+    return (
+    	<div>
+        	<h3>{count}</h3>
+            <button onClick={handleIncrement}>点击加一</button>
+        </div>	
+    );
+}
+```
+
+
+
+先以这个两个阶段的整体工作流程举例：
+
+![IMAGE](https://p6-xtjj-sign.byteimg.com/tos-cn-i-73owjymdk6/0f98c14992234736a18c209d84297bf4~tplv-73owjymdk6-jj-mark-v1:0:0:0:0:5o6Y6YeR5oqA5pyv56S-5Yy6IEAg5pys54uX6LaF57qn5b-Z55qE:q75.awebp?rk3s=f64ab15b&x-expires=1731915332&x-signature=sUlsUh4H6wGp%2FgkG1PP9X8l0VlU%3D)
+
+如上图所示，当用户点击按钮更新 `count，Scheduler` 先进行任务的协调，当 `Scheduler` 调度完成后，将任务交给 `Reconciler，Reconciler` 就需要计算出新的 `UI`，最后就由 `Renderer` **同步**进行渲染更新操作。
+
+`Scheduler` 和 `Reconciler` 的工作流程是可以随时被以下原因中断：
+
+- 有其他更高优先级的任务需要执行
+- 当前的 `time slice` 没有剩余的时间
+- 发生了其他错误
+
+`Scheduler` 和 `Reconciler` 的的工作是在内存里进行的，不会更新用户界面，因此即使工作流程反复被中断，用户也不会看到更新不完全的 `UI`。
+
+> [!TIP]
+>
+> 由于Scheduler和Reconciler都是平台无关的，所以`React`为他们单独发了一个包[react-Reconciler](https://link.juejin.cn/?target=https%3A%2F%2Fwww.npmjs.com%2Fpackage%2Freact-reconciler)
+
+
+
+### 调度器Scheduler
+
+上面提到，`Fiber` 和 `Scheduler` 都是 `React16` 引入的。`Scheduler` 是用来根据任务的优先级安排任务执行顺序的。
+
+其实部分浏览器的原生 `API` 已经实现了，即`requestIdleCallback`。
+
+但是由于 *浏览器兼容性* 和 *触发频率受很多因素影响而不稳定* 等问题，`React`放弃使用浏览器原生的API，`React`实现了功能更完备的`requestIdleCallback`Polyfill，即**Scheduler**。除了在空闲时触发回调的功能外，**Scheduler**还提供了多种调度优先级供任务设置。
+
+另外，[Scheduler](https://link.juejin.cn/?target=https%3A%2F%2Fgithub.com%2Ffacebook%2Freact%2Fblob%2F1fb18e22ae66fdb1dc127347e169e73948778e5a%2Fpackages%2Fscheduler%2FREADME.md)是独立于`React`的库，可以用来实现任务调度，而不只是在 `React` 中使用。
+
+> [!TIP]
+>
+> 注：`Polyfill` 是指用于在旧版本浏览器中实现新标准 `API` 的代码填充（或称垫片）。它通常用于解决旧版本浏览器不支持新特性或 `API` 的问题。
+
+
+
+### 协调器Reconciler与Render阶段
+
+#### Reconciler实现可中断的循环
+
+`Reconciler` 根据新旧虚拟 `DOM` 树的差异确定需要更新的部分。
+
+上面说到，在 `React15` 中**Reconciler**是递归处理虚拟 `DOM` 的。而 `React16` 中，更新工作从递归变成了可以中断的循环过程。
+
+- 每次循环都会调用`shouldYield`判断当前是否有剩余时间。如果当前浏览器帧没有剩余时间，`shouldYield`会中止循环，直到浏览器有空闲时间后再继续遍历。
+- `Reconciler` 与 `Renderer` 不再是交替工作。当 `Scheduler` 将任务交给 `Reconciler` 后， `Reconciler` 会**为变化的虚拟 DOM 打上代表增/删/更新的标记**，整个 `Scheduler` 与 `Reconciler` 的工作都在内存中进行。只有当所有组件都完成 `Reconciler` 的工作，才会统一交给 `Renderer`。
+
+
+
+#### Render 阶段
+
+类组件或者函数组件本身就是在 `render` 阶段被调用的。在源码中，`render` 阶段开始于`performSyncWorkOnRoot`或`performConcurrentWorkOnRoot`方法的调用，这取决于本次更新是同步更新还是异步更新。
+
+1. **performSyncWorkOnRoot**：同步模式
+2. **performConcurrentWorkOnRoot**：并发模式
+
+```js
+// performSyncWorkOnRoot会调用该方法
+function workLoopSync() {
+  while (workInProgress !== null) {
+    performUnitOfWork(workInProgress);
+  }
+}
+
+// performConcurrentWorkOnRoot会调用该方法
+function workLoopConcurrent() {
+  while (workInProgress !== null && !shouldYield()) {
+    performUnitOfWork(workInProgress);
+  }
+}
+
+```
+
+对于以上代码的注释：
+
+**workInProgress** ： 当前已创建的`workInProgress fiber`，即在内存中构建的`Fiber树`。
+
+**shouldYield**： 如果当前浏览器帧没有剩余时间，`shouldYield`会中止循环，直到浏览器有空闲时间后再继续遍历。*（可以看到上面两种方法的区别是是否调用shouldYield）*
+
+**performUnitOfWork**： 创建下一个`Fiber节点`并赋值给`workInProgress`，并将`workInProgress`与已创建的`Fiber节点`连接起来构成`Fiber树`。
+
+可以看到上面两种方法主要都是在执行`performUnitOfWork`,下面我们详细看一下`performUnitOfWork`。
+
+#### performUnitOfWork方法
+
+`performUnitOfWork` 方法的工作流程可以分为两个阶段：“ 递 ” 和 “ 归 ”。
+
+#### “递阶段 —— beginWork”
+
+> [!TIP]
+>
+> 作用：传入`当前Fiber节点`，创建`子Fiber节点`。
+
+首先从`rootFiber`开始向下**深度优先**遍历。为遍历到的每个`Fiber节点`调用**beginWork**方法（此方法后续详细介绍），该方法会根据传入的`Fiber节点`创建`子Fiber节点`，并将这两个`Fiber节点`连接起来。
+
+当遍历到叶子节点（即没有子组件的组件）时就会进入“归”阶段。
+
+
+
+#### “归阶段 —— complateWork”
+
+> [!TIP]
+>
+> 作用：收集一些副作用。
+
+在“归”阶段调用**completeWork**处理`Fiber节点`，主要是收集一些副作用（此方法后续详细介绍）。
+
+当某个`Fiber节点`执行完`completeWork`，如果其存在`同级Fiber节点`（即`fiber.sibling !== null`），会进入其`同级Fiber`的“递”阶段。
+
+如果不存在`同级Fiber`，会进入`父级 Fiber`的“归”阶段。
+
+“递”和“归”阶段会交错执行直到“归”到`rootFiber`。至此，`render阶段`的工作就结束了。
+
+
+
+#### 图示 “ 递 ” 和 “ 归 ”
+
+先看一个简单的：
+
+![image.png](https://p6-xtjj-sign.byteimg.com/tos-cn-i-73owjymdk6/9b96045d6e794e339217ede572098d0d~tplv-73owjymdk6-jj-mark-v1:0:0:0:0:5o6Y6YeR5oqA5pyv56S-5Yy6IEAg5pys54uX6LaF57qn5b-Z55qE:q75.awebp?rk3s=f64ab15b&x-expires=1731915332&x-signature=Rh59upGsdc6efSb6LOSKZyIecws%3D)
+
+稍复杂的 `fiber` 节点。注意 `beginWork` 和 `complateWork` 的顺序： ![image.png](https://p6-xtjj-sign.byteimg.com/tos-cn-i-73owjymdk6/a633f612b1d848a786bf45a4e6a3748c~tplv-73owjymdk6-jj-mark-v1:0:0:0:0:5o6Y6YeR5oqA5pyv56S-5Yy6IEAg5pys54uX6LaF57qn5b-Z55qE:q75.awebp?rk3s=f64ab15b&x-expires=1731915332&x-signature=MA32m3wVseHPvpevvHMG6oc6ks4%3D)
+
+> [!TIP]
+>
+> 注：为什么指向父级 fiber( parent FiberNode )的字段叫做 return 而不是 parent？ 因为作为一个工作单元，`return`指节点执行完`completeWork`后会**返回**的下一个节点。子`Fiber节点`及其 `sibling` 节点完成工作后会**返回**其父级节点（`parent FiberNode` ），所以用`return`指代父级节点。
+
+
+
+### 渲染器Renderer与commit阶段
+
+`render` 阶段完成后，开启`commit阶段`工作流程，`Renderer` 在此阶段工作。
+
+与 `render` 阶段可以被打断不同的是，`commit` 阶段是不可以被打断的，一旦开始就会**同步**执行直到完成渲染工作。
+
+渲染器 `Renderer` 的工作主要就是**将各种副作用（flags 表示）commit 到宿主环境的 UI 中**。整个阶段可以分为三个阶段，分别是 **BeforeMutation 阶段、Mutation 阶段和 Layout 阶段**。
+
+1. **before mutation 阶段**（执行`DOM`操作前）：一些准备工作，如处理DOM节点渲染/删除后的 `autoFocus`、`blur` 逻辑、触发`getSnapshotBeforeUpdate`生命周期方法、调度`useEffect`。
+2. **mutation 阶段**（执行`DOM`操作）：React根据调和阶段的计算结果执行DOM的增删改操作。
+3. **layout 阶段**（执行`DOM`操作后）：执行一些可能需要最终的 DOM 结构信息才能完成的工作，比如测量 DOM 元素的尺寸和位置。
+
+> [!TIP]
+>
+> 注意：在`before mutation阶段`之前和`layout阶段`之后还有一些额外工作，涉及到比如`useEffect`的触发、`优先级相关`的重置、`ref`的绑定/解绑。
+
+
+
+## Fiber的含义
+
+前面反复提到，与 `React16` 之前的栈式架构相比，`Fiber` 架构中的更新工作是可以中断的循环过程。
+
+`fiber` 译为“*纤维*”，`React` 的 `Fiber` 架构借鉴了 `Fiber` 作为轻量级、可调度执行单元的概念，将其应用于组件的渲染和更新过程中。
+
+实际上，`Fiber`包含三层含义：
+
+1. `fiber` 架构
+2. 静态的数据结构
+3. 动态的工作单元
+
+#### fiber架构
+
+`React16`之前的`Reconciler`采用递归的方式执行，数据保存在递归调用栈中，所以被称为`stack Reconciler`。`React16`的`Reconciler`基于`Fiber节点`实现，被称为`Fiber Reconciler`，各个 `FiberNode` 之间通过链表的形式串联起来。
+
+![image.png](https://p9-xtjj-sign.byteimg.com/tos-cn-i-73owjymdk6/926a0b59c883427cbd643c54cc27cf71~tplv-73owjymdk6-jj-mark-v1:0:0:0:0:5o6Y6YeR5oqA5pyv56S-5Yy6IEAg5pys54uX6LaF57qn5b-Z55qE:q75.awebp?rk3s=f64ab15b&x-expires=1732228375&x-signature=OZK099F5qxH5nbnCV%2Bpw%2BCoB5Is%3D) 看一下简化版源码：
+
+```js
+function FiberNode(tag, pendingProps,key, mode, ) {
+  //...
+
+  // Fiber树结构:周围的 Fiber Node 通过链表的形式进行关联
+  this.return = null; // 上一级节点
+  this.child = null; // 第一个子节点
+  this.sibling = null; // 下一个同级节点
+  this.index = 0; // 在上一级节点中的索引
+
+  //...
+}
+```
+
+#### 静态的数据结构
+
+作为静态的数据结构来说，每个`Fiber节点`对应一个`React element`，保存了该组件的类型（函数组件/类组件/原生组件...）、对应的 `DOM` 节点等信息。
+
+```js
+function FiberNode(tag, pendingProps,key, mode, ) {
+  //...
+    // 实例属性：
+
+    // 节点类型标记 Function/Class/Host...
+    this.tag = tag;
+    // key属性
+    this.key = key;
+    // 组件的元素类型，大部分情况同type，某些情况不同，比如FunctionComponent使用React.memo包裹
+    this.elementType = null;
+    // 实际的 JavaScript 对象类型。对于 FunctionComponent，指函数本身，对于ClassComponent，指class，对于HostComponent，指DOM节点tagName
+    this.type = null;
+    // 节点对应的真实DOM节点
+    this.stateNode = null;
+  //...
+}
+```
+
+#### 动态的工作单元
+
+作为动态的工作单元来说，每个`Fiber节点`保存了本次更新中该组件改变的状态、要执行的工作（需要被删除/被插入页面中/被更新...）。
+
+```js
+// Props和State 改变相关信息
+this.pendingProps = pendingProps; // 当前待处理的props
+this.memoizedProps = null; // 上次渲染完成，已应用到组件的props
+this.updateQueue = null; // 更新队列，用于存储状态更新和回调
+this.memoizedState = null; // 上次渲染完成后的state，即组件的当前状态
+this.dependencies = null;  // 依赖列表，用于追踪副作用
+
+this.mode = mode; // Fiber的模式
+
+// Effects 副作用
+this.flags = NoFlags; // Fiber的标志位，表示Fiber的生命周期状态
+this.subtreeFlags = NoFlags; // 子树的标志位
+this.deletions = null; // 待删除的子Fiber列表
+
+// 优先级调度
+this.lanes = NoLanes; // 当前Fiber的优先级
+this.childLanes = NoLanes; // 子Fiber的优先级
+```
+
+![image.png](https://p9-xtjj-sign.byteimg.com/tos-cn-i-73owjymdk6/e556b96afb6749099d5af4009f3f9931~tplv-73owjymdk6-jj-mark-v1:0:0:0:0:5o6Y6YeR5oqA5pyv56S-5Yy6IEAg5pys54uX6LaF57qn5b-Z55qE:q75.awebp?rk3s=f64ab15b&x-expires=1732228375&x-signature=z0wDbUM%2FyjH6eQ3t5PktwO22N5E%3D)
+
+## Fiber双缓冲
+
+对于 `fiber`，我们已经有一些了解了。那么 `fiber`节点构成的 `fiber` 树和页面上的`DOM` 树有什么关系呢？我们经常看到的 `fiber` 双缓冲是什么？
+
+#### 双缓冲的概念
+
+双缓冲（`Double Buffering`）是一种在计算机图形学和用户界面设计中常用的技术，简单来说，就是通过将绘制和显示过程分离，改善图像渲染的流畅性和视觉效果。
+
+![image.png](https://p9-xtjj-sign.byteimg.com/tos-cn-i-73owjymdk6/73287cb7a11243f696821f3fff5aa7f3~tplv-73owjymdk6-jj-mark-v1:0:0:0:0:5o6Y6YeR5oqA5pyv56S-5Yy6IEAg5pys54uX6LaF57qn5b-Z55qE:q75.awebp?rk3s=f64ab15b&x-expires=1732228375&x-signature=FxtIfPOz86XcusAWv3AzyPeSY%2Fw%3D)
+
+如上图，普通的绘图方式就像是直接在电脑屏幕上画图，用户可以看到绘图的每一个步骤，这样不太优雅。
+
+双缓冲就类似于首先在内存上创建一个“虚拟屏幕”，所有的图形绘制工作都在**虚拟屏幕**上完成。这个虚拟屏幕就像是一个幕后的画布，绘图或称首先在这个虚拟屏幕上进行，用户看不到绘图的过程。
+
+当虚拟屏幕上的图形绘制完成时，绘图程序会迅速将整个画面一次性**拷贝**到电脑屏幕上，**替换**掉之前的画面，这个拷贝过程是瞬间完成的。
+
+这样，用户在屏幕上看到的图像始终都是完整的。
+
+#### React中的双缓冲fiber树
+
+在 `React` 源码中，很多方法都需要接收两颗 `FiberTree`：
+
+```js
+function cloneChildFibers(current, workInProgress){
+  // ...
+}
+```
+
+`current` 是当前屏幕上显示内容对应的 `FiberNode`，`workInProgress` 指的是正在内存中构建的 `FiberNode`。
+
+两个 `FiberNode` 会通过 `alternate `属性相互指向：
+
+```js
+current.alternate = workInProgress;
+workInProgress.alternate = current;
+```
+
+每次状态更新都会产生新的`workInProgress Fiber Tree`，通过`current`与`workInProgress`的替换，完成`DOM`更新。
+
+可以从`首次渲染（mount）`和`更新（update）`这两个阶段来看一下 `FiberTree` 的构建/替换流程。
+
+#### 首次渲染（mount）
+
+首先我们先了解一下几个概念：
+
+- **fiberRootNode**：整个应用的根节点,`fiberRootNode`的`current`会指向当前页面上已渲染内容对应`Fiber树`，即`current Fiber Tree`。
+- **hostRootFiber**: 它是一个具体的 `Fiber` 节点实例，具有 `Fiber` 节点的所有属性和方法。通常包含指向宿主环境（如 `DOM`）的引用，并且负责协调 `React` 组件与宿主环境之间的交互。
+- **rootFiber**：一个通用术语，用来指代 `Fiber` 树的根节点，包括`HostRootFiber`，其他类型的根 `Fiber` 等。
+- workInProgress Fiber Tree: 内存中构建的树，简写 `WIP FiberTree`。
+- current Fiber Tree: 页面显示的树。
+
+```js
+// 示例
+function App() { 
+    const [num, setNum] = useState(0); 
+    return ( 
+        <p onClick={() => setNum(prevNum => prevNum + 1)}>{num}</p> 
+    ); 
+}
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(
+    <App />
+);
+```
+
+##### 流程一：
+
+当执行 `ReactDOM.createRoot` 时：
+
+```js
+// ReactFiberRoot.js 伪代码
+function createFiberRoot(){
+   //...
+   
+   // 创建 FiberRootNode 实例 
+   const root = new FiberRootNode(/* 参数 */); 
+   // 创建 HostRootFiber 实例 
+   const uninitializedFiber = createHostRootFiber(/* 参数 */); 
+   // 将 HostRootFiber 设置为 FiberRoot 的 current 属性 
+   root.current = uninitializedFiber;
+   
+   // ...
+   return root;
+}
+```
+
+此时会创建 fiberRootNode 和 hostRootFiber，fiberRootNode 通过 `current` 来指向 hostRootFiber。
+
+即创建如下的结构：
+
+![image.png](https://p9-xtjj-sign.byteimg.com/tos-cn-i-73owjymdk6/56a0aba5c21a4b5789b4edfedb2b2ca4~tplv-73owjymdk6-jj-mark-v1:0:0:0:0:5o6Y6YeR5oqA5pyv56S-5Yy6IEAg5pys54uX6LaF57qn5b-Z55qE:q75.awebp?rk3s=f64ab15b&x-expires=1732228375&x-signature=fICic%2FCBedKWOzdYs4trIyNqzlY%3D)
+
+由于是首屏渲染，页面中还没有挂载任何`DOM`，所以`fiberRootNode.current`指向的`rootFiber`没有任何`子Fiber节点`（即 current Fiber Tree 为空）。
+
+##### 流程二 （render)
+
+接下来进入`render阶段`，根据组件返回的JSX在内存中以**深度优先原则**依次创建`wip FiberNode`并连接在一起构建Fiber树，即`workInProgress Fiber Tree`。
+
+![image.png](https://p9-xtjj-sign.byteimg.com/tos-cn-i-73owjymdk6/38971a7f061e4a2b995a02fa005909a5~tplv-73owjymdk6-jj-mark-v1:0:0:0:0:5o6Y6YeR5oqA5pyv56S-5Yy6IEAg5pys54uX6LaF57qn5b-Z55qE:q75.awebp?rk3s=f64ab15b&x-expires=1732228375&x-signature=1B%2BvChA%2FwvK6ZfwdPqWorUfoOII%3D)
+
+生成的 wip FiberTree 里面的每一个 FiberNode 会和 current FiberTree 里面的 FiberNode通过`alternate`进行关联。但是目前 currentFiberTree里面只有一个 HostRootFiber，因此就只有这个 HostRootFiber 进行了 alternate 的关联。
+
+##### 流程三 (commit)
+
+当 wip FiberTree生成完毕后，进入commit阶段，此时 FiberRootNode就会被传递给 Renderer（渲染器），接下来就是进行渲染工作。已构建完的`workInProgress Fiber Tree`在此阶段渲染到页面。
+
+渲染工作完毕后，浏览器中就显示了对应的 UI，**此时 FiberRootNode.current 就会指向这颗 wip Fiber Tree，曾经的 wip Fiber Tree 它就会变成 current FiberTree**，完成了双缓存的工作：
+
+![image.png](https://p9-xtjj-sign.byteimg.com/tos-cn-i-73owjymdk6/4a397c9366f943de8b7df20be503d056~tplv-73owjymdk6-jj-mark-v1:0:0:0:0:5o6Y6YeR5oqA5pyv56S-5Yy6IEAg5pys54uX6LaF57qn5b-Z55qE:q75.awebp?rk3s=f64ab15b&x-expires=1732228375&x-signature=thr6TrLGrwI4Yw7JeliKqLRDtFY%3D)
+
+#### 更新（update）
+
+点击`p节点`触发状态改变而更新，这样就进入了update。
+
+##### 流程四 （render)
+
+update会开启一次新的`render阶段`并构建一棵新的`workInProgress Fiber Tree`，流程和前面一样。
+
+新的 wip Fiber Tree 里面的每一个 FiberNode 和 current Fiber Tree 的每一个 FiberNode 通过 `alternate` 属性进行关联。
+
+![image.png](https://p9-xtjj-sign.byteimg.com/tos-cn-i-73owjymdk6/cf9320b4782c45cc834296812a661bf4~tplv-73owjymdk6-jj-mark-v1:0:0:0:0:5o6Y6YeR5oqA5pyv56S-5Yy6IEAg5pys54uX6LaF57qn5b-Z55qE:q75.awebp?rk3s=f64ab15b&x-expires=1732228375&x-signature=%2BWp1VDNP13fdSosG6w5ZB3tpqzM%3D)
+
+##### 流程五 (commit)
+
+1. 当 wip Fiber Tree 生成完毕后， `workInProgress Fiber Tree`就完成了`render阶段`的构建，进入`commit阶段`渲染到页面上。
+
+![image.png](https://p9-xtjj-sign.byteimg.com/tos-cn-i-73owjymdk6/fa086ffc0034456c83f63bfe2d56936f~tplv-73owjymdk6-jj-mark-v1:0:0:0:0:5o6Y6YeR5oqA5pyv56S-5Yy6IEAg5pys54uX6LaF57qn5b-Z55qE:q75.awebp?rk3s=f64ab15b&x-expires=1732228375&x-signature=EwAXuwlkYOVbEQHTu9qBlyB0zmU%3D)
+
+FiberRootNode 会被传递给 Renderer 进行渲染，此时宿主环境所渲染出来的真实 UI 对应的就是**左边 Fiber Tree** （此时还是wip Fiber Tree) 对应的 DOM 结构，FiberRootNode.current 就会指向左边这棵树，右边的树就再次成为了新的 wip Fiber Tree。
+
+以上两棵fiber树交替并更新DOM的过程这就是fiber双缓冲的原理。
+
+
+
+Diff 算法是 React 中最核心的部分，它决定了 React 在更新时如何高效地复用和更新 FiberNode。
+
+前面我们提到：
+
+> 在构建 workInProgress Fiber Tree 时会尝试复用 current Fiber Tree 中对应的 FiberNode 的数据，这个决定是否复用的过程就是 Diff 算法。
+
+除了 `workInProgress Fiber Tree` 和 `current Fiber Tree` 的构建关系，我们还需要了解一个概念：`JSX`，即类组件的 render 方法的返回结果，或函数组件的调用结果。JSX 对象中包含描述 `DOM 节点`的信息。
+
+Diff 算法的本质就是**对比 current Fiber Tree 和 JSX 对象，生成 workInProgress Fiber Tree**。
+
+当组件的状态或者属性发生变化时，React 需要决定如何更新 DOM 来反映这些变化。Diff 算法就是**用来决定哪些部分的 DOM 需要更新的算法**。
+
+![image.png](https://p3-xtjj-sign.byteimg.com/tos-cn-i-73owjymdk6/60d80daf4ed44a1d8a5e494a1d324c3b~tplv-73owjymdk6-jj-mark-v1:0:0:0:0:5o6Y6YeR5oqA5pyv56S-5Yy6IEAg5pys54uX6LaF57qn5b-Z55qE:q75.awebp?rk3s=f64ab15b&x-expires=1732076499&x-signature=%2FchxdKG979Vi6FLWoQrSzgkV2Dg%3D)
+
+## Diff 算法的特点
+
+Diff 算法具有以下特点：
+
+1. **分层，同级比较**：React 将整个 DOM 树分为多个层级，然后逐层比较，只比较同一层级的节点，从而减少比较的复杂度。同级比较时按照从左到右的顺序进行比较。
+2. **元素类型对比**： 两个不同类型的元素会生成不同的树，如果元素类型发生了变化，React 会销毁旧树并创建新树。
+3. **key 属性**：React 使用 key 属性来标识节点的唯一性，从而在比较时能够快速定位到需要更新的节点。
+
+### 关于 key
+
+key 是 React 中用于标识节点的唯一性的一种机制。在 Diff 算法中，React 使用 `key `属性来快速定位到需要更新的节点，从而提高 Diff 算法的性能。
+
+我们经常强调在列表渲染中要使用 key 来提高性能，那么 key 到底是怎么帮助我们识别的呢？看一个简单的例子：
+
+```jsx
+jsx 代码解读复制代码<div>
+	<p key="a">a</p>
+	<span key="b">b</span>
+</div>
+jsx 代码解读复制代码<div>
+	<span key="b">b</span>
+	<p key="a">a</p>
+</div>
+```
+
+在上面的例子中，React 在比较两个 JSX 对象时，会按照从左到右的顺序进行比较。那么两个 JSX 在比较第一个子节点时，发现 `p` 和 `span` 的元素类型不同，因此会销毁旧树并创建新树。
+
+但是由于他们有 key，React 会认为他们只是位置发生了变化，而不是元素类型发生了变化，因此会复用旧树中的节点，只是改变他们的位置。
+
+## Diff 算法的实现
+
+Diff 算法在 React 中是通过 `reconcileChildFibers` 函数实现的，该函数会根据 `current Fiber Node` 和 `JSX 对象` 生成 `workInProgress Fiber Node`。
+
+在 `reconcileChildFibers` 函数中，React 会根据 current Fiber Node 和 JSX 对象的类型进行不同的处理：
+
+1. **当 current Fiber Node 和 JSX 对象的类型相同时**，React 会递归地调用 `reconcileChildFibers` 函数来比较子节点，并生成对应的 workInProgress Fiber Node。如果子节点类型不同，React 会销毁旧树并创建新树。
+2. **当 current Fiber Node 和 JSX 对象的类型不同时**，React 会销毁旧树并创建新树。
+
+在比较子节点时，React 会使用 key 属性来标识节点的唯一性，从而快速定位到需要更新的节点。
+
+看一下源码片段：
+
+```js
+function reconcileChildFibers(returnFiber: Fiber, currentFirstChild: Fiber | null, newChild: any): Fiber | null {
+	// ...
+
+	// 处理对象类型的新子元素
+	if (typeof newChild === 'object' && newChild !== null) {
+		switch (newChild.$$typeof) {
+			case REACT_ELEMENT_TYPE:
+				// 处理单一的 React 元素
+				return placeSingleChild(reconcileSingleElement(returnFiber, currentFirstChild, newChild, lanes));
+			case REACT_PORTAL_TYPE:
+				// 处理 React portal
+				return placeSingleChild(reconcileSinglePortal(returnFiber, currentFirstChild, newChild, lanes));
+			case REACT_LAZY_TYPE:
+				// 处理懒加载的组件
+				const payload = newChild._payload;
+				const init = newChild._init;
+
+				return reconcileChildFibers(returnFiber, currentFirstChild, init(payload), lanes);
+		}
+
+		// 如果新子元素是一个数组，协调数组中的每个子元素。
+		if (isArray(newChild)) {
+			return reconcileChildrenArray(returnFiber, currentFirstChild, newChild, lanes);
+		}
+		// 如果新子元素是一个可迭代对象，协调迭代器中的每个子元素。
+		if (getIteratorFn(newChild)) {
+			return reconcileChildrenIterator(returnFiber, currentFirstChild, newChild, lanes);
+		}
+		// 如果新子元素是一个可迭代对象，协调迭代器中的每个子元素。
+		throwOnInvalidObjectType(returnFiber, newChild);
+	}
+
+	// 如果新子元素是一个非空字符串或数字，协调单个文本节点。
+	if ((typeof newChild === 'string' && newChild !== '') || typeof newChild === 'number') {
+		return placeSingleChild(reconcileSingleTextNode(returnFiber, currentFirstChild, '' + newChild, lanes));
+	}
+
+	//...
+
+	// 如果新子元素是 null 或 undefined，删除当前的所有子节点。
+	return deleteRemainingChildren(returnFiber, currentFirstChild);
+}
+// ...
+```
+
+## Diff 的流程
+
+React 的 diff 算法分为两轮遍历：
+
+第一轮遍历，处理可复用的节点。
+
+第二轮遍历，遍历第一轮剩下的 fiber。
+
+### 第一轮遍历
+
+第一轮遍历的三种情况：
+
+1. 如果新旧子节点的 key 和 type 都相同，说明可以复用。
+2. 如果新旧子节点的 key 相同，但是 type 不相同，这个时候就会根据 `ReactElement` 来生成一个全新的 fiber，旧的 fiber 被放入到 `deletions` 数组里面，回头统一删除。但是此时遍历并不会终止。
+3. 如果新旧子节点的 key 和 type 都不相同，结束遍历。
+
+示例：
+
+```html
+html 代码解读复制代码更新前
+<ul>
+	<li key="a">a</li>
+	<li key="b">b</li>
+	<li key="c">c</li>
+	<li key="d">d</li>
+</ul>
+html 代码解读复制代码更新后
+<ul>
+	<li key="a">a</li>
+	<li key="b">b</li>
+	<li key="c2">c2</li>
+	<li key="d">d</li>
+</ul>
+```
+
+以上结构，经过前面 [Fiber 的学习](https://juejin.cn/post/7403185402348306468)，我们可以知道结构是这样的：
+
+![image.png](https://p3-xtjj-sign.byteimg.com/tos-cn-i-73owjymdk6/0bdc2687ec98442c8bb822b2d11221dd~tplv-73owjymdk6-jj-mark-v1:0:0:0:0:5o6Y6YeR5oqA5pyv56S-5Yy6IEAg5pys54uX6LaF57qn5b-Z55qE:q75.awebp?rk3s=f64ab15b&x-expires=1732076499&x-signature=xWtIJ%2FWnP4Tu75y5BQ2chBSN2%2Fs%3D)
+
+为了方便我们看同级的比较，`ul`部分我们暂时省略。 经过前面对 fiber 双缓冲的学习，我们知道目前可以看到的这些是 `current fiber`，而我们要通过对比创建`workInProgress Fiber`。下面就是对比的过程：
+
+![image.png](https://p3-xtjj-sign.byteimg.com/tos-cn-i-73owjymdk6/ed02d58267ef43c1ba3f84d00480e975~tplv-73owjymdk6-jj-mark-v1:0:0:0:0:5o6Y6YeR5oqA5pyv56S-5Yy6IEAg5pys54uX6LaF57qn5b-Z55qE:q75.awebp?rk3s=f64ab15b&x-expires=1732076499&x-signature=4qZ7tc4iKfkrE8dhHErV%2FuLx%2Fd4%3D)
+
+遍历到第一个 `li` 时，发现 `key` 相同，`type` 相同，可以复用。
+
+> [!TIP]
+>
+> 关于 alternate，是用来关联 wip Fiber Node 和 currentFiber Node 的，可以参考前面[Fiber 的学习](https://juejin.cn/post/7403185402348306468)。
+
+![image.png](https://p3-xtjj-sign.byteimg.com/tos-cn-i-73owjymdk6/308590a57ec34bd489e90348a5a668c8~tplv-73owjymdk6-jj-mark-v1:0:0:0:0:5o6Y6YeR5oqA5pyv56S-5Yy6IEAg5pys54uX6LaF57qn5b-Z55qE:q75.awebp?rk3s=f64ab15b&x-expires=1732076499&x-signature=brOB12LKH5y4vKY0FgyeaRW0CYI%3D) 遍历到第二个 `li` 时，也可以复用。
+
+![image.png](https://p3-xtjj-sign.byteimg.com/tos-cn-i-73owjymdk6/cf1bfc469fbf47cc916b37529baa6bb3~tplv-73owjymdk6-jj-mark-v1:0:0:0:0:5o6Y6YeR5oqA5pyv56S-5Yy6IEAg5pys54uX6LaF57qn5b-Z55qE:q75.awebp?rk3s=f64ab15b&x-expires=1732076499&x-signature=JDbq%2FhX%2Bp%2BG%2BACbHdBCzCsWZNqE%3D) 遍历到第三个 `li` 时，发现 `key` 不同，结束遍历。
+
+### 第二轮遍历
+
+第一轮遍历结束后，如果有节点没有遍历到，那么就会进入第二轮遍历。
+
+还是以刚才的例子为例，第一轮遍历结束后，还剩下两个`li`。第二轮遍历中，首先会将剩余的旧的 FiberNode 放入到一个 `map` 里：
+
+![image.png](https://p3-xtjj-sign.byteimg.com/tos-cn-i-73owjymdk6/da07eb341b1b435fb22a0b9f8a2c9224~tplv-73owjymdk6-jj-mark-v1:0:0:0:0:5o6Y6YeR5oqA5pyv56S-5Yy6IEAg5pys54uX6LaF57qn5b-Z55qE:q75.awebp?rk3s=f64ab15b&x-expires=1732076499&x-signature=4XQS8NZFfGyxIjBGe%2BFI1uuLfp4%3D)
+
+接下来会继续去遍历剩下的 `JSX 对象数组` ，遍历的同时，从 `map` 里面去找有没有能够复用的。如果找到了就移动过来。如果在 `map` 里面没有找到，那就会新增这个 FiberNode：
+
+![image.png](https://p3-xtjj-sign.byteimg.com/tos-cn-i-73owjymdk6/6a798e3011644329a19cab94537200bf~tplv-73owjymdk6-jj-mark-v1:0:0:0:0:5o6Y6YeR5oqA5pyv56S-5Yy6IEAg5pys54uX6LaF57qn5b-Z55qE:q75.awebp?rk3s=f64ab15b&x-expires=1732076499&x-signature=jxPFEBwJo%2FR4XTjpBfACiUBrz1M%3D)
+
+![image.png](https://p3-xtjj-sign.byteimg.com/tos-cn-i-73owjymdk6/3b8dfd6ad76e441a8bdad5ac02182737~tplv-73owjymdk6-jj-mark-v1:0:0:0:0:5o6Y6YeR5oqA5pyv56S-5Yy6IEAg5pys54uX6LaF57qn5b-Z55qE:q75.awebp?rk3s=f64ab15b&x-expires=1732076499&x-signature=eD3g3jEglB6WeU%2Bzv1GByFAIawg%3D)
+
+如果整个 `JSX 对象数组`遍历完成后，map 里面还有剩余的 FiberNode，说明这些 FiberNode 是无法进行复用，就将这些 Fiber 节点添加到 `deletions 数组` 里面，之后统一删除。
+
+### 第二个示例
+
+前面例子比较简单，可以对照以上流程再看一个示例。 更新前：
+
+```html
+<ul>
+	<li key="a">a</li>
+	<li key="b">b</li>
+	<li key="c">c</li>
+	<li key="d">d</li>
+	<li key="e">e</li>
+</ul>
+```
+
+更新后：
+
+```html
+<ul>
+	<li key="a">a</li>
+	<li key="b">b</li>
+	<li key="e">e</li>
+	<li key="f">f</li>
+	<li key="c">c</li>
+</ul>
+```
+
+第一轮遍历和前面示例一样，第一个 `li：a` 和第二个 `li: b` 的 key 和 type 都相同，可以复用。遍历到第三个 `li` 时，发现 key 不同，结束遍历。
+
+![image.png](https://p3-xtjj-sign.byteimg.com/tos-cn-i-73owjymdk6/1cf09de8537244adb03371e14bc06cef~tplv-73owjymdk6-jj-mark-v1:0:0:0:0:5o6Y6YeR5oqA5pyv56S-5Yy6IEAg5pys54uX6LaF57qn5b-Z55qE:q75.awebp?rk3s=f64ab15b&x-expires=1732076499&x-signature=8GfPI0jWclL6naN5XvDbg9hSxTE%3D)
+
+#### 第二轮遍历：
+
+剩余的旧的 FiberNode 放入到一个 map 里：
+
+![image.png](https://p3-xtjj-sign.byteimg.com/tos-cn-i-73owjymdk6/d78f68f25f3d4eb9ab02e94dc1e41247~tplv-73owjymdk6-jj-mark-v1:0:0:0:0:5o6Y6YeR5oqA5pyv56S-5Yy6IEAg5pys54uX6LaF57qn5b-Z55qE:q75.awebp?rk3s=f64ab15b&x-expires=1732076499&x-signature=8%2B2caIrZ4zG%2BQkh9H%2BgFHTi5sSQ%3D)
+
+继续遍历，从 map 里面去找有 key 为 e, type 为 li 的，找到了，移过来复用:
+
+![image.png](https://p3-xtjj-sign.byteimg.com/tos-cn-i-73owjymdk6/799a1d11bff8469e9253e97b9a46ae99~tplv-73owjymdk6-jj-mark-v1:0:0:0:0:5o6Y6YeR5oqA5pyv56S-5Yy6IEAg5pys54uX6LaF57qn5b-Z55qE:q75.awebp?rk3s=f64ab15b&x-expires=1732076499&x-signature=cULZn1epHafDahzv1MG5jkXASZM%3D)
+
+map 中没有 `li.f`，新增:
+
+![image.png](https://p3-xtjj-sign.byteimg.com/tos-cn-i-73owjymdk6/ba370e726e304d869603ed4119661401~tplv-73owjymdk6-jj-mark-v1:0:0:0:0:5o6Y6YeR5oqA5pyv56S-5Yy6IEAg5pys54uX6LaF57qn5b-Z55qE:q75.awebp?rk3s=f64ab15b&x-expires=1732076499&x-signature=iDkLajpbWmEOzL8%2BNyXW60JJnaI%3D)
+
+map 中有 `li.c`，复用:
+
+![image.png](https://p3-xtjj-sign.byteimg.com/tos-cn-i-73owjymdk6/499a6e68226442c88525a2bc31293a62~tplv-73owjymdk6-jj-mark-v1:0:0:0:0:5o6Y6YeR5oqA5pyv56S-5Yy6IEAg5pys54uX6LaF57qn5b-Z55qE:q75.awebp?rk3s=f64ab15b&x-expires=1732076499&x-signature=Q8Xl8j2jw5uMphQqhfSp2wVKRL8%3D)
+
+JSX 数组遍历完成，map 中还剩下 `li.d`:
+
+![image.png](https://p3-xtjj-sign.byteimg.com/tos-cn-i-73owjymdk6/1015568e6774401dab2408476467ead3~tplv-73owjymdk6-jj-mark-v1:0:0:0:0:5o6Y6YeR5oqA5pyv56S-5Yy6IEAg5pys54uX6LaF57qn5b-Z55qE:q75.awebp?rk3s=f64ab15b&x-expires=1732076499&x-signature=I7zWpKW82733HPTY%2Fs5Pjfn5bfI%3D)
+
+这个 FiberNode 无法复用，添加到 `deletions` 数组中,之后删除。
+
+## Diff 算法的优化
+
+为了提高 Diff 算法的性能，React 在实现时做了一些优化：
+
+1. **避免不必要的比较**：React 在比较同级节点时，会按照从左到右的顺序进行比较，从而避免出现跨层级的节点移动问题。
+2. **使用 key 属性**：React 使用 key 属性来标识节点的唯一性，从而在比较时能够快速定位到需要更新的节点。
+3. **批量更新**：React 在更新 DOM 时，会将多个更新操作合并为一个，从而减少 DOM 操作的次数。
+
