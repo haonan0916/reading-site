@@ -5,7 +5,7 @@ const base = "/reading-site/"
 export default defineConfig({
   base,
   title: "前端知识库",
-  description: "前端知识总结、面试常见问题、简历文档",
+  description: "记录前端知识、常见问题、学习记录等",
   ignoreDeadLinks: true,
   head: [
     ['link', { rel: 'icon', href: `${base}logo.png` }],
