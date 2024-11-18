@@ -3207,11 +3207,11 @@ const UnControlleredComponent: React.FC = () => {
 > ```tsx
 > const ParentComponent: React.FC = () => {
 >     const [count, setCount] = useState<number>(0);
->
+> 
 >     const memorizedCallback = useCallback(() => {
 >         // 这个回调函数不会因为count的变化而改变
 >     }, []);
->   
+> 
 >     return <ChildComponent onSomeEvent={memoizedCallback} />;
 > }
 > ```
@@ -3229,7 +3229,7 @@ const UnControlleredComponent: React.FC = () => {
 >     }
 >     return true;
 >   }
->
+> 
 >   render() {
 >     // 组件逻辑
 >   }
@@ -3239,9 +3239,16 @@ const UnControlleredComponent: React.FC = () => {
 > 4. 使用 `PureComponent` 或 `PureComponent` 类
 >
 >    `PureComponent` 是一个React组件基类，它实现了 `shouldComponentUpdate` 方法，进行了浅比较（shallow comparison）。如果组件的props或state没有浅层变化，那么组件就不会重新渲染。
+>    
 > 5. 自定义 `shouldComponentUpdate` 实现
 >
 >    对于更复杂的场景，你可能需要自定义 `shouldComponentUpdate` 方法，以更精确地控制何时重新渲染。
+>    
+> 5. 利用高阶组件
+>
+>    在函数组件中，并没有 `shouldComponentUpdate` 这个生命周期，可以利用高阶组件，封装一个类似 `PureComponet` 的功能。
+>    
+>    
 >
 > **总结**
 >
@@ -4301,6 +4308,33 @@ function reconcileChildFibers(returnFiber: Fiber, currentFirstChild: Fiber | nul
 
 ## Diff 的流程
 
+> [!IMPORTANT]
+>
+> `diff` 算法探讨的就是虚拟 `DOM` 树发生变化后，生成 `DOM` 树更新补丁的方式。它通过对比新旧两株虚拟 `DOM` 树的变更差异，将更新补丁作用于真实 `DOM`，以最小成本完成视图更新。
+>
+> `diff` 算法可以总结为三个策略，分别从树、组件及元素三个层面进行复杂度的优化：
+>
+> **策略一：忽略节点跨层级操作场景，提升比对效率。（基于树进行对比）**
+>
+> 这一策略需要进行树比对，即对树进行分层比较。树比对的处理手法是非常“暴力”的，即两棵树只对同一层次的节点进行比较，如果发现节点已经不存在了，则该节点及其子节点会被完全删除掉，不会用于进一步的比较，这就提升了比对效率。
+>
+> 
+>
+> **策略二：如果组件的 class 一致，则默认为相似的树结构，否则默认为不同的树结构。**（**基于组件进行对**比）
+>
+> 在组件比对的过程中：
+>
+> - 如果组件是同一类型则进行树比对；
+> - 如果不是则直接放入补丁中。
+>
+> 只要父组件类型不同，就会被重新渲染。这也就是为什么 `shouldComponentUpdate、PureComponent` 及 `React.memo` 可以提高性能的原因。
+>
+> 
+>
+> **策略三：同一层级的子节点，可以通过标记 key 的方式进行列表对比。**（**基于节点进行对比**）
+>
+> 元素比对主要发生在同层级中，通过标记节点操作生成补丁。节点操作包含了插入、移动、删除等。其中节点重新排序同时涉及插入、移动、删除三个操作，所以效率消耗最大，此时策略三起到了至关重要的作用。通过标记 `key` 的方式，`React` 可以直接移动 `DOM` 节点，降低内耗。
+
 React 的 diff 算法分为两轮遍历：
 
 第一轮遍历，处理可复用的节点。
@@ -4429,3 +4463,236 @@ JSX 数组遍历完成，map 中还剩下 `li.d`:
 1. **避免不必要的比较**：React 在比较同级节点时，会按照从左到右的顺序进行比较，从而避免出现跨层级的节点移动问题。
 2. **使用 key 属性**：React 使用 key 属性来标识节点的唯一性，从而在比较时能够快速定位到需要更新的节点。
 3. **批量更新**：React 在更新 DOM 时，会将多个更新操作合并为一个，从而减少 DOM 操作的次数。
+
+
+
+## React 的事件机制
+
+> [!IMPORTANT]
+>
+> `React` 并不是将 `click` 等事件绑定到了真实 `dom` 上，而是在 `document` 处监听了所有的事件，当事件发生并且冒泡到 `document` 处的时候，`React` 将事件内容封装并交由真正的处理函数运行。这样的方式不仅减少内存消耗，还能在组件挂载销毁时统一订阅和移除事件。
+>
+> 除此之外，冒泡到 `document` 上的事件也不是原生的浏览器事件，而是由 `React` 自己实现的合成事件。因此，如果不想要事件冒泡的话应该调用`event.preventDefault()` 方法，而不是调用 `event.stopProppagation()` 方法。
+>
+> `React` 基于虚拟 `dom` 实现了一个合成事件层，定义的事件处理器会接收到一个合成事件对象的实例，它与原生的浏览器事件拥有同样的接口，支持冒泡机制，所有的事件都自动绑定在最外层上。
+>
+> 在 `React` 底层，主要对合成事件做了两件事：
+>
+> - **事件委派：**`React` 会把所有的事件绑定到结构的最外层，使用统一的事件监听器，这个事件监听器上维持了一个映射来保存所有组件内部事件监听和处理函数。
+> - **自动绑定：**`React` 组件中，每个方法的上下文都会指向该组件的实例，即自动绑定 `this` 为当前组件。
+
+
+
+## React 类组件生命周期（17 版本）
+
+![image.png](https://cdn.nlark.com/yuque/0/2021/png/1500604/1611822510207-8101671e-8b5a-4968-88b1-85d44e078b0b.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_63%2Ctext_5b6u5L-h5YWs5LyX5Y-377ya5YmN56uv5YWF55S15a6d%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10%2Fformat%2Cwebp%2Fresize%2Cw_1125%2Climit_0)
+
+### getDerivedStateFromProps
+
+`getDerivedStateFromProps` 是 `React` 中的一个静态生命周期方法，用于在组件接收新 `props` 时更新组件的状态。这个方法在组件实例化之前和每次接收到新的 `props` 时都会被调用。它的主要用途是根据新的 `props` 计算并更新组件的状态，以确保组件的状态与 `props` 保持同步。
+
+### React常见生命周期的过程
+
+- 挂载阶段，首先执行 `constructor` 构造方法，来创建组件
+- 创建完成之后，就会执行 `render` 方法，该方法会返回需要渲染的内容
+- 随后，`React` 会将需要渲染的内容挂载到 `DOM` 树上
+- **挂载完成之后就会执行****`componentDidMount`生命周期函数**
+- 如果我们给组件创建一个 `props`（用于组件通信）、调用 `setState`（更改 `state` 中的数据）、调用 `forceUpdate`（强制更新组件）时，都会重新调用`render` 函数
+- `render` 函数重新执行之后，就会重新进行 `DOM` 树的挂载
+- **挂载完成之后就会执行****`componentDidUpdate`生命周期函数**
+- **当移除组件时，就会执行****`componentWillUnmount`生命周期函数**
+
+
+
+`React` 的类组件与函数式组件生命周期对应表： 
+
+| **class 组件**             | **Hooks 组件**                |
+| -------------------------- | ----------------------------- |
+| `constructor`              | `useState`                    |
+| `getDerivedStateFromProps` | `useState` 里面 `update` 函数 |
+| `shouldComponentUpdate`    | `useMemo`                     |
+| `render`                   | 函数本身                      |
+| `componentDidMount`        | `useEffect`                   |
+| `componentDidUpdate`       | `useEffect`                   |
+| `componentWillUnmount`     | `useEffect` 里面返回的函数    |
+| `componentDidCatch`        | 无                            |
+| `getDerivedStateFromError` | 无                            |
+
+## React-Router
+
+### 1. 什么是前端路由
+
+一个路径 `path` 对应一个组件 `component` 当我们在浏览器中访问一个 `path` 的时候，`path` 对应的组件会在页面中进行渲染
+![image.png](/react_images/1.png)
+
+### 2. 创建路由开发环境
+
+```bash
+# 使用CRA创建项目
+npm create-react-app react-router-pro
+
+# 安装最新的ReactRouter包
+npm i react-router-dom
+
+# 启动项目
+npm run start
+```
+
+### 3. 快速开始
+
+![image.png](/react_images/2.png)
+
+```jsx
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+
+const router = createBrowserRouter([
+  {
+    path:'/login',
+    element: <div>登录</div>
+  },
+  {
+    path:'/article',
+    element: <div>文章</div>
+  }
+])
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <RouterProvider router={router}/>
+)
+```
+
+
+
+> [!TIP]
+>
+> `react-router` 里的 `Link` 标签和 `a` 标签的区别
+>
+> 从最终渲染的 `DOM` 来看，这两者都是链接，都是 标签，区别是∶ 
+>
+> `<Link>`是 `react-router` 里实现路由跳转的链接，一般配合 `<Route>`  使用，`react-router` 接管了其默认的链接跳转行为，区别于传统的页面跳转，`<Link>` 的“跳转”行为只会触发相匹配的 `<Route>` 对应的页面内容更新，而不会刷新整个页面。
+>
+> 
+>
+> `<Link>` 做了 `3` 件事情:
+>
+> - 有 `onclick` 那就执行 `onclick`
+> - `click` 的时候阻止 `a` 标签默认事件
+> - 根据跳转 `href` (即是 `to` )，用 `history` (`web` 前端路由两种方式之一，`history & hash` )跳转，此时只是链接变了，并没有刷新页面而 `<a>` 标签就是普通的超链接了，用于从当前页面跳转到 `href` 指向的另一 个页面(非锚点情况)。
+
+## 抽象路由模块
+
+![image.png](/react_images/3.png)
+
+## 路由导航
+
+### 1. 什么是路由导航
+
+路由系统中的多个路由之间需要进行路由跳转，并且在跳转的同时有可能需要传递参数进行通信
+![image.png](/react_images/4.png)
+
+### 2. 声明式导航
+
+> 声明式导航是指通过在模版中通过 `<Link/> ` 组件描述出要跳转到哪里去，比如后台管理系统的左侧菜单通常使用这种方式进行
+
+
+![image.png](/react_images/5.png)
+
+语法说明：通过给组件的 `to` 属性指定要跳转到路由 `path`，组件会被渲染为浏览器支持的 `a` 链接，如果需要传参直接通过字符串拼接的方式拼接参数即可。
+
+### 3. 编程式导航
+
+编程式导航是指通过 `useNavigate` 钩子得到导航方法，然后通过调用方法以命令式的形式进行路由跳转，比如想在登录请求完毕之后跳转就可以选择这种方式，更加灵活
+
+![image.png](/react_images/6.png)
+
+语法说明：通过调用navigate方法传入地址path实现跳转
+
+## 导航传参
+
+![image.png](/react_images/7.png)
+
+### 嵌套路由配置
+
+#### 1. 什么是嵌套路由
+
+在一级路由中又内嵌了其他路由，这种关系就叫做嵌套路由，嵌套至一级路由内的路由又称作二级路由，例如：
+![image.png](/react_images/8.png)
+
+#### 2. 嵌套路由配置
+
+> 实现步骤
+>
+>     1. 使用 `children`属性配置路由嵌套关系  
+>     2. 使用 `<Outlet/>` 组件配置二级路由渲染位置
+
+![image.png](/react_images/9.png)
+
+#### 3. 默认二级路由
+
+当访问的是一级路由时，默认的二级路由组件可以得到渲染，只需要在二级路由的位置去掉 `path`，设置 `index` 属性为 `true`。
+
+![image.png](/react_images/10.png)
+
+#### 4. 404路由配置
+
+场景：当浏览器输入 `url` 的路径在整个路由配置中都找不到对应的 `path`，为了用户体验，可以使用 `404` 兜底组件进行渲染。
+
+实现步骤：
+
+1. 准备一个 `NotFound` 组件
+2. 在路由表数组的末尾，以 `*` 号作为路由 `path` 配置路由
+
+![image.png](/react_images/11.png)
+
+#### 5. 两种路由模式
+
+各个主流框架的路由常用的路由模式有俩种，`history` 模式和 `hash` 模式, `ReactRouter` 分别由 `createBrowerRouter` 和 `createHashRouter` 函数负责创建
+
+| 路由模式  | url表现       | 底层原理                          | 是否需要后端支持 |
+| --------- | ------------- | --------------------------------- | ---------------- |
+| `history` | `url/login`   | `history` 对象 + `pushState` 事件 | 需要             |
+| `hash`    | `url/#/login` | 监听 `hashChange` 事件            | 不需要           |
+
+
+
+## 为什么 useState 要使用数组而不是对象
+
+> [!IMPORTANT]
+>
+> - 如果 `useState` 返回的是数组，那么使用者可以对数组中的元素命名，代码看起来也比较干净
+> - 如果 `useState` 返回的是对象，在解构对象的时候必须要和 `useState` 内部实现返回的对象同名，想要使用多次的话，必须得设置别名才能使用返回值
+>
+> **总结：** `useState` 返回的是 `array` 而不是 `object` 的原因就是为了**降低使用的复杂度**，返回数组的话可以直接根据顺序解构，而返回对象的话要想使用多次就需要定义别名了。
+
+
+
+## 为什么 React 的 Hooks 调用会有条件限制
+
+> [!TIP]
+>
+> 在 `React` 中，`Hooks` 的设计原则之一是只能在函数组件的顶层使用，而不能在条件语句、循环或其他嵌套函数中使用。
+
+
+
+### 1. 保证 Hook 的顺序一致性
+
+`React` 在每次渲染时都会按照相同的顺序调用同一个组件中的所有 `Hook`。这种顺序一致性是 `React` 能够正确管理组件状态和生命周期的关键。如果在条件语句或循环中使用 `Hook`，可能会导致 `Hook` 的调用顺序在不同渲染中发生变化，从而破坏 `React` 的内部状态管理。
+
+
+
+### 2. 便于理解和调试
+
+`Hook` 的使用规则使得代码更加可预测和易于理解。开发人员可以清楚地看到哪些状态和副作用是在组件的顶层管理的，而不必担心条件语句或循环中的复杂逻辑。
+
+
+
+### 3. 避免潜在的错误
+
+如果允许在条件语句或循环中使用 `Hook`，可能会引入难以调试的错误。例如，状态的初始化和更新可能会在不同的渲染中出现不一致的行为，导致组件状态混乱。
+
+
+
+### 4. 保持 Hook 的设计理念
+
+`React Hooks` 的设计理念是让状态管理和生命周期管理更加直观和简洁。通过限制 `Hook` 的使用位置，`React` 能够提供一个一致的 `API`，使开发人员更容易理解和使用 `Hooks`。

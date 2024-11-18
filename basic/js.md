@@ -2133,3 +2133,114 @@ self.addEventListener('fetch', event => {
 ### 总结
 
 浏览器通过多种机制缓存 `URL` 和相关资源，包括 `HTTP` 缓存、浏览器缓存和服务工作者。这些机制共同作用，提高了网页的加载速度和用户体验。选择合适的缓存策略可以显著提升应用的性能和可靠性。
+
+
+
+# js如何用var实现const
+
+> [!TIP]
+>
+> **使用`var`实现`const`的实现思路**：通过创建一个不可修改的对象或函数，确保其值在整个代码执行过程中保持不变。**使用Object.freeze()防止对象被修改、使用闭包创建不可变的变量**。以下是具体的实现方法。
+>
+> 要使用`var`来实现类似于`const`的行为，我们需要确保变量的值在被初始化后不会被修改或重新赋值。尽管`var`本身没有这种约束，但我们可以通过一些编程技巧来模拟这种行为。以下是详细的实现方法。
+
+## 1. 使用 Object.freeze() 防止对象被修改
+
+`Object.freeze()`方法可以冻结一个对象，使其不能被修改。通过冻结一个对象，我们可以确保对象的属性不会被重新赋值。
+
+```js
+var MY_CONST_OBJECT = Object.freeze({
+    key1: 'value1',
+    key2: 'value2'
+});
+
+// 尝试修改对象的属性（将失败）
+
+MY_CONST_OBJECT.key1 = "newValue"; // 不会生效
+console.log(MY_CONST_OBJECT.key1); // 输出 "value1"
+```
+
+通过这种方式，我们可以创建一个不可修改的对象，从而模拟`const`的行为。
+
+
+
+## 2. 使用闭包创建不可变的变量
+
+闭包是一种在函数内部创建局部作用域并返回内部函数的方法。通过这种方式，我们可以创建一个不可变的变量。
+
+```js
+function createConstant(value) {
+    return function() {
+        return value;
+    }
+}
+
+var MY_CONSTANT = createConstant(42);
+
+console.log(MY_CONSTANT()); // 输出 42
+
+// 尝试修改常量（将失败）
+MY_CONSTANT = createConstant(100); // 不会生效
+console.log(MY_CONSTANT()); // 仍然输出 42
+```
+
+
+
+在这个例子中，`createConstant`函数返回一个闭包，该闭包持有原始值并确保其不可变。
+
+
+
+## 3. 使用立即执行函数表达式（IIFE）
+
+立即调用函数表达式（`IIFE`）可以用来创建一个局部作用域，从而保护变量不被外部修改。
+
+```js
+var MY_CONSTANT;
+
+(function() {
+    const value = 42;
+    MY_CONSTANT = function() {
+        return value;
+    };
+})();
+
+console.log(MY_CONSTANT()); // 输出 42
+
+// 尝试修改常量（将失败）
+MY_CONSTANT = function() {
+    return 100;
+}; // 不会生效
+console.log(MY_CONSTANT()); // 仍然输出 42
+```
+
+
+
+## 4. 使用代理（Proxy）对象
+
+代理（`Proxy`）对象可以拦截和定义基本操作（如属性读取、赋值等），从而可以用来保护对象的属性不被修改。
+
+```js
+var MY_CONSTANT_OBJECT = new Proxy({
+    key1: 'value1',
+    key2: 'value2'
+}, {
+    set: function(target, key, value) {
+        console.warn("Attempt to modify constant object");
+        return true; // 需要返回true以避免抛出错误
+    }
+});
+
+// 尝试修改对象的属性（将失败并产生警告）
+MY_CONSTANT_OBJECT.key1 = "newValue"; // 警告: Attempt to modify constant object
+
+console.log(MY_CONSTANT_OBJECT.key1); // 输出 "value1"
+```
+
+
+
+## 5. 总结
+
+通过使用`Object.freeze()`、闭包、立即调用函数表达式（`IIFE`）和代理（`Proxy`）对象，我们可以在JavaScript中模拟`const`的行为，即使使用的是`var`关键字。这些方法分别适用于不同的场景，可以根据具体需求选择合适的方法。**关键在于确保变量一旦被初始化后，其值不会被修改或重新赋值**。这样就能在不使用`const`关键字的情况下，达到相同的效果。
+
+
+
