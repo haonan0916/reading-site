@@ -1,3 +1,392 @@
+# 链表
+
+## 链表逆置
+
+```js
+function reverse(head) {
+    let pre = null, next = null;
+    while (head !== null) {
+        next = head.next;
+        head.next = pre;
+    	pre = head;
+        head = next;
+    }
+    return pre;
+}
+```
+
+
+
+## 链表指定区间内反转
+
+> [!TIP]
+>
+> 思路：创建一个虚拟头结点，方便反转操作。
+
+```js
+function reverseBetween(head, m, n) {
+    let dummpy = new ListNode(-1);
+    dummpy.next = head;
+    let pre = dummpy, cur = head, next = null;
+    for (let i = 0; i < m - 1; i++) {
+        pre = pre.next;
+        cur = cur.next;
+    }
+    
+    for (let i = 0; i < n - m; i++) {
+        next = cur.next;
+        cur.next = cur.next.next;
+        next.next = pre.next;
+        pre.next = next;
+    }
+    
+    return dummpy.next;
+}
+```
+
+
+
+## 合并两个排序的链表
+
+```js
+function Merge( pHead1 ,  pHead2 ) {
+    // 确定 p1 为最终答案
+    if (!pHead1) {
+        return pHead2;
+    }
+    if (!pHead2) {
+        return pHead1;
+    }
+    let h1 = pHead1, h2 = pHead2;
+    if (h1.val > h2.val) {
+        pHead1 = h2;
+        pHead2 = h1;
+    }
+ 
+    let dummpy = new ListNode(-1);
+    dummpy.next = pHead1;
+    let p1 = pHead1, p2 = pHead2, pre = dummpy;
+    while (p1 && p2) {
+        if (p1.val > p2.val) {
+            let next = p2.next;
+            pre.next = p2;
+            p2.next = p1;
+            p2 = next;
+        } else {
+            p1 = p1.next;
+        }
+        pre = pre.next;
+    }
+ 
+    if (p1) {
+        pre.next = p1;
+    }
+    if (p2) {
+        pre.next = p2;
+    }
+ 
+    return dummpy.next;
+}
+```
+
+
+
+## 合并k个已排序的链表
+
+> [!TIP]
+>
+> 思路：使用优先队列（小根堆），将 `k` 个链表的头节点先按照从小到大的顺序放入优先队列。
+
+```java
+public class Solution {
+    public ListNode mergeKLists (ArrayList<ListNode> lists) {
+        PriorityQueue<ListNode> heap = new Priority<>((a, b) -> a.val - b.val);
+        for (ListNode head : lists) {
+            heap.add(head);
+        }
+        if (heap.isEmpty()) {
+            return null;
+        }
+        // 取出第一个当作总的头结点
+        ListNode head = heap.poll(), p = head;
+        if (head.next) {
+            heap.add(head.next);
+        }
+        while (!heap.isEmpty()) {
+            ListNode cur = heap.poll();
+            p.next = cur;
+            p = cur;
+            if (cur.next) {
+                heap.add(cur.next);
+            }
+        }
+    }
+}
+```
+
+
+
+## 判断链表是否有环
+
+> [!TIP]
+>
+> 思路：快慢指针。快指针一次走两步，慢指针一次走一步。如果两者能相遇，则表明链表必定有环。
+
+```js
+function hasCycle(head) {
+    if (!head || !head.next || !head.next.next) return false;
+    let slow = head, fast = head.next.next;
+    while (fast && fast.next && slow !== fast) {
+        slow = slow.next;
+        fast = fast.next.next;
+    }
+    if (!fast || !fast.next) {
+        return false;
+    }
+    if (slow === fast) {
+        return true;
+    }
+}
+```
+
+
+
+## 链表中环的入口节点
+
+> [!TIP]
+>
+> 思路：快慢指针。快指针一次走两步，慢指针一次走一步。当两者相遇时，让快指针回到开头，快、慢指针每次各走一步，直到两者相遇，相遇的那个节点就是环的入口节点。
+
+```js
+function entryNodeOfLoop(pHead) {
+    if (!pHead || !pHead.next || !pHead.next.next) return null;
+    let slow = pHead, fast = pHead.next.next;
+    while (fast && fast.next && slow !== fast) {
+        slow = slow.next;
+        fast = fast.next.next;
+    }
+    if (!fast || !fast.next) return null;
+    fast = pHead;
+    while (fast !== slow) {
+        fast = fast.next;
+        slow = slow.next;
+    }
+    return slow;
+}
+```
+
+
+
+## 链表中倒数最后k个节点
+
+> [!TIP]
+>
+> 思路：快慢指针。先找长度再找最后 `k`。 先让快指针走 `k` 步，再让慢指针从头开始，两个指针往后移，直到快指针走到头，此时慢指针指向的节点就是倒数最后 `k` 个节点。
+
+```js
+function findKthToTail(pHead, k) {
+    if (k < 0) return null;
+    let fast = pHead, slow = pHead;
+    let length = 0;
+    while (fast) {
+        length++;
+        fast = fast.next;
+    }
+    if (k > length) return null;
+    fast = pHead;
+    while (k-- > 0 && fast) {
+        fast = fast.next;
+    }
+    while (fast) {
+        fast = fast.next;
+        slow = slow.next;
+    }
+    return slow;
+}
+```
+
+
+
+## 两个链表的第一个公共节点
+
+> [!TIP]
+>
+> 思路：先求出两个链表长度差 `diff`，让长的那个链表线移动 `diff` 步。然后，两个链表同时移动，直到相遇，相遇的那个节点就是第一个公共节点。
+
+```js
+function FindFirstCommonNode(pHead1, pHead2) {
+    if (pHead1 === null || pHead2 === null) {
+        return null;
+    }
+    // 分别获取 pHead1 和 pHead2 的链表长度
+    let len1 = 0, len2 = 0;
+    let h1 = pHead1, h2 = pHead2;
+    while(h1 !== null) {
+        len1++;
+        h1 = h1.next;
+    }
+    while(h2 !== null) {
+        len2++;
+        h2 = h2.next;
+    }
+    h1 = len1 > len2 ? pHead1 : pHead2;
+    h2 = len1 <= len2 ? pHead1 : pHead2;
+    // 先让 h1 走 |len1 - len2| 个节点
+    let diff = Math.abs(len1 - len2);
+    while (diff-- > 0) {
+        h1 = h1.next;
+    }
+    // 然后 h1 和 h2 一块走，直到相遇
+    while (h1 !== h2) {
+        h1 = h1.next;
+        h2 = h2.next;
+    }
+    return h1;
+}
+```
+
+
+
+## 链表相加
+
+> [!TIP]
+>
+> 思路：先将两个链表逆置，然后再进行链表相加即可。
+
+```js
+function addInList( head1 ,  head2 ) {
+    // write code here
+    if (head1.val === 0 || head2.val === 0) {
+        return head1.val === 0 ? head2 : head1;
+    }
+    return reverse(add(reverse(head1), reverse(head2)));
+}
+ 
+const reverse = (head) => {
+    let last = null;
+    let cur = head;
+    while (cur) {
+        let tmp = cur.next;
+        cur.next = last;
+        last = cur;
+        cur = tmp;
+    }
+    return last;
+}
+ 
+const add = (h1, h2) => {
+    // 进制数
+    let carry = 0;
+    let ans = null, cur = null;
+    for (let sum = 0, value = 0;
+     h1 !== null || h2 !== null;
+     h1 = h1 === null ? null : h1.next,
+     h2 = h2 === null ? null : h2.next) {
+        sum = (h1 === null ? 0 : h1.val) +
+              (h2 === null ? 0 : h2.val) +
+              carry;
+        value = sum % 10;
+        carry = Math.floor(sum / 10);
+        if (!ans) {
+            ans = new ListNode(value);
+            cur = ans;
+        } else {
+            cur.next = new ListNode(value);
+            cur = cur.next;
+        }
+    }
+    if (carry !== 0) {
+        cur.next = new ListNode(carry);
+    }
+    return ans;
+}
+```
+
+
+
+
+
+# 归并排序
+
+> [!IMPORTANT]
+>
+> 主要利用**分治思想**，时间复杂度 `O(nlogn)`。
+>
+> 1. 对数组不断等长**拆分**，直到一个数的长度。
+> 2. 回溯时，按升序**合并**左右两段。
+> 3. 重复以上两个过程，直到递归结束。
+
+
+
+![归并排序](/algorithm/归并排序.png)
+
+## 归并排序模板
+
+```js
+// 辅助数组
+let help = [];
+
+function merge(l, r) {
+    if (l === r) return;
+    let mid = Math.floor((l + r) / 2);
+    merge(l, mid);
+    merge(mid + 1, r);
+    
+    let i = l, j = mid + 1, k = l;
+    while (l <= mid && j <= r) {
+        if (nums[i] <= nums[j]) {
+            help[k++] = nums[i];
+        } else {
+            help[k++] = nums[j];
+        }
+    }
+    
+    while (i <= mid) help[k++] = nums[i++];
+    while (j <= r) help[k++] = nums[j++];
+    for (i = l, i <= r; i++) nums[i] = help[i];
+}
+```
+
+
+
+## 逆序对
+
+[数组中的逆序对](https://www.nowcoder.com/practice/96bd6684e04a44eb80e6a68efc0ec6c5?tpId=295&tags=&title=&difficulty=0&judgeStatus=0&rp=0&sourceUrl=%2Fexam%2Foj)
+
+```js
+const MOD = 1000000007;
+function InversePairs(nums) {
+    let help = [], ans = 0;
+    function merge(l, r) {
+        if (l === r) return;
+        let mid = Math.floor((l + r) / 2);
+        merge(l, mid);
+        merge(mid + 1, r);
+        
+        let i = l, j = mid + 1, k = l;
+        while (i <= mid && j <= r) {
+            if (nums[i] <= nums[j]) {
+                help[k++] = nums[i++];
+            } else {
+                help[k++] = nums[j++];
+                ans += (mid - i + 1) % MOD;
+            }
+        }
+        while (i <= mid) help[k++] = nums[i++];
+        while (j <= mid) help[k++] = nums[j++];
+        for (i = l; i <= r; i++) {
+            nums[i] = help[i];
+        }
+    }
+    merge(0, nums.length - 1);
+    return ans % MOD;
+}
+```
+
+
+
+
+
 # bfs 及其拓展
 
 ## bfs 模板

@@ -45,6 +45,10 @@ export default defineConfig({
           {
             text: '计算机网络',
             link: '/basic/计算机网络'
+          },
+          {
+            text: '操作系统',
+            link: '/basic/操作系统'
           }
         ]
       },
@@ -134,6 +138,10 @@ export default defineConfig({
           {
             text: '计算机网络',
             link: '/basic/计算机网络'
+          },
+          {
+            text: '操作系统',
+            link: '/basic/操作系统'
           }
         ]
       },
