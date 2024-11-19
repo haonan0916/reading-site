@@ -318,7 +318,7 @@ const add = (h1, h2) => {
 
 
 
-![归并排序](/algorithm/归并排序.png)
+![归并排序](/algorithm_images/归并排序.png)
 
 ## 归并排序模板
 
