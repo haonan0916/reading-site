@@ -713,9 +713,9 @@ ol > li::marker {
 >       
 >
 >      是一个 CSS 变量，表示渐变的结束角度。这个变量应该在其他地方定义，例如：
->        
+>            
 >      css深色版本
->        
+>            
 >      ```css
 >      :root {
 >        --percentage: 70%; /* 例如，表示 70% */
@@ -735,7 +735,7 @@ ol > li::marker {
 >       
 >
 >      表示创建一个径向渐变遮罩。
->        
+>            
 >      - `circle closest-side at center` 表示创建一个圆心在元素中心的径向渐变，圆的大小由最近的边决定。
 >      - `transparent 80%` 表示从圆心到 80% 的部分是透明的。
 >      - `#fff 80%` 表示从 80% 到边缘的部分是白色的。
@@ -746,7 +746,7 @@ ol > li::marker {
 
 `html` 渲染页面的步骤：
 
-![img](https://upload-images.jianshu.io/upload_images/17731096-fa683f3028fd4bfe.png?imageMogr2/auto-orient/strip|imageView2/2/w/1200/format/webp)
+![img](/css_images/渲染页面.png)
 
 看懂上图就很好理解之类问题了，如果现在有一个页面需要加载大量的静态资源（图片等多媒体文件）。但是我们又并不需要使用所有资源。
 
