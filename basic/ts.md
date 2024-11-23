@@ -2217,7 +2217,7 @@ s1.speak(100, 200);
 
 `TypeScript` 类型工具是一系列预定义的类型，它们可以帮助开发者更方便地进行类型转换和操作。这些工具类型在全局作用域内可用，无需额外导入。
 
-## 1. Partical<T>
+## 1. `Partical<T>`
 
 `Partial<T>` 类型工具可以将一个类型的所有属性变为可选的。这对于创建部分更新对象非常有用。例如，假设有一个 `Person` 接口：
 
@@ -2242,7 +2242,7 @@ type PartialPerson = Partial<Person>;
 
 
 
-## 2. Required<T>
+## 2. `Required<T>`
 
 `Required<T>` 类型工具与 `Partial<T>` 相反，它可以将一个类型的所有属性变为必填的。例如：
 
@@ -2257,7 +2257,7 @@ type RequiredPerson = Required<PartialPerson>;
 
 
 
-## 3. Readonly<T>
+## 3. `Readonly<T>`
 
 `Readonly<T>` 类型工具可以将一个类型的所有属性设为只读，这意味着这些属性不能被重新赋值。例如：
 
@@ -2273,7 +2273,7 @@ type ReadonlyPerson = Readonly<Person>;
 
 
 
-## 4. Pick<T, K>
+## 4. `Pick<T, K>`
 
 `Pick<T, K>` 类型工具可以从给定的类型中选取出指定的键值，然后组成一个新的类型。例如：
 
@@ -2288,7 +2288,7 @@ type NewPerson = Pick<Person, 'name' | 'age'>
 
 
 
-## 5. Omit<T, K>
+## 5. `Omit<T, K>`
 
 `Omit<T, K>` 类型工具的功能是返回去除指定的键值之后的新类型。例如：
 
@@ -2302,7 +2302,7 @@ type NewPerson = Omit<Person, 'age'>
 
 
 
-## 6. Exclude<T, U>
+## 6. `Exclude<T, U>`
 
 `Exclude<T, U>` 类型工具可以从联合类型中去除指定的类型。例如：
 
@@ -2314,7 +2314,7 @@ type T = Exclude<'a' | 'b' | 'c', 'a'>
 
 
 
-## 7. Extract<T, U>
+## 7. `Extract<T, U>`
 
 `Extract<T, U>` 类型工具与 `Exclude<T, U>` 相反，它从联合类型中提取指定的类型。例如：
 
@@ -2326,7 +2326,7 @@ type T = Extract<'a' | 'b' | 'c', 'a'>;
 
 
 
-## 8. Record<K, T>
+## 8. `Record<K, T>`
 
 `Record<K, T>` 类型工具可以创建一个新类型，该类型具有由 `K` 中的每个键映射到 `T` 的属性。例如：
 
@@ -2341,7 +2341,7 @@ type RecordType = Record<'a' | 'b', string>;
 
 
 
-## 9. Awaited<T>
+## 9. `Awaited<T>`
 
 `Awaited<T>` 类型工具用于递归地解开 `Promise`。例如：
 
@@ -2357,7 +2357,7 @@ type B = Awaited<Promise<Promise<number>>>;
 
 
 
-## 10. ReturnType<T>
+## 10. `ReturnType<T>`
 
 `ReturnType<T>` 类型工具可以提取函数类型的返回类型。例如：
 
