@@ -218,7 +218,13 @@ Promise.race([promise1,timeOutPromise(5000)]).then(res=>{})
 
 > [!TIP]
 >
-> 注意：一旦从进行状态变成为其他状态就**永远**不能更改状态了。
+> 注意：
+>
+> 一旦从进行状态变成为其他状态就**永远**不能更改状态了。
+>
+> 碰到 `resolve / reject` 函数会**立刻**将 `promise` 的状态改为 `fulfilled / reject`。
+>
+> `Promise` 的状态是 `pending` 时，`Promise.then` 先不执行。
 
 **Promise的特点：**
 
@@ -338,6 +344,7 @@ promise.then(
 >
 > - 当 `then` 处理程序的参数不是函数时，它会被忽略，直接传递前一个 `Promise` 的结果。
 > - 如果没有处理程序，则返回的 `Promise` 使用原始 `Promise` 的最终状态，然后调用该 `Promise`。（对此 `Promise` 使用**最近的最后一个值**）
+> - `.then` 或 `.catch` 返回的值不能是 `promise` 本身，否则会造成死循环。
 
 `then`**方法返回的是一个新的 `Promise` 实例（不是原来那个 `Promise` 实例）。**因此可以采用链式写法，即 `then`方法后面再调用另一个 `then` 方法。
 
@@ -444,7 +451,69 @@ Promise.race([promise1,promise2,promise3]).then(res=>{
 )
 ```
 
-#### 5. finally()
+#### 5. any()
+
+`Promise.any` 是一个在 `ECMAScript 2021 (ES12)` 中引入的 `Promise` 方法，用于处理多个 `Promise` 对象。`Promise.any` 的行为类似于 `Promise.race`，但它在处理多个 `Promise` 时有一些重要的不同之处。
+
+`Promise.any` **的行为**
+
+1. **返回第一个成功的 Promise**：
+   - `Promise.any` 会等待所有传入的 `Promise` 中的第一个成功（`fulfilled`）的 `Promise`，并返回其结果。
+   - 如果所有传入的 `Promise` 都失败（rejected），则 `Promise.any` 会返回一个 `rejected` 的 `Promise`，其拒绝理由是一个 `AggregateError` 对象，包含所有失败的 `Promise` 的拒绝原因。
+2. **处理多个 Promise**：
+   - 你可以传入一个可迭代对象（如数组）作为参数，其中每个元素都是一个 `Promise`。
+
+语法：
+
+```js
+Promise.any(iterable).then(value => {
+    // 第一个成功（fulfilled）的 Promise 结果
+}, reason => {
+    // 如果所有 Promise 都失败，这里的 reason 是一个  AggregateError 对象
+});
+```
+
+
+
+**失败的情况**
+
+假设所有 `Promise` 都失败：
+
+```js
+const promise1 = new Promise((resolve, reject) => setTimeout(() => reject("Failure 1"), 1000));
+const promise2 = new Promise((resolve, reject) => setTimeout(() => reject("Failure 2"), 500));
+const promise3 = new Promise((resolve, reject) => setTimeout(() => reject("Failure 3"), 1500));
+
+Promise.any([promise1, promise2, promise3])
+  .then(value => {
+    console.log(value);
+  })
+  .catch(reason => {
+    console.error(reason); // AggregateError: All promises were rejected
+  });
+```
+
+在这个例子中，所有传入的 `Promise` 都失败，因此 `Promise.any` 返回一个 `rejected` 的 `Promise`，其拒绝理由是一个 `AggregateError` 对象，包含所有失败的 `Promise` 的拒绝原因。
+
+`AggregateError` **对象**
+
+`AggregateError` 是一个错误对象，用于表示多个错误的集合。它通常包含一个 `errors` 属性，**该属性是一个包含所有错误的数组**。
+
+```js
+const aggregateError = new AggregateError([new Error("Error 1"), new Error("Error 2")], "All promises were rejected");
+
+console.log(aggregateError.message); // "All promises were rejected"
+console.log(aggregateError.errors); // [Error: Error 1, Error: Error 2]
+```
+
+**总结**
+
+- **`Promise.any`**：返回第一个成功（`fulfilled`）的 `Promise` 的结果。
+- **如果所有 Promise 都失败**：返回一个 `rejected` 的 `Promise`，其拒绝理由是一个 `AggregateError` 对象，包含所有失败的 `Promise` 的拒绝原因。
+
+
+
+#### 6. finally()
 
 `finally`方法用于指定不管 `Promise` 对象最后状态如何，都会执行的操作。该方法是 `ES2018` 引入标准的。
 
@@ -492,7 +561,7 @@ promise
 
 > [!TIP]
 >
-> `.finally`的返回值如果在没有抛出错误的情况下默认会是上一个 `Promise` 的返回值
+> `.finally`的返回值如果**在没有抛出错误的情况下**默认会是上一个 `Promise` 的返回值
 
 ## 4. 对 async/await 的理解
 
@@ -2265,9 +2334,7 @@ console.log(MY_CONSTANT_OBJECT.key1); // 输出 "value1"
 
 ### 示例
 
-假设有一个DOM结构如下：
-
-html深色版本
+假设有一个 `DOM` 结构如下：
 
 ```js
 <div id="outer">
@@ -2278,8 +2345,6 @@ html深色版本
 ```
 
 我们在各个元素上分别绑定捕获和冒泡阶段的事件处理器：
-
-javascript深色版本
 
 ```js
 document.getElementById('outer').addEventListener('click', function(event) {

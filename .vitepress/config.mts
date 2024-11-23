@@ -112,6 +112,19 @@ export default defineConfig({
           },
         ]
       },
+      {
+        text: '其他',
+        items: [
+          {
+            text: '跨域问题梳理',
+            link: '/orther/跨域问题梳理'
+          },
+          {
+            text: '前端项目上线',
+            link: '/orther/前端项目上线'
+          },
+        ]
+      },
       { text: '简历', link: '/note/简历文档' },
     ],
 
@@ -202,6 +215,19 @@ export default defineConfig({
           {
             text: '50days50projects（React18 版）',
             link: '/project/50days50projects'
+          },
+        ]
+      },
+      {
+        text: '其他',
+        items: [
+          {
+            text: '跨域问题梳理',
+            link: '/orther/跨域问题梳理'
+          },
+          {
+            text: '前端项目上线',
+            link: '/orther/前端项目上线'
           },
         ]
       },

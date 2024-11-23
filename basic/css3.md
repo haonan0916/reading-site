@@ -713,9 +713,9 @@ ol > li::marker {
 >       
 >
 >      是一个 CSS 变量，表示渐变的结束角度。这个变量应该在其他地方定义，例如：
->            
+>                
 >      css深色版本
->            
+>                
 >      ```css
 >      :root {
 >        --percentage: 70%; /* 例如，表示 70% */
@@ -735,7 +735,7 @@ ol > li::marker {
 >       
 >
 >      表示创建一个径向渐变遮罩。
->            
+>                
 >      - `circle closest-side at center` 表示创建一个圆心在元素中心的径向渐变，圆的大小由最近的边决定。
 >      - `transparent 80%` 表示从圆心到 80% 的部分是透明的。
 >      - `#fff 80%` 表示从 80% 到边缘的部分是白色的。
@@ -893,6 +893,65 @@ ol > li::marker {
 > **浏览器会将所有的回流（重排）、重绘的操作放在一个队列中，当队列中的操作到了一定的数量或者到了一定的时间间隔，浏览器就会对队列进行批处理。这样就会让多次的回流、重绘变成一次回流重绘。**
 
 上面，将多个读操作（或者写操作）放在一起，就会等所有的读操作进入队列之后执行，这样，原本应该是触发多次回流（重排），变成了只触发一次回流（重排）。
+
+
+
+# css选择器 .a.b 和.a .b分别代表着什么
+
+在 `CSS` 中，选择器用于选择文档中的特定元素，并为其应用样式。`.a.b` 和 `.a .b` 是两种不同的选择器，它们代表的意义和选择的元素也不同。下面详细解释这两种选择器的含义：
+
+### 1. **`.a.b`**
+
+- **含义**：选择同时具有类 `a` 和类 `b` 的元素。
+- **选择的元素**：元素必须同时拥有 `class="a"` 和 `class="b"` 属性。
+
+#### 示例
+
+html深色版本
+
+```html
+<div class="a b">This element will be selected.</div>
+<div class="a">This element will not be selected.</div>
+<div class="b">This element will not be selected.</div>
+```
+
+css深色版本
+
+```css
+.a.b {
+  color: red;
+}
+```
+
+在这个示例中，只有第一个 `<div>` 元素会被选中并应用红色文本样式，因为它同时具有 `class="a"` 和 `class="b"`。
+
+### 2. **`.a .b`**
+
+- **含义**：选择类 `b` 的元素，但这些元素必须是类 `a` 元素的后代。
+- **选择的元素**：元素必须是类 `a` 元素的子元素、孙元素等任意级别的后代。
+
+#### 示例
+
+```html
+<div class="a">
+  <div class="b">This element will be selected.</div>
+  <span>This element will not be selected.</span>
+</div>
+<div class="b">This element will not be selected.</div>
+```
+
+```css
+.a .b {
+  color: blue;
+}
+```
+
+在这个示例中，只有第一个 `<div>` 元素内的 `.b` 元素会被选中并应用蓝色文本样式，因为它是一个类 `a` 元素的后代。
+
+## 总结
+
+- **`.a.b`**：选择同时具有类 `a` 和类 `b` 的元素。
+- **`.a .b`**：选择类 `b` 的元素，但这些元素必须是类 `a` 元素的后代。
 
 
 
