@@ -2244,3 +2244,83 @@ console.log(MY_CONSTANT_OBJECT.key1); // 输出 "value1"
 
 
 
+# 事件传播的冒泡与捕获，哪个先执行
+
+在 `Web` 开发中，事件传播的冒泡与捕获是两个重要的概念，它们描述了事件在 `DOM` 树中传递的两种不同方式。根据 `W3C` 标准，事件传播的顺序是**先捕获后冒泡**。具体来说，事件传播分为三个阶段：
+
+1. **捕获阶段（Capturing Phase）**：
+   - 事件从最顶层的节点（通常是 `window` 或 `document`）开始，逐级向下传递，直到到达目标元素。在这个阶段，如果在某个节点上绑定了捕获阶段的事件处理器，那么该处理器会被执行。
+2. **目标阶段（Target Phase）**：
+   - 事件到达目标元素。在这个阶段，目标元素上的事件处理器会被执行。
+3. **冒泡阶段（Bubbling Phase）**：
+   - 事件从目标元素开始，逐级向上传递，直到到达最顶层的节点。在这个阶段，如果在某个节点上绑定了冒泡阶段的事件处理器，那么该处理器会被执行。
+
+### 事件传播的顺序
+
+根据W3C标准，事件传播的顺序如下：
+
+1. **捕获阶段**：从最顶层的节点开始，逐级向下传递，直到到达目标元素。
+2. **目标阶段**：在目标元素上执行事件处理器。
+3. **冒泡阶段**：从目标元素开始，逐级向上传递，直到到达最顶层的节点。
+
+### 示例
+
+假设有一个DOM结构如下：
+
+html深色版本
+
+```js
+<div id="outer">
+  <div id="inner">
+    <button id="button">Click me</button>
+  </div>
+</div>
+```
+
+我们在各个元素上分别绑定捕获和冒泡阶段的事件处理器：
+
+javascript深色版本
+
+```js
+document.getElementById('outer').addEventListener('click', function(event) {
+  console.log('Outer captured');
+}, true); // true 表示捕获阶段
+
+document.getElementById('inner').addEventListener('click', function(event) {
+  console.log('Inner captured');
+}, true); // true 表示捕获阶段
+
+document.getElementById('button').addEventListener('click', function(event) {
+  console.log('Button target');
+}); // 默认是冒泡阶段
+
+document.getElementById('button').addEventListener('click', function(event) {
+  console.log('Button bubbled');
+}, false); // false 表示冒泡阶段
+
+document.getElementById('inner').addEventListener('click', function(event) {
+  console.log('Inner bubbled');
+}, false); // false 表示冒泡阶段
+
+document.getElementById('outer').addEventListener('click', function(event) {
+  console.log('Outer bubbled');
+}, false); // false 表示冒泡阶段
+```
+
+当点击按钮时，事件传播的顺序如下：
+
+1. **捕获阶段**：
+   - `document` -> `outer` -> `inner` -> `button`
+   - 输出：`Outer captured` -> `Inner captured`
+2. **目标阶段**：
+   - `button`
+   - 输出：`Button target`
+3. **冒泡阶段**：
+   - `button` -> `inner` -> `outer` -> `document`
+   - 输出：`Button bubbled` -> `Inner bubbled` -> `Outer bubbled`
+
+### 总结
+
+- **捕获阶段**：事件从最顶层的节点开始，逐级向下传递，直到到达目标元素。
+- **目标阶段**：事件在目标元素上执行。
+- **冒泡阶段**：事件从目标元素开始，逐级向上传递，直到到达最顶层的节点。
