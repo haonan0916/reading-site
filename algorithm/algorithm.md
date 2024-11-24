@@ -304,6 +304,128 @@ const add = (h1, h2) => {
 
 
 
+# 双指针
+
+## 盛最多水的容器
+
+[盛最多水的容器](https://leetcode.cn/problems/container-with-most-water/?envType=study-plan-v2&envId=top-100-liked)
+
+> [!TIP]
+>
+> 思路：通过对向指针来解答本题。
+
+```js
+function maxArea(height) {
+    let ans = 0;
+    for (let l = 0, r = height.length - 1; l < r; ) {
+        ans = Math.max(ans, Math.min(height[l], height[r]) * (r - l));
+        if (height[l] <= height[r]) {
+            l++;
+        } else {
+            r--;
+        }
+    }
+    return ans;
+}
+```
+
+
+
+## 三数之和
+
+[三数之和](https://leetcode.cn/problems/3sum/submissions/582726386/?envType=study-plan-v2&envId=top-100-liked)
+
+> [!TIP]
+>
+> 从头到尾遍历，内部使用对向指针。
+
+```js
+function threeSum(nums) {
+    let ans = [];
+    for (let i = 0; i < nums.length; i++) {
+        if (nums[i] > 0) return ans;
+        if (i > 0 && ums[i] === nums[i - 1]) continue;
+        let l = i + 1, r = nums.length - 1;
+        while (l < r) {
+            let sum = nums[i] + nums[l] + nums[r];
+            if (sum === 0) {
+                ans.push([nums[i], nums[l], nums[r]]);
+                while (r > l && nums[r] === nums[r - 1]) r--;
+                while (r > l && nums[l] === nums[l - 1]) l++;
+                r--;
+                l++;
+            } else if (sum < 0) {
+                l++;
+            } else {
+                r--;
+            }
+        }  
+    }
+    return ans;
+}
+```
+
+
+
+## 接雨水
+
+[接雨水](https://leetcode.cn/problems/trapping-rain-water/?envType=study-plan-v2&envId=top-100-liked)
+
+> [!TIP]
+>
+> 接雨水我们其实要求的就是每个位置上面能存多少雨水，然后把每个位置上的雨水相加即可。
+>
+> `每个位置上面能存的雨水 = max{0, min{左边的最大值，右边的最大值} - 当前位置的值}`
+>
+> 1. 分别维护一个左边最大值和右边最大值的数组
+> 2. 直接使用双指针
+
+方法1：
+
+```js
+function trap(height) {
+    let n = height.length;
+    let lmax = Array.from(n, () => 0), rmax = Array.from(n, () => 0);
+    lmax[0] = height[0];
+    for (let i = 1; i < n; i++) {
+        lmax[i] = Math.max(lmax[i - 1], height[i]);
+    }
+    rmax[n - 1] = height[n - 1];
+    for (let i = n - 2; i >= 0; i--) {
+        rmax[i] = Math.max(rmax[i + 1], height[i]);
+    }
+    let ans = 0;
+    for (let i = 1; i < n - 1; i++) {
+        ans += Math.max(0, Math.min(lmax[i - 1], rmax[i + 1]) - height[i]);
+    }
+    return ans;
+}
+```
+
+方法2：
+
+```js
+function trap(height) {
+    let n = height.length, lmax = height[0], rmax = height[n - 1], l = 1, r = n - 2;
+   	let ans = 0;
+    while (l <= r) {
+        if (lmax <= rmax) {
+            ans += Math.max(0, lmax - height[l]);
+            lmax = Math.max(lmax, height[l++]);
+        } else {
+            ans += Math.max(0, rmax - height[r]);
+            rmax = Math.max(rmax, height[r--]);
+        }
+    }
+    
+    return ans;
+}
+```
+
+
+
+
+
 
 
 # 归并排序
