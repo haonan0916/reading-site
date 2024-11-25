@@ -2389,3 +2389,83 @@ document.getElementById('outer').addEventListener('click', function(event) {
 - **捕获阶段**：事件从最顶层的节点开始，逐级向下传递，直到到达目标元素。
 - **目标阶段**：事件在目标元素上执行。
 - **冒泡阶段**：事件从目标元素开始，逐级向上传递，直到到达最顶层的节点。
+
+
+
+# 数组的 forEach 方法
+
+在 `JavaScript` 中，`Array.prototype.forEach` 方法**不支持异步操作**。尽管在 `forEach` 回调中使用了 `async` 和 `await`，但 `forEach` 本身不会等待异步操作完成。因此，`forEach` 会立即遍历数组并启动所有的异步操作，而不会等待每个异步操作完成后再继续下一个。
+
+```js
+let arr = [1, 2, 3, 4, 5];
+arr.forEach(async item => {
+    await sleep(1000);
+    console.log(item);
+});
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+```
+
+## 输出结果
+
+由于 `forEach` 不会等待 `await`，所有的 `sleep(1000)` 操作会几乎同时开始。因此，`1` 秒后，所有的 `console.log(item)` 会几乎同时执行，输出结果如下：
+
+```js
+1
+2
+3
+4
+5
+```
+
+## 解释
+
+1. **启动所有异步操作**：`forEach` 会立即遍历数组 `[1, 2, 3, 4, 5]`，并为每个元素启动一个 `sleep(1000)` 操作。
+2. **并发执行**：所有 `sleep(1000)` 操作几乎是同时开始的，因为 `forEach` 不会等待每个 `await` 完成。
+3. **1秒后输出**：1秒后，所有 `sleep(1000)` 操作完成，`console.log(item)` 会几乎同时执行，输出 `1, 2, 3, 4, 5`。
+
+
+
+## 如何实现按顺序输出
+
+如果希望按顺序输出每个元素，可以使用 `for...of` 循环，这样可以确保每个异步操作完成后才继续下一个。
+
+```js
+let arr = [1, 2, 3, 4, 5];
+
+async function processArray(arr) {
+    for (let item of arr) {
+        await sleep(1000);
+        console.log(item);
+    }
+}
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+processArray(arr);
+```
+
+## 输出结果
+
+使用 `for...of` 循环后，输出结果将是按顺序的：
+
+```js
+1
+(1 second later)
+2
+(1 second later)
+3
+(1 second later)
+4
+(1 second later)
+5
+```
+
+### 解释
+
+1. **按顺序执行**：`for...of` 循环会等待每个 `await sleep(1000)` 完成后再继续下一个迭代。
+2. **1秒间隔**：每个 `console.log(item)` 会在前一个 `sleep(1000)` 完成后执行，因此每个输出之间有 `1` 秒的间隔。
