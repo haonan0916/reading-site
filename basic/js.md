@@ -2428,3 +2428,257 @@ processArray(arr);
 
 1. **按顺序执行**：`for...of` 循环会等待每个 `await sleep(1000)` 完成后再继续下一个迭代。
 2. **1 秒间隔**：每个 `console.log(item)` 会在前一个 `sleep(1000)` 完成后执行，因此每个输出之间有 `1` 秒的间隔。
+
+# 后端接口返回 html，怎么显示在页面上
+
+## 1. 不使用框架（基础实现方案）
+
+使用 `innerHTML`
+
+```js
+// 获取接口数据
+fetch("/api/get-html")
+  .then((response) => response.text())
+  .then((html) => {
+    // 安全提示：确保 HTML 内容可信或已过滤
+    const container = document.getElementById("target-container");
+    container.innerHTML = html;
+  });
+```
+
+> [!TIP]
+>
+> 在 `React` 中使用 `dangerouslySetInnerHTML` 属性渲染富文本时，如何避免潜在的安全风险？
+>
+> 方案：使用 `DOMPurify` 过滤
+>
+> ```jsx
+> import DOMPurify from "dompurify";
+>
+> function SafeRenderer({ rawHTML }) {
+>   const cleanHTML = DOMPurify.sanitize(rawHTML, {
+>     ALLOWED_TAGS: ["p", "strong", "em", "a"], // 白名单标签
+>     ALLOWED_ATTR: ["href", "title"], // 白名单属性
+>     FORBID_CONTENTS: ["script", "iframe"], // 黑名单内容
+>   });
+>
+>   return <div dangerouslySetInnerHTML={{ __html: cleanHTML }} />;
+> }
+> ```
+
+## 2. React 实现（dangerouslySetInnerHTML）
+
+```jsx
+function HtmlRenderer() {
+  const [html, setHtml] = useState("");
+
+  useEffect(() => {
+    fetch("/api/html")
+      .then((res) => res.text())
+      .then((data) => setHtml(data));
+  }, []);
+
+  return <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(html) }} />;
+}
+```
+
+## 3. Vue 实现（v-html + 计算属性）
+
+```vue
+<template>
+  <div v-html="safeHTML"></div>
+</template>
+
+<script>
+import DOMPurify from "dompurify";
+
+export default {
+  data() {
+    return {
+      rawHTML: "",
+    };
+  },
+  computed: {
+    safeHTML() {
+      return DOMPurify.sanitize(this.rawHTML);
+    },
+  },
+  mounted() {
+    fetch("/api/html")
+      .then((res) => res.text())
+      .then((data) => (this.rawHTML = data));
+  },
+};
+</script>
+```
+
+## WebSocket
+
+### WebSocket 是什么
+
+- `WebSocket` 是一种网络传输协议，可在单个 `TCP` 连接上进行全双工通信，位于 `OSI` 模型的**应用层**。
+- `WebSocket` 使得客户端和服务器之间的数据交换变得更加简单，允许服务端主动向客户端推送数据。客户端和服务器只需要完成**一次握手**，两者之间就可以创建**持久性**的连接，并进行双向数据传输。
+
+### WebSocket 优缺点
+
+#### 优点
+
+- 实时性： `WebSocket` 提供了双向通信，**服务器可以主动向客户端推送数据**，实现实时性非常高，适用于实时聊天、在线协作等应用。
+- 减少网络延迟： 与轮询和长轮询相比，`WebSocket` 可以显著减少网络延迟，因为不需要在每个请求之间建立和关闭连接。
+- 较小的数据传输开销： `WebSocket` 的数据帧相比于 `HTTP` 请求报文较小，减少了在每个请求中传输的开销，特别适用于需要频繁通信的应用。
+- 较低的服务器资源占用： 由于 `WebSocket` 的长连接特性，服务器可以处理更多的并发连接，相较于短连接有更低的资源占用。
+- 跨域通信： 与一些其他跨域通信方法相比，`WebSocket` 更容易实现跨域通信。
+
+#### 缺点
+
+- 连接状态保持： 长时间保持连接可能会导致服务器和客户端都需要维护连接状态，可能增加一些负担。
+- 不适用于所有场景： 对于一些请求-响应模式较为简单的场景，`WebSocket` 的实时特性可能并不是必要的，使用 `HTTP` 请求可能更为合适。
+- 复杂性： 与传统的 `HTTP` 请求相比，`WebSocket` 的实现和管理可能稍显复杂，尤其是在处理连接状态、异常等方面。
+
+### WebSocket 适用场景
+
+- 实时聊天应用： `WebSocket` 是实现实时聊天室、即时通讯应用的理想选择，因为它能够提供低延迟和高实时性。
+- 在线协作和协同编辑： 对于需要多用户协同工作的应用，如协同编辑文档或绘图，`WebSocket` 的实时性使得用户能够看到其他用户的操作。
+- 实时数据展示： 对于需要实时展示数据变化的应用，例如股票行情、实时监控系统等，`WebSocket` 提供了一种高效的通信方式。
+- 在线游戏： 在线游戏通常需要快速、实时的通信，`WebSocket` 能够提供低延迟和高并发的通信能力。
+- 推送服务： 用于实现消息推送服务，向客户端主动推送更新或通知。
+
+### WebSocket 通信过程以及原理
+
+#### 建立连接
+
+- `WebSocket` 协议属于应用层协议，依赖传输层的 `TCP` 协议。它通过 `HTTP/1.1` 协议的 `101` 状态码进行握手建立连接。
+
+#### 具体过程
+
+- 客户端发送一个 `HTTP GET` 请求到服务器，请求的路径是 `WebSocket` 的路径（类似 `ws://example.com/socket`）。请求中包含一些特殊的头字段，如 `Upgrade: websocket 和 Connection: Upgrade`，以表明客户端希望升级连接为 `WebSocket`。
+- 服务器收到这个请求后，会返回一个 `HTTP 101` 状态码（协议切换协议）。同样在响应头中包含 `Upgrade: websocket `和 `Connection: Upgrade`，以及一些其他的 `WebSocket` 特定的头字段，例如 `Sec-WebSocket-Accept`，用于验证握手的合法性。
+- 客户端和服务器之间的连接从普通的 `HTTP` 连接升级为 `WebSocket` 连接。之后，客户端和服务器之间的通信就变成了 `WebSocket` 帧的传输，而不再是普通的 `HTTP` 请求和响应。
+
+#### 示例
+
+```js
+// 客户端请求
+GET ws://localhost:8888/ HTTP/1.1
+Host: localhost:8888
+Connection: Upgrade
+Upgrade: websocket
+Origin: http://localhost:63342
+Sec-WebSocket-Version: 13
+Accept-Encoding: gzip, deflate, br
+Accept-Language: zh-CN,zh;q=0.9,ja;q=0.8,en;q=0.7
+Sec-WebSocket-Key: b7wpWuB9MCzOeQZg2O/yPg==
+Sec-WebSocket-Extensions: permessage-deflate; client_max_window_bits
+
+// 服务端响应
+HTTP/1.1 101 Web Socket Protocol Handshake
+Connection: Upgrade
+Date: Wed, 22 Nov 2023 08:15:00 GMT
+Sec-WebSocket-Accept: Q4TEk+qOgJsKy7gedijA5AuUVIw=
+Server: TooTallNate Java-WebSocket
+Upgrade: websocket
+```
+
+##### Sec-WebSocket-Key
+
+- 与服务端响应头部的 `Sec-WebSocket-Accept` 是配套的，提供基本的防护，比如恶意的连接，或者无意的连接；这里的“配套”指的是：`Sec-WebSocket-Accept` 是根据请求头部的 `Sec-WebSocket-Key` 计算而来，计算过程大致为基于 `SHA1` 算法得到摘要并转成 `base64` 字符串。
+
+##### Sec-WebSocket-Extensions
+
+- 用于协商本次连接要使用的 `WebSocket` 扩展。
+
+#### 数据通信
+
+- `WebSocket` 的每条消息可能会被切分成多个数据帧（最小单位）。发送端会将消息切割成多个帧发送给接收端，接收端接收消息帧并将关联的帧重新组装成完整的消息。
+
+### WebSocket 实战：建立连接与数据传输
+
+以下是一个使用 `JavaScript` 建立 `WebSocket` 连接并进行数据传输的实战示例：
+
+```js
+// 建立WebSocket连接
+var ws = new WebSocket("wss://example.com/socketserver");
+
+// 连接建立事件
+ws.onopen = function () {
+  console.log("连接成功");
+  // 可以发送数据
+  ws.send(JSON.stringify({ type: "message", content: "Hello Server!" }));
+};
+
+// 数据接收事件
+ws.onmessage = function (event) {
+  console.log("接收到消息：", event.data);
+};
+
+// 错误处理
+ws.onerror = function (error) {
+  console.error("WebSocket Error: ", error);
+};
+
+// 连接关闭事件
+ws.onclose = function () {
+  console.log("WebSocket连接已关闭");
+};
+
+// 发送JSON格式数据
+function sendJsonData(data) {
+  if (ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify(data));
+  } else {
+    console.error("WebSocket连接未打开");
+  }
+}
+
+// 接收JSON数据示例
+ws.onmessage = function (event) {
+  var message = JSON.parse(event.data);
+  if (message.type === "response") {
+    console.log("服务器响应：", message.content);
+  }
+};
+```
+
+### 心跳机制的实现
+
+心跳机制是 `WebSocket` 通信中用于检测连接活性的一种技术。以下是一个简单的心跳机制实现：
+
+```js
+// 设置心跳间隔为25秒
+var heartbeatInterval = 25000;
+
+// 定义心跳函数
+function sendHeartbeat() {
+  if (ws.readyState === WebSocket.OPEN) {
+    ws.send("ping");
+  }
+}
+
+// 设置定时器发送心跳
+var heartbeatTimer = setInterval(sendHeartbeat, heartbeatInterval);
+
+// 监听心跳响应
+ws.onmessage = function (event) {
+  if (event.data === "pong") {
+    console.log("心跳响应收到");
+    // 可以在这里重置某些状态或计时器
+  }
+};
+
+// 连接关闭时清除心跳定时器
+ws.onclose = function () {
+  clearInterval(heartbeatTimer);
+};
+```
+
+### 安全性与跨域问题
+
+为了确保通信的安全性，`WebSocket` 支持通过`wss://`（`WebSocket Secure`）前缀建立加密连接。对于跨域问题，可以利用 `CORS` 策略来允许不同域之间的通信。
+
+### 第三方库的使用
+
+在实际开发中，可以借助一些第三方库来简化 `WebSocket` 的使用，例如：
+
+- **Socket.IO**：提供自动重连和丰富的事件系统。
+- **ReconnectingWebSocket**：自动处理断线重连。
+- **SockJS**：提供向后兼容性，能在不支持 `WebSocket` 的浏览器上工作。
