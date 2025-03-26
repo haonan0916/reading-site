@@ -1,24 +1,20 @@
 # 单行文字溢出
 
 ```css
-overflow: hidden;            // 溢出隐藏
-text-overflow: ellipsis;      // 溢出用省略号显示
-white-space: nowrap;         // 规定段落中的文本不进行换行
+overflow: hidden; // 溢出隐藏
+text-overflow: ellipsis; // 溢出用省略号显示
+white-space: nowrap; // 规定段落中的文本不进行换行
 ```
-
-
 
 # 文字多行溢出
 
 ```css
-overflow: hidden;            // 溢出隐藏
-text-overflow: ellipsis;     // 溢出用省略号显示
-display:-webkit-box;         // 作为弹性伸缩盒子模型显示。
--webkit-box-orient:vertical; // 设置伸缩盒子的子元素排列方式：从上到下垂直排列
--webkit-line-clamp:3;        // 显示的行数
+overflow: hidden; // 溢出隐藏
+text-overflow: ellipsis; // 溢出用省略号显示
+display: -webkit-box; // 作为弹性伸缩盒子模型显示。
+-webkit-box-orient: vertical; // 设置伸缩盒子的子元素排列方式：从上到下垂直排列
+-webkit-line-clamp: 3; // 显示的行数
 ```
-
-
 
 # 实现水平垂直居中
 
@@ -26,14 +22,14 @@ display:-webkit-box;         // 作为弹性伸缩盒子模型显示。
 
 ```css
 .parent {
-    position: relative;
+  position: relative;
 }
- 
+
 .child {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%,-50%);
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
 }
 ```
 
@@ -41,36 +37,34 @@ display:-webkit-box;         // 作为弹性伸缩盒子模型显示。
 
 ```css
 .parent {
-    position: relative;
+  position: relative;
 }
- 
+
 .child {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    margin: auto;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: auto;
 }
 ```
 
-****
-
-
+---
 
 - 利用绝对定位，先将元素的左上角通过 `top:50%` 和 `left:50%` 定位到页面的中心，然后再通过 `margin` 负值来调整元素的中心点到页面的中心。该方法适用于**盒子宽高已知**的情况
 
 ```css
 .parent {
-    position: relative;
+  position: relative;
 }
- 
+
 .child {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    margin-top: -50px;     /* 自身 height 的一半 */
-    margin-left: -50px;    /* 自身 width 的一半 */
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-top: -50px; /* 自身 height 的一半 */
+  margin-left: -50px; /* 自身 width 的一半 */
 }
 ```
 
@@ -78,13 +72,11 @@ display:-webkit-box;         // 作为弹性伸缩盒子模型显示。
 
 ```css
 .parent {
-    display: flex;
-    justify-content:center;
-    align-items:center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 ```
-
-
 
 # 网格（grid）布局
 
@@ -102,76 +94,72 @@ display:-webkit-box;         // 作为弹性伸缩盒子模型显示。
 > - `grid-row`：指定元素占多少行；如：`grid-row: 1/3` 表示该元素占据 `[1, 3)` 行
 > - `grid-column`：指定元素占多少列；如：`grid-column: 1/3` 表示该元素占据 `[1, 3)` 列
 >
-> 这里的`/`不是除号的意思，仅是占位的作用。如果只写一个数字的话，默认跨越1个网格
+> 这里的`/`不是除号的意思，仅是占位的作用。如果只写一个数字的话，默认跨越 1 个网格
 
 ```html
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
     <style>
-        .headTitle {
-            font-size: 32px;
-            text-align: center;
-            color: blueviolet;
-        }
+      .headTitle {
+        font-size: 32px;
+        text-align: center;
+        color: blueviolet;
+      }
 
-        .layout {
-            /* width: 80%; */
-            width: 1400px;
-            min-height: 500px;
-            background-color: #fff;
-            border-radius: 10px;
-            margin: 0 auto;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
-            padding: 30px;
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            /* 响应式（使用响应式，宽度不能固定，可以写成百分比形式） */
-            /* grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); */
-            gap: 30px;
-        }
+      .layout {
+        /* width: 80%; */
+        width: 1400px;
+        min-height: 500px;
+        background-color: #fff;
+        border-radius: 10px;
+        margin: 0 auto;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+        padding: 30px;
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        /* 响应式（使用响应式，宽度不能固定，可以写成百分比形式） */
+        /* grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); */
+        gap: 30px;
+      }
 
-        .layout .box {
-            background-color: aqua;
-            border-radius: 8px;
-            padding: 10px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: #fff;
-        }
+      .layout .box {
+        background-color: aqua;
+        border-radius: 8px;
+        padding: 10px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: #fff;
+      }
 
-        .layout .box1 {
-            grid-row: 1/3;
-            grid-column: 1/3;
-        }
+      .layout .box1 {
+        grid-row: 1/3;
+        grid-column: 1/3;
+      }
     </style>
-</head>
+  </head>
 
-<body>
+  <body>
     <div class="headTitle">grid布局</div>
     <div class="layout">
-        <div class="box box1">box</div>
-        <div class="box">box</div>
-        <div class="box">box</div>
-        <div class="box">box</div>
-        <div class="box">box</div>
-        <div class="box">box</div>
-        <div class="box">box</div>
-        <div class="box">box</div>
-        <div class="box">box</div>
-        <div class="box">box</div>
+      <div class="box box1">box</div>
+      <div class="box">box</div>
+      <div class="box">box</div>
+      <div class="box">box</div>
+      <div class="box">box</div>
+      <div class="box">box</div>
+      <div class="box">box</div>
+      <div class="box">box</div>
+      <div class="box">box</div>
+      <div class="box">box</div>
     </div>
-</body>
-
+  </body>
 </html>
 ```
-
-
 
 # 卡片翻转效果
 
@@ -180,139 +168,134 @@ display:-webkit-box;         // 作为弹性伸缩盒子模型显示。
 ```html
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
-    <link rel="stylesheet" href="./css/card.css">
-</head>
+    <link rel="stylesheet" href="./css/card.css" />
+  </head>
 
-<body>
+  <body>
     <!-- 小球区域 -->
     <div class="ball ball-left"></div>
     <div class="ball ball-right"></div>
 
     <!-- 卡片区域 -->
     <div class="outer">
-        <div class="inner">
-            <!-- 卡片正面 -->
-            <div class="card front-face">
-                <h1>正面</h1>
-                <button>去反面</button>
-            </div>
-            <!-- 卡片反面 -->
-            <div class="card back-face">
-                <h1>反面</h1>
-                <button>去正面</button>
-            </div>
+      <div class="inner">
+        <!-- 卡片正面 -->
+        <div class="card front-face">
+          <h1>正面</h1>
+          <button>去反面</button>
         </div>
+        <!-- 卡片反面 -->
+        <div class="card back-face">
+          <h1>反面</h1>
+          <button>去正面</button>
+        </div>
+      </div>
     </div>
-</body>
-
+  </body>
 </html>
 ```
 
 ```less
 html,
 body {
-    background-color: #000;
-    margin: 0;
-    padding: 0;
+  background-color: #000;
+  margin: 0;
+  padding: 0;
 }
 
 .ball {
-    width: 250px;
-    height: 250px;
-    background-color: rebeccapurple;
-    border-radius: 50%;
-    position: absolute;
-    left: 50%;
-    top: 50%;
+  width: 250px;
+  height: 250px;
+  background-color: rebeccapurple;
+  border-radius: 50%;
+  position: absolute;
+  left: 50%;
+  top: 50%;
 }
 
 .ball-left {
-    transform: translate(calc(-50% - 230px), calc(-50% - 130px));
-    background: linear-gradient(-45deg, rgb(96, 242, 157), rgb(34, 204, 247));
-    animation: ani-ball 2s linear infinite alternate;
+  transform: translate(calc(-50% - 230px), calc(-50% - 130px));
+  background: linear-gradient(-45deg, rgb(96, 242, 157), rgb(34, 204, 247));
+  animation: ani-ball 2s linear infinite alternate;
 }
 
 .ball-right {
-    transform: translate(calc(-50% + 230px), calc(-50% + 130px));
-    background: linear-gradient(90deg, rgb(238, 29, 193), rgb(243, 167, 239));
-    animation: ani-ball 2s linear infinite alternate-reverse;
+  transform: translate(calc(-50% + 230px), calc(-50% + 130px));
+  background: linear-gradient(90deg, rgb(238, 29, 193), rgb(243, 167, 239));
+  animation: ani-ball 2s linear infinite alternate-reverse;
 }
 
 @keyframes ani-ball {
-    from {
-        width: 250px;
-        height: 250px;
-    }
+  from {
+    width: 250px;
+    height: 250px;
+  }
 
-    to {
-        width: 230px;
-        height: 230px;
-    }
+  to {
+    width: 230px;
+    height: 230px;
+  }
 }
 
 .outer {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    perspective: 1000px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  perspective: 1000px;
 
-    &:hover .inner {
-        transform: rotateY(180deg);
+  &:hover .inner {
+    transform: rotateY(180deg);
+  }
+
+  .inner {
+    width: 500px;
+    height: 300px;
+    transition: 0.6s;
+    transform-style: preserve-3d;
+
+    .card {
+      width: 100%;
+      height: 100%;
+      letter-spacing: 0.2em;
+      overflow: hidden;
+      border-radius: 20px;
+      padding: 20px;
+      box-sizing: border-box;
+      position: absolute;
+      left: 0;
+      top: 0;
+      // 这个样式一定要添加到内部的正反面盒子上
+      backface-visibility: hidden;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.1);
+      // 毛玻璃效果
+      backdrop-filter: blur(30px);
+      color: #fff;
     }
 
-    .inner {
-        width: 500px;
-        height: 300px;
-        transition: .6s;
-        transform-style: preserve-3d;
-
-
-        .card {
-            width: 100%;
-            height: 100%;
-            letter-spacing: 0.2em;
-            overflow: hidden;
-            border-radius: 20px;
-            padding: 20px;
-            box-sizing: border-box;
-            position: absolute;
-            left: 0;
-            top: 0;
-            // 这个样式一定要添加到内部的正反面盒子上
-            backface-visibility: hidden;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.1);
-            // 毛玻璃效果
-            backdrop-filter: blur(30px);
-            color: #fff;
-        }
-
-        .front-face {
-            z-index: 2;
-        }
-
-        .back-face {
-            z-index: 1;
-            transform: rotateY(180deg);
-        }
+    .front-face {
+      z-index: 2;
     }
+
+    .back-face {
+      z-index: 1;
+      transform: rotateY(180deg);
+    }
+  }
 }
 
 input,
 button {
-    padding: 10px;
-    border-radius: 6px;
+  padding: 10px;
+  border-radius: 6px;
 }
 ```
-
-
 
 # 发光边角鼠标跟随效果
 
@@ -321,127 +304,129 @@ button {
 ```html
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
-    <link rel="stylesheet" href="./css/index.css">
+    <link rel="stylesheet" href="./css/index.css" />
     <script>
-        onload = () => {
-            const colors = ['#f00', '#f0f', '#ff0', '#0f0']
-            const wrappers = document.querySelectorAll('.card-wrapper');
-            wrappers.forEach((wrapper, i) => {
-                wrapper.style.setProperty('--color', colors[i % 4]);
+      onload = () => {
+        const colors = ["#f00", "#f0f", "#ff0", "#0f0"];
+        const wrappers = document.querySelectorAll(".card-wrapper");
+        wrappers.forEach((wrapper, i) => {
+          wrapper.style.setProperty("--color", colors[i % 4]);
 
-                wrapper.addEventListener('mousemove', (e) => {
-                    const rect = wrapper.getBoundingClientRect()
-                    const x = e.pageX - rect.left
-                    const y = e.pageY - rect.top
-                    wrapper.style.setProperty('--x', `${x}px`)
-                    wrapper.style.setProperty('--y', `${y}px`)
-                })
-            })
-        }
+          wrapper.addEventListener("mousemove", (e) => {
+            const rect = wrapper.getBoundingClientRect();
+            const x = e.pageX - rect.left;
+            const y = e.pageY - rect.top;
+            wrapper.style.setProperty("--x", `${x}px`);
+            wrapper.style.setProperty("--y", `${y}px`);
+          });
+        });
+      };
     </script>
-</head>
+  </head>
 
-<body>
+  <body>
     <div class="container">
-        <div class="card-wrapper">
-            <div class="card">
-                <h3>使用人群</h3>
-                <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Explicabo corrupti saepe quis voluptatibus
-                    laborum, tempora in vitae magnam expedita nesciunt, culpa dicta quibusdam commodi eos fuga doloribus
-                    soluta minima nam?</p>
-            </div>
+      <div class="card-wrapper">
+        <div class="card">
+          <h3>使用人群</h3>
+          <p>
+            Lorem ipsum dolor sit amet consectetur adipisicing elit. Explicabo
+            corrupti saepe quis voluptatibus laborum, tempora in vitae magnam
+            expedita nesciunt, culpa dicta quibusdam commodi eos fuga doloribus
+            soluta minima nam?
+          </p>
         </div>
-        <div class="card-wrapper">
-            <div class="card">
-                <h3>课程亮点</h3>
-                <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Aliquam rem accusamus quidem, voluptates
-                    iste sequi temporibus, placeat labore et delectus suscipit velit non quo omnis dolore. Aliquam illo
-                    autem cum.</p>
-            </div>
+      </div>
+      <div class="card-wrapper">
+        <div class="card">
+          <h3>课程亮点</h3>
+          <p>
+            Lorem ipsum dolor sit amet consectetur, adipisicing elit. Aliquam
+            rem accusamus quidem, voluptates iste sequi temporibus, placeat
+            labore et delectus suscipit velit non quo omnis dolore. Aliquam illo
+            autem cum.
+          </p>
         </div>
-        <div class="card-wrapper">
-            <div class="card">
-                <h3>讲师介绍</h3>
-                <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Quibusdam ea nemo eos possimus sit
-                    accusantium recusandae, quos sequi temporibus mollitia molestias consequatur explicabo?
-                    Exercitationem quia perferendis reiciendis laudantium? Odio, sed?</p>
-            </div>
+      </div>
+      <div class="card-wrapper">
+        <div class="card">
+          <h3>讲师介绍</h3>
+          <p>
+            Lorem, ipsum dolor sit amet consectetur adipisicing elit. Quibusdam
+            ea nemo eos possimus sit accusantium recusandae, quos sequi
+            temporibus mollitia molestias consequatur explicabo? Exercitationem
+            quia perferendis reiciendis laudantium? Odio, sed?
+          </p>
         </div>
+      </div>
     </div>
-</body>
-
+  </body>
 </html>
 ```
-
-
 
 ```less
 html,
 body {
-    background-color: #000;
-    color: #fff;
-    font-size: 12px;
+  background-color: #000;
+  color: #fff;
+  font-size: 12px;
 }
 
 .container {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    width: 100%;
-    transform: translate(-50%, -50%);
-    display: flex;
-    justify-content: space-evenly;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 100%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  justify-content: space-evenly;
 
-    .card-wrapper {
-        width: 25%;
-        padding: 20px 40px;
-        box-sizing: border-box;
-        position: relative;
-        overflow: hidden;
-        border-radius: 15px;
+  .card-wrapper {
+    width: 25%;
+    padding: 20px 40px;
+    box-sizing: border-box;
+    position: relative;
+    overflow: hidden;
+    border-radius: 15px;
 
-        &::before {
-            position: absolute;
-            left: var(--x);
-            top: var(--y);
-            content: '';
-            display: block;
-            width: 400px;
-            height: 400px;
-            background: radial-gradient(var(--color), transparent 70%);
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-
-        }
-
-        &::after {
-            z-index: 2;
-            position: absolute;
-            top: 0;
-            left: 0;
-            content: '';
-            display: block;
-            width: 100%;
-            height: 100%;
-            background: rgba(33, 33, 33, 0.5);
-            border-radius: 15px;
-        }
-
-        .card {
-            z-index: 9;
-            position: relative;
-            letter-spacing: 0.1em;
-        }
+    &::before {
+      position: absolute;
+      left: var(--x);
+      top: var(--y);
+      content: "";
+      display: block;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(var(--color), transparent 70%);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
     }
+
+    &::after {
+      z-index: 2;
+      position: absolute;
+      top: 0;
+      left: 0;
+      content: "";
+      display: block;
+      width: 100%;
+      height: 100%;
+      background: rgba(33, 33, 33, 0.5);
+      border-radius: 15px;
+    }
+
+    .card {
+      z-index: 9;
+      position: relative;
+      letter-spacing: 0.1em;
+    }
+  }
 }
 ```
-
-
 
 # 元素宽高等比例
 
@@ -471,9 +456,9 @@ body {
 >
 > ```html
 > <div class="item">
-> 	<div class="inner">
->         <div class="container"></div>
->     </div>
+>   <div class="inner">
+>     <div class="container"></div>
+>   </div>
 > </div>
 > ```
 >
@@ -481,30 +466,24 @@ body {
 >
 > ```css
 > .item {
->     background: red;
->     width: 50%;
->     margin: 0 auto;
+>   background: red;
+>   width: 50%;
+>   margin: 0 auto;
 > }
-> 
+>
 > .inner {
->     width: 100%;
->     padding-top: 75%;
->     height: 0;
->     position: relative;
+>   width: 100%;
+>   padding-top: 75%;
+>   height: 0;
+>   position: relative;
 > }
-> 
+>
 > .container {
->     position: absolute;
->     inset: 0;
->     background: black;
+>   position: absolute;
+>   inset: 0;
+>   background: black;
 > }
 > ```
->
-> 
-
-
-
-
 
 # 设置元素的列宽和列数
 
@@ -522,34 +501,26 @@ body {
 
 ![img](/css_images/三列文字_1.png)
 
-
-
 实现：
 
 ```html
-<div class="three-column-text">
-  .......
-</div>
+<div class="three-column-text">.......</div>
 ```
 
 ```css
-  .three-column-text {
-    columns: 3 auto;
-    column-rule: solid 1px #ddd;
-    column-gap: 20px;
-    padding: 10px;
-  }
+.three-column-text {
+  columns: 3 auto;
+  column-rule: solid 1px #ddd;
+  column-gap: 20px;
+  padding: 10px;
+}
 ```
-
-
 
 # 让 img 图像适合容器 div
 
 > [!TIP]
 >
 > 使用 `css` 的 `object-fit` 属性。将其设置为：`cover`
-
-
 
 # 列表数字样式设置
 
@@ -572,8 +543,6 @@ ol > li::marker {
 }
 ```
 
-
-
 > [!TIP]
 >
 > 1. **选择器 `ol > li::marker`**：
@@ -591,7 +560,6 @@ ol > li::marker {
 > 3. **属性 `content: counters(list-item, ".") " "`**：
 >
 >    - `content`：用于生成内容。在这里，它用于生成列表项的标记内容。
->
 >    - ```css
 >      counters(list-item, ".")
 >      ```
@@ -602,8 +570,6 @@ ol > li::marker {
 >      - `"."`：计数器之间的分隔符。例如，对于嵌套的列表项，编号可能会显示为 `1.1`、`1.2` 等。
 >
 >    - `" "`：在生成的编号后面添加一个空格，以确保编号和列表项文本之间有适当的间距。
-
-
 
 # 0.5px 的边框
 
@@ -618,10 +584,6 @@ ol > li::marker {
 > ```html
 > <div class="hairline"></div>
 > ```
->
-> 
-
-
 
 实现的效果如下：
 
@@ -638,8 +600,6 @@ ol > li::marker {
   transform-origin: 0 0;
 }
 ```
-
-
 
 # 环形图
 
@@ -678,9 +638,12 @@ ol > li::marker {
   height: 100px;
   clip-path: circle(50px at center);
   background-image: conic-gradient(#f44336 var(--percentage), transparent 0);
-  mask-image: radial-gradient(circle closest-side at center, transparent 80%, #fff 80%);
+  mask-image: radial-gradient(
+    circle closest-side at center,
+    transparent 80%,
+    #fff 80%
+  );
 }
-
 ```
 
 > [!TIP]
@@ -703,19 +666,15 @@ ol > li::marker {
 > 4. **属性 `background-image: conic-gradient(#f44336 var(--percentage), transparent 0)`**：
 >
 >    - 使用 `conic-gradient` 函数创建一个圆锥渐变背景。
->
 >    - `#f44336` 是渐变的颜色，表示饼图的填充色。
->
 >    - ```css
 >      var(--percentage)
 >      ```
 >
->       
->
 >      是一个 CSS 变量，表示渐变的结束角度。这个变量应该在其他地方定义，例如：
->                
->      css深色版本
->                
+>
+>      css 深色版本
+>
 >      ```css
 >      :root {
 >        --percentage: 70%; /* 例如，表示 70% */
@@ -727,20 +686,15 @@ ol > li::marker {
 > 5. **属性 `mask-image: radial-gradient(circle closest-side at center, transparent 80%, #fff 80%)`**：
 >
 >    - 使用 `mask-image` 属性创建一个遮罩图像，用于进一步控制饼图的显示区域。
->
 >    - ```css
 >      radial-gradient(circle closest-side at center, transparent 80%, #fff 80%)
 >      ```
 >
->       
->
 >      表示创建一个径向渐变遮罩。
->                
+>
 >      - `circle closest-side at center` 表示创建一个圆心在元素中心的径向渐变，圆的大小由最近的边决定。
 >      - `transparent 80%` 表示从圆心到 80% 的部分是透明的。
 >      - `#fff 80%` 表示从 80% 到边缘的部分是白色的。
-
-
 
 # display: none 情况下图片是如何加载的
 
@@ -754,8 +708,6 @@ ol > li::marker {
 
 解决办法：
 善用 `css` 的加载机制(如 `background:url` 资源导入)，`display:none` 规则下的静态资源不会进行加载，完成`DOM` 树后，`CSS` 树对 `DOM` 树渲染合成`render` 树，避免了无用静态资源加载的问题。相应的 `display:none` 也会引起页面重排、重绘。
-
-
 
 **1. 元素有 display: none**
 
@@ -787,8 +739,6 @@ ol > li::marker {
 
 ```
 
-
-
 **2. 如果父元素有{display: none;}**
 
 > [!IMPORTANT]
@@ -798,36 +748,30 @@ ol > li::marker {
 ```html
 <!DOCTYPE html>
 <html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width">
-  <title>test</title>
-</head>
-<style>
-
-.img-container {
-	background-image: url(../imgs/icon1.png);
-}
-
-</style>
-<body>
-<div style="display:none">
-    <div class="img-container"></div>
-    <img src="../imgs/icon2.png">
-</div>
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>test</title>
+  </head>
+  <style>
+    .img-container {
+      background-image: url(../imgs/icon1.png);
+    }
+  </style>
+  <body>
+    <div style="display:none">
+      <div class="img-container"></div>
+      <img src="../imgs/icon2.png" />
+    </div>
+  </body>
 </html>
 ```
 
-
-
-**3.伪类背景图片只在触发伪类时候才会请求加载（因此建议请求雪碧图---即一堆小图汇总到一张大图上，这样不会有UI跳跃感）**
+**3.伪类背景图片只在触发伪类时候才会请求加载（因此建议请求雪碧图---即一堆小图汇总到一张大图上，这样不会有 UI 跳跃感）**
 
 **4.已经请求过的相同图片不会重复请求**
 
 **5.不存在的元素，即时样式表里有写，也不会请求加载**
-
-
 
 # 回流（重排）与重绘
 
@@ -855,8 +799,6 @@ ol > li::marker {
 - 全局范围：从根节点开始，对整个渲染树进行重新布局
 - 局部范围：对渲染树的某部分或者一个渲染对象进行重新布局
 
-
-
 ## 重绘
 
 当页面中某些元素的样式发生变化，但是不会影响其在文档流中的位置时，浏览器就会对元素进行重新绘制，这个过程就是**重绘**。
@@ -870,8 +812,6 @@ ol > li::marker {
 > [!WARNING]
 >
 > 注意： **当触发回流时，一定会触发重绘，但是重绘不一定会引发回流。**
-
-
 
 # 如何避免回流（重排）与重绘
 
@@ -894,9 +834,7 @@ ol > li::marker {
 
 上面，将多个读操作（或者写操作）放在一起，就会等所有的读操作进入队列之后执行，这样，原本应该是触发多次回流（重排），变成了只触发一次回流（重排）。
 
-
-
-# css选择器 .a.b 和.a .b分别代表着什么
+# css 选择器 .a.b 和.a .b 分别代表着什么
 
 在 `CSS` 中，选择器用于选择文档中的特定元素，并为其应用样式。`.a.b` 和 `.a .b` 是两种不同的选择器，它们代表的意义和选择的元素也不同。下面详细解释这两种选择器的含义：
 
@@ -907,7 +845,7 @@ ol > li::marker {
 
 #### 示例
 
-html深色版本
+html 深色版本
 
 ```html
 <div class="a b">This element will be selected.</div>
@@ -915,7 +853,7 @@ html深色版本
 <div class="b">This element will not be selected.</div>
 ```
 
-css深色版本
+css 深色版本
 
 ```css
 .a.b {
@@ -953,5 +891,23 @@ css深色版本
 - **`.a.b`**：选择同时具有类 `a` 和类 `b` 的元素。
 - **`.a .b`**：选择类 `b` 的元素，但这些元素必须是类 `a` 元素的后代。
 
+# 实现三角形
 
+效果：
 
+![倒三角](/css_images/倒三角.png)
+
+```css
+div {
+  width: 0;
+  height: 0;
+  border: 10px solid transparent;
+  border-top-color: red;
+}
+```
+
+# css margin 与 padding
+
+> [!IMPORTANT]
+>
+> 在 `CSS` 规范中，**水平/垂直方向的百分比属性（`margin/padding`）基于的是包含块的宽度。**

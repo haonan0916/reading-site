@@ -7,61 +7,53 @@
 3. `TypeScript`增加了：静态类型检查、接口、 泛型等很多**现代开发特性**，更适合**大型项目**的开发。
 4. `TypeScript`需要**编译**为`JavaScript`，然后交给浏览器或其他`JavaScript`运行环境执行。
 
-
-
 # 为何需要 TS
 
-## JS的困扰
+## JS 的困扰
 
 ### 1. 不清楚的数据类型
 
 ```js
-let welcome = 'hello'
-welcome() // 此行报错：TypeError: welcome is not a function
+let welcome = "hello";
+welcome(); // 此行报错：TypeError: welcome is not a function
 ```
 
 ### 2. 有漏洞的逻辑
 
 ```js
-const str = Date.now() % 2 ? '奇数' : '偶数'
+const str = Date.now() % 2 ? "奇数" : "偶数";
 
-if (str !== '奇数') {
-    alert('hello')
-} else if (str === '偶数') {
-    alert('world')
+if (str !== "奇数") {
+  alert("hello");
+} else if (str === "偶数") {
+  alert("world");
 }
 ```
 
 ### 3. 访问不存在的属性
 
 ```js
-const obj = { width: 10, height: 15 }
+const obj = { width: 10, height: 15 };
 const area = obj.width * obj.height;
 ```
 
 ### 4. 低级的拼写错误
 
 ```js
-const message = 'hello, world'
+const message = "hello, world";
 message.toUperCase(); // 应该是 message.toUpperCase()
 ```
-
-
 
 ## 静态类型检查
 
 - 在代码运行前进行检查，发现代码的错误或不合理之处，减小运行时出现异常的几率，此种检查叫『**静态类型检查**』，`TypeScript` 核心就是『静态类型检查』，简言之就是**把运行时的错误前置**。
 - 同样的功能，`TypeScript` 的代码量要**大于** `JavaScript`，但由于` TypeScript` 的代码结构更加清晰，在后期代码的维护中 `TypeScript` 却**胜于** `JavaScript`。
 
-
-
 # 编译 TS
 
 > [!TIP]
 >
 > 浏览器不能直接运行 `TypeScript` 代码，需要编译为 `JavaScript` 再交由浏览器解析器执行。
-
-
 
 ## 1. 命令行编译
 
@@ -71,10 +63,10 @@ message.toUperCase(); // 应该是 message.toUpperCase()
 
 ```js
 const person = {
-    name: '李四',
-    age: 18
-}
-console.log(`我叫${person.name}，我今年${person.age}岁了`)
+  name: "李四",
+  age: 18,
+};
+console.log(`我叫${person.name}，我今年${person.age}岁了`);
 ```
 
 - **第二步**：全局安装`TypeScript`
@@ -88,8 +80,6 @@ npm i typescript -g
 ```bash
 tsc demo.ts
 ```
-
-
 
 ## 2. 自动化编译
 
@@ -120,63 +110,57 @@ tsc --noEmitOnError --watch
 >
 > 备注：当然也可以修改`tsconfig.json`中的`noEmitOnError`配置
 
-
-
 # 类型声明
 
 使用`:`来对**变量**或**函数形参**，进行类型声明：
 
 ```js
-let a: string	// 变量a只能存储字符串
-let b: number	// 变量b只能存储数值
-let c: boolean 	// 变量c只能存储布尔值
+let a: string; // 变量a只能存储字符串
+let b: number; // 变量b只能存储数值
+let c: boolean; // 变量c只能存储布尔值
 
-a = 'hello'
-a = 100		// 警告：不能将类型“number”分配给类型“string”
+a = "hello";
+a = 100; // 警告：不能将类型“number”分配给类型“string”
 
-a = 666
-b = '你好'	// 警告：不能将类型“string”分配给类型“number”
+a = 666;
+b = "你好"; // 警告：不能将类型“string”分配给类型“number”
 
-c = true
-c = 666		// 警告：不能将类型“number”分配给类型“boolean”
+c = true;
+c = 666; // 警告：不能将类型“number”分配给类型“boolean”
 
 // 参数x必须是数字，参数y也必须是数字，函数返回值也必须是数字
 function demo(x: number, y: number): number {
-    return x + y
+  return x + y;
 }
 
-demo(100,200) 
-demo(100,'200') 	//警告：类型“string”的参数不能赋给类型“number”的参数
-demo(100,200,300) //警告：应有 2 个参数，但获得 3 个
-demo(100) 				//警告：应有 2 个参数，但获得 1 个
+demo(100, 200);
+demo(100, "200"); //警告：类型“string”的参数不能赋给类型“number”的参数
+demo(100, 200, 300); //警告：应有 2 个参数，但获得 3 个
+demo(100); //警告：应有 2 个参数，但获得 1 个
 ```
 
 在`:`后也可以写**字面量类型**，不过实际开发中用的不多。
 
 ```js
-let a: '你好'	//a的值只能为字符串“你好”
-let b: 100 		//b的值只能为数字100
+let a: "你好"; //a的值只能为字符串“你好”
+let b: 100; //b的值只能为数字100
 
-a = '欢迎'//警告：不能将类型“"欢迎"”分配给类型“"你好"”
-b = 200   //警告：不能将类型“200”分配给类型“100”
+a = "欢迎"; //警告：不能将类型“"欢迎"”分配给类型“"你好"”
+b = 200; //警告：不能将类型“200”分配给类型“100”
 ```
-
-
 
 # 类型判断
 
 `TS`会根据我们的代码，进行类型推导，例如下面代码中的变量`d`，只能存储数字
 
 ```js
-let d = -99 //TypeScript会推断出变量d的类型是数字
-d = false 	//警告：不能将类型“boolean”分配给类型“number”
+let d = -99; //TypeScript会推断出变量d的类型是数字
+d = false; //警告：不能将类型“boolean”分配给类型“number”
 ```
 
 > [!TIP]
 >
 > 但要注意，类型推断不是万能的，面对复杂类型时推断容易出问题，所以尽量还是明确的编写类型声明！
-
-
 
 # 类型总览
 
@@ -194,8 +178,6 @@ d = false 	//警告：不能将类型“boolean”分配给类型“number”
 > [!TIP]
 >
 > **备注：其中**`object`**包含：**`Array`**、**`Function`**、**`Date`**、**`Error`**等......**
-
-
 
 ## ts 中的数据类型
 
@@ -218,16 +200,16 @@ d = false 	//警告：不能将类型“boolean”分配给类型“number”
 例如下面代码：
 
 ```js
-let str1: string
-str1 = 'hello'
-str1 = new String('hello') //报错
+let str1: string;
+str1 = "hello";
+str1 = new String("hello"); //报错
 
-let str2: String
-str2 = 'hello'
-str2 = new String('hello')
+let str2: String;
+str2 = "hello";
+str2 = new String("hello");
 
-console.log(typeof str1)
-console.log(typeof str2)
+console.log(typeof str1);
+console.log(typeof str2);
 ```
 
 > [!TIP]
@@ -241,10 +223,10 @@ console.log(typeof str2)
 
 ```js
 // 原始类型字符串
-let str = 'hello'
+let str = "hello";
 
 // 当访问 str.length 时，js 引擎做了以下工作：
-let size = (function() {
+let size = (function () {
   // 1. 自动装箱：创建一个临时的String对象包装原始字符串
   let tempStringObject = new String(str);
 
@@ -259,8 +241,6 @@ let size = (function() {
 console.log(size); // 输出: 5
 ```
 
-
-
 # 常用类型与语法
 
 ## 1. any
@@ -271,18 +251,18 @@ console.log(size); // 输出: 5
 
 ```js
 // 明确的表示a的类型是 any —— 【显式的any】
-let a: any 
+let a: any;
 // 以下对a的赋值，均无警告
-a = 100
-a = '你好'
-a = false
+a = 100;
+a = "你好";
+a = false;
 
 // 没有明确的表示b的类型是any，但TS主动推断出来b是any —— 隐式的any
-let b 
+let b;
 //以下对b的赋值，均无警告
-b = 100
-b = '你好'
-b = false
+b = 100;
+b = "你好";
+b = false;
 ```
 
 > [!WARNING]
@@ -291,14 +271,12 @@ b = false
 
 ```js
 /* 注意点：any类型的变量，可以赋值给任意类型的变量 */
-let c:any
-c = 9
+let c: any;
+c = 9;
 
-let x: string
-x = c // 无警告
+let x: string;
+x = c; // 无警告
 ```
-
-
 
 ## 2. unknown
 
@@ -310,16 +288,16 @@ x = c // 无警告
 
 ```js
 // 设置a的类型为unknown
-let a: unknown 
+let a: unknown;
 
 //以下对a的赋值，均符合规范
-a = 100
-a = false
-a = '你好'
+a = 100;
+a = false;
+a = "你好";
 
 // 设置x的数据类型为string
-let x: string
-x = a //警告：不能将类型“unknown”分配给类型“string”
+let x: string;
+x = a; //警告：不能将类型“unknown”分配给类型“string”
 ```
 
 2. `unknown`会强制开发者在使用之前进行类型检查，从而提供更强的类型安全性。
@@ -331,7 +309,7 @@ a = 'hello'
 
 //第一种方式：加类型判断
 if(typeof a === 'string'){
-  x = a 
+  x = a
   console.log(x)
 }
 
@@ -371,27 +349,27 @@ str3.toUpperCase() //警告：“str3”的类型为“未知”
 
 ```js
 /* 指定a的类型为never，那就意味着a以后不能存任何的数据了 */
-let a: never
+let a: never;
 
 // 以下对a的所有赋值都会有警告
-a = 1 
-a = true
-a = undefined
-a = null
+a = 1;
+a = true;
+a = undefined;
+a = null;
 ```
 
 2. `never`一般是`TypeScript`主动推断出来的，例如：
 
 ```js
 // 指定a的类型为string
-let a: string
+let a: string;
 // 给a设置一个值
-a = 'hello'
+a = "hello";
 
-if (typeof a === 'string') {
-  console.log(a.toUpperCase())
+if (typeof a === "string") {
+  console.log(a.toUpperCase());
 } else {
-  console.log(a) // TypeScript会推断出此处的a是never，因为没有任何一个值符合此处的逻辑
+  console.log(a); // TypeScript会推断出此处的a是never，因为没有任何一个值符合此处的逻辑
 }
 ```
 
@@ -400,11 +378,9 @@ if (typeof a === 'string') {
 ```js
 // 限制throwError函数不需要有任何返回值，任何值都不行，像undeifned、null都不行
 function throwError(str: string): never {
-  throw new Error('程序异常退出:' + str)
+  throw new Error("程序异常退出:" + str);
 }
 ```
-
-
 
 ## 4. void
 
@@ -415,10 +391,10 @@ function throwError(str: string): never {
 1. `void`通常用于函数返回值声明
 
 ```js
-function logMessage(msg:string):void{
-  console.log(msg)
+function logMessage(msg: string): void {
+  console.log(msg);
 }
-logMessage('你好')
+logMessage("你好");
 ```
 
 > [!CAUTION]
@@ -429,46 +405,48 @@ logMessage('你好')
 
 ```js
 // 无警告
-function logMessage(msg:string):void{
-  console.log(msg)
+function logMessage(msg: string): void {
+  console.log(msg);
 }
 
 // 无警告
-function logMessage(msg:string):void{
-  console.log(msg)
+function logMessage(msg: string): void {
+  console.log(msg);
   return;
 }
 
 // 无警告
-function logMessage(msg:string):void{
-  console.log(msg)
-  return undefined
+function logMessage(msg: string): void {
+  console.log(msg);
+  return undefined;
 }
 ```
 
 3. 那限制函数返回值时，是不是`undefined`和`void`就没区别呢？—— 有区别。因为还有这句话 ：【**返回值类型为**`void`**的函数，调用者不应依赖其返回值进行任何操作！】**对比下面两段代码：
 
 ```js
-function logMessage(msg:string):void{
-  console.log(msg)
+function logMessage(msg: string): void {
+  console.log(msg);
 }
 
-let result = logMessage('你好')
+let result = logMessage("你好");
 
-if(result){ // 此行报错：无法测试 "void" 类型的表达式的真实性
-  console.log('logMessage有返回值')
+if (result) {
+  // 此行报错：无法测试 "void" 类型的表达式的真实性
+  console.log("logMessage有返回值");
 }
 ```
 
 ```js
-function logMessage(msg:string):undefined{
-  console.log(msg)
+function logMessage(msg: string): undefined {
+  console.log(msg);
 }
 
-let result = logMessage('你好')
+let result = logMessage("你好");
 
-if(result){ // 此行无警告
-  console.log('logMessage有返回值')
+if (result) {
+  // 此行无警告
+  console.log("logMessage有返回值");
 }
 ```
 
@@ -489,8 +467,6 @@ if(result){ // 此行无警告
 > 1. **从语法上讲**：函数是可以返回`undefined`的，至于显式返回，还是隐式返回，这无所谓！
 > 2. **从语义上讲**：函数调用者不应关心函数返回的值，也不应依赖返回值进行任何操作！即使我们知道它返回了`undefined`。
 
-
-
 ## 5. object
 
 > [!TIP]
@@ -502,23 +478,23 @@ if(result){ // 此行无警告
 `object`（小写）的含义是：所有**非原始类型**，可存储：对象、函数、数组等，由于限制的范围**比较宽泛**，在实际开发中使用的**相对较少**。
 
 ```js
-let a:object //a的值可以是任何【非原始类型】，包括：对象、函数、数组等
+let a: object; //a的值可以是任何【非原始类型】，包括：对象、函数、数组等
 
 // 以下代码，是将【非原始类型】赋给a，所以均符合要求
-a = {}
-a = {name:'张三'}
-a = [1,3,5,7,9]
-a = function(){}
-a = new String('123')
+a = {};
+a = { name: "张三" };
+a = [1, 3, 5, 7, 9];
+a = function () {};
+a = new String("123");
 class Person {}
-a = new Person()
+a = new Person();
 
 // 以下代码，是将【原始类型】赋给a，有警告
-a = 1         // 警告：不能将类型“number”分配给类型“object”
-a = true      // 警告：不能将类型“boolean”分配给类型“object”
-a = '你好'    // 警告：不能将类型“string”分配给类型“object” 
-a = null      // 警告：不能将类型“null”分配给类型“object”
-a = undefined // 警告：不能将类型“undefined”分配给类型“object”
+a = 1; // 警告：不能将类型“number”分配给类型“object”
+a = true; // 警告：不能将类型“boolean”分配给类型“object”
+a = "你好"; // 警告：不能将类型“string”分配给类型“object”
+a = null; // 警告：不能将类型“null”分配给类型“object”
+a = undefined; // 警告：不能将类型“undefined”分配给类型“object”
 ```
 
 ### Object
@@ -528,23 +504,23 @@ a = undefined // 警告：不能将类型“undefined”分配给类型“object
 - 由于限制的范围实在**太大了**！所以实际开发中使用**频率极低**。
 
 ```js
-let b:Object //b的值必须是Object的实例对象（除去undefined和null的任何值）
+let b: Object; //b的值必须是Object的实例对象（除去undefined和null的任何值）
 
 // 以下代码，均无警告，因为给a赋的值，都是Object的实例对象
-b = {}
-b = {name:'张三'}
-b = [1,3,5,7,9]
-b = function(){}
-b = new String('123')
+b = {};
+b = { name: "张三" };
+b = [1, 3, 5, 7, 9];
+b = function () {};
+b = new String("123");
 class Person {}
-b = new Person()
-b = 1  			// 1不是Object的实例对象，但其包装对象是Object的实例
-b = true  	// truue不是Object的实例对象，但其包装对象是Object的实例
-b = '你好'	// “你好”不是Object的实例对象，但其包装对象是Object的实例
+b = new Person();
+b = 1; // 1不是Object的实例对象，但其包装对象是Object的实例
+b = true; // truue不是Object的实例对象，但其包装对象是Object的实例
+b = "你好"; // “你好”不是Object的实例对象，但其包装对象是Object的实例
 
 // 以下代码均有警告
-b = null      // 警告：不能将类型“null”分配给类型“Object”
-b = undefined // 警告：不能将类型“undefined”分配给类型“Object”
+b = null; // 警告：不能将类型“null”分配给类型“Object”
+b = undefined; // 警告：不能将类型“undefined”分配给类型“Object”
 ```
 
 ### 声明对象类型
@@ -573,7 +549,7 @@ person3 = {name:'王五'}
 person3 = {name:'王五',gender:'男'}
 ```
 
-2.  **索引签名**： 允许定义对象可以具有**任意数量的属性**，这些属性的**键**和**类型**是**可变的**，常用于：描述类型不确定的属性，（具有动态属性的对象）。
+2. **索引签名**： 允许定义对象可以具有**任意数量的属性**，这些属性的**键**和**类型**是**可变的**，常用于：描述类型不确定的属性，（具有动态属性的对象）。
 
 ```js
 // 限制person对象必须有name属性，可选age属性但值必须是数字，同时可以有任意数量、任意类型的其他属性
@@ -593,11 +569,11 @@ person = {
 ### 声明函数类型
 
 ```js
-let count: (a: number, b: number) => number
+let count: (a: number, b: number) => number;
 
 count = function (x, y) {
-  return x + y 
-}
+  return x + y;
+};
 ```
 
 > [!TIP]
@@ -605,24 +581,22 @@ count = function (x, y) {
 > 备注：
 >
 > - `TypeScript` 中的`=>`在函数类型声明时表示**函数类型**，描述其**参数类型**和**返回类型**。
-> - `JavaScript`  中的`=>`是一种定义函数的语法，是具体的函数实现。
+> - `JavaScript` 中的`=>`是一种定义函数的语法，是具体的函数实现。
 > - 函数类型声明还可以使用：接口、自定义类型等方式，下文中会详细讲解。
 
 ### 声明数组类型
 
 ```js
-let arr1: string[] 
-let arr2: Array<string>
+let arr1: string[];
+let arr2: Array<string>;
 
-arr1 = ['a','b','c']
-arr2 = ['hello','world']
+arr1 = ["a", "b", "c"];
+arr2 = ["hello", "world"];
 ```
 
 > [!TIP]
 >
 > 备注：上述代码中的`Array<string>`属于泛型，下文会详细讲解。
-
-
 
 ## 6. tuple
 
@@ -649,8 +623,6 @@ arr3 = [100]
 arr1 = ['hello',123,false]
 ```
 
-
-
 ## 7. enum
 
 > [!TIP]
@@ -660,24 +632,24 @@ arr1 = ['hello',123,false]
 如下代码的功能是：根据调用`walk`时传入的不同参数，执行不同的逻辑，存在的问题是调用`walk`时传参时没有任何提示，编码者很容易写错字符串内容；并且用于判断逻辑的`up`、`down`、`left`、`right`是**连续且相关的一组值**，那此时就特别适合使用 **枚举（**`enum`**）**。
 
 ```js
-function walk(str:string) {
-  if (str === 'up') {
+function walk(str: string) {
+  if (str === "up") {
     console.log("向【上】走");
-  } else if (str === 'down') {
+  } else if (str === "down") {
     console.log("向【下】走");
-  } else if (str === 'left') {
+  } else if (str === "left") {
     console.log("向【左】走");
-  } else if (str === 'right') {
+  } else if (str === "right") {
     console.log("向【右】走");
   } else {
     console.log("未知方向");
   }
 }
 
-walk('up')
-walk('down')
-walk('left')
-walk('right')
+walk("up");
+walk("down");
+walk("left");
+walk("right");
 ```
 
 ### 1. **数字枚举**
@@ -694,17 +666,17 @@ enum Direction {
 }
 
 console.log(Direction) // 打印Direction会看到如下内容
-/* 
+/*
   {
-    0:'Up', 
-    1:'Down', 
-    2:'Left', 
-    3:'Right', 
-    Up:0, 
-    Down:1, 
+    0:'Up',
+    1:'Down',
+    2:'Left',
+    3:'Right',
+    Up:0,
+    Down:1,
     Left:2,
     Right:3
-  } 
+  }
 */
 
 // 反向映射
@@ -759,7 +731,7 @@ walk(Direction.Down)
 
 ### 2. 字符串枚举
 
- 枚举成员的值是字符串 
+枚举成员的值是字符串
 
 ```js
 enum Direction {
@@ -783,9 +755,9 @@ console.log(dir); // 输出: "up"
 >
 > **何为**编译时内联？
 >
-> 所谓“内联”其实就是 `TypeScript` 在编译时，会将枚举**成员引用**替换为它们的**实际值**，而不是生成额外的枚举对象。这可以减少生成的 `JavaScript` 代码量，并提高运行时性能。  
+> 所谓“内联”其实就是 `TypeScript` 在编译时，会将枚举**成员引用**替换为它们的**实际值**，而不是生成额外的枚举对象。这可以减少生成的 `JavaScript` 代码量，并提高运行时性能。
 
- 使用普通枚举的 `TypeScript` 代码如下：
+使用普通枚举的 `TypeScript` 代码如下：
 
 ```js
 enum Directions {
@@ -804,10 +776,10 @@ let x = Directions.Up;
 "use strict";
 var Directions;
 (function (Directions) {
-    Directions[Directions["Up"] = 0] = "Up";
-    Directions[Directions["Down"] = 1] = "Down";
-    Directions[Directions["Left"] = 2] = "Left";
-    Directions[Directions["Right"] = 3] = "Right";
+  Directions[(Directions["Up"] = 0)] = "Up";
+  Directions[(Directions["Down"] = 1)] = "Down";
+  Directions[(Directions["Left"] = 2)] = "Left";
+  Directions[(Directions["Right"] = 3)] = "Right";
 })(Directions || (Directions = {}));
 
 let x = Directions.Up;
@@ -830,10 +802,8 @@ let x = Directions.Up;
 
 ```js
 "use strict";
-let x = 0 /* Directions.Up */;
+let x = 0; /* Directions.Up */
 ```
-
-
 
 ## 8. type
 
@@ -852,23 +822,23 @@ let x = 0 /* Directions.Up */;
 > 联合类型是一种高级类型，它表示一个值可以是几种不同类型之一。
 
 ```js
-type Status = number | string
-type Gender = '男' | '女'
+type Status = number | string;
+type Gender = "男" | "女";
 
 function printStatus(status: Status) {
   console.log(status);
 }
 
-function logGender(str:Gender){
-  console.log(str)
+function logGender(str: Gender) {
+  console.log(str);
 }
 
 printStatus(404);
-printStatus('200');
-printStatus('501');
+printStatus("200");
+printStatus("501");
 
-logGender('男')
-logGender('女')
+logGender("男");
+logGender("女");
 ```
 
 ### 3. 交叉类型
@@ -880,15 +850,15 @@ logGender('女')
 ```js
 //面积
 type Area = {
-  height: number; //高
-  width: number; //宽
+  height: number, //高
+  width: number, //宽
 };
 
 //地址
 type Address = {
-  num: number; //楼号
-  cell: number; //单元号
-  room: string; //房间号
+  num: number, //楼号
+  cell: number, //单元号
+  room: string, //房间号
 };
 
 // 定义类型House，且House是Area和Address组成的交叉类型
@@ -899,40 +869,38 @@ const house: House = {
   width: 75,
   num: 6,
   cell: 3,
-  room: '702'
+  room: "702",
 };
 ```
-
-
 
 ## 9. 一个特殊情况
 
 先来观察如下两段代码：
 
-### 代码段1（正常）
+### 代码段 1（正常）
 
 在函数定义时，限制函数返回值为`void`，那么函数的返回值就必须是空。
 
 ```js
-function demo():void{
+function demo(): void {
   // 返回undefined合法
-  return undefined
+  return undefined;
 
   // 以下返回均不合法
-  return 100
-  return false
-  return null
-  return []
+  return 100;
+  return false;
+  return null;
+  return [];
 }
-demo()
+demo();
 ```
 
-### 代码段2（特殊）
+### 代码段 2（特殊）
 
 使用**类型声明**限制函数返回值为`void`时，`TypeScript`**并不会严格要求函数返回空。**
 
 ```js
-type LogFunc = () => void
+type LogFunc = () => void;
 
 const f1: LogFunc = () => {
   return 100; // 允许返回非空值
@@ -952,11 +920,9 @@ const f3: LogFunc = function () {
 ```js
 const src = [1, 2, 3];
 const dst = [0];
- 
+
 src.forEach((el) => dst.push(el));
 ```
-
-
 
 ## 11. 属性修饰符
 
@@ -995,13 +961,11 @@ class Person {
 }
 ```
 
-
-
 ## 12. 抽象类
 
 > [!TIP]
 >
-> - **概述**：抽象类是一种**无法被实例化**的类，专门用来定义类的**结构和行为**，类中可以写**抽象方法**，也可以写**具体实现**。抽象类主要用来为其派生类提供一个**基础结构**，要求其派生类**必须实现**其中的抽象方法。  
+> - **概述**：抽象类是一种**无法被实例化**的类，专门用来定义类的**结构和行为**，类中可以写**抽象方法**，也可以写**具体实现**。抽象类主要用来为其派生类提供一个**基础结构**，要求其派生类**必须实现**其中的抽象方法。
 > - **简记**：抽象类**不能实例化**，其意义是**可以被继承**，抽象类里可以有**普通方法**、也可以有**抽象方法**。
 
 通过以下场景，理解抽象类：
@@ -1075,12 +1039,10 @@ e1.printPackage()
 >
 > **总结**：何时使用抽象类？
 >
-> 1. **定义**通用接口**：**为一组相关的类定义通用的行为（方法或属性）时。  
+> 1. **定义**通用接口**：**为一组相关的类定义通用的行为（方法或属性）时。
 > 2. **提供**基础实现：在抽象类中提供某些方法或为其提供基础实现，这样派生类就可以继承这些实现。
 > 3. **确保**关键实现：强制派生类实现一些关键行为。
 > 4. **共享**代码和逻辑：当多个类需要共享部分代码时，抽象类可以避免代码重复。
-
-
 
 ## 13. interface
 
@@ -1147,8 +1109,8 @@ interface CountInterface {
 }
 
 const count: CountInterface = (x, y) => {
-  return x + y
-}
+  return x + y;
+};
 ```
 
 ### 接口之间的继承
@@ -1212,8 +1174,6 @@ class Person implements PersonInterface {
 > 2. **类的契约：**规定一个类需要实现哪些属性和方法。
 > 3. **扩展已有接口：**一般用于扩展第三方库的类型， 这种特性在大型项目中可能会用到。
 
-
-
 ## 14. 一些相似概念的区别
 
 ### interface 与 type 的区别
@@ -1239,9 +1199,9 @@ interface PersonInterface {
 
 // 使用 type 定义 Person 对象
 type PersonType = {
-  name: string;
-  age: number;
-  speak(): void;
+  name: string,
+  age: number,
+  speak(): void,
 };
 
 // 使用PersonInterface
@@ -1255,12 +1215,12 @@ type PersonType = {
 
 // 使用PersonType
 let person: PersonType = {
-  name:'张三',
-  age:18,
-  speak(){
-    console.log(`我叫：${this.name}，年龄：${this.age}`)
-  }
-}
+  name: "张三",
+  age: 18,
+  speak() {
+    console.log(`我叫：${this.name}，年龄：${this.age}`);
+  },
+};
 ```
 
 `interface` 可以继承、合并
@@ -1294,24 +1254,24 @@ const student: StudentInterface = {
 ```js
 // 使用 type 定义 Person 类型，并通过交叉类型实现属性的合并
 type PersonType = {
-  name: string; // 姓名
-  age: number;  // 年龄
+  name: string, // 姓名
+  age: number, // 年龄
 } & {
-  speak: () => void;
+  speak: () => void,
 };
 
 // 使用 type 定义 Student 类型，并通过交叉类型继承 PersonType
 type StudentType = PersonType & {
-  grade: string; // 年级
+  grade: string, // 年级
 };
 
 const student: StudentType = {
-  name: '李四',
+  name: "李四",
   age: 18,
-  grade: '高二',
+  grade: "高二",
   speak() {
     console.log(this.name, this.age, this.grade);
-  }
+  },
 };
 ```
 
@@ -1319,14 +1279,12 @@ const student: StudentType = {
 
 > [!TIP]
 >
-> - **相同点：**都能定义一个**类的格式**（定义类应遵循的契约）  
+> - **相同点：**都能定义一个**类的格式**（定义类应遵循的契约）
 > - **不相同：**
 >
-> 1️⃣接口：**只能**描述**结构**，**不能**有任何**实现代码**，一个类可以实现**多个**接口。
+> 1️⃣ 接口：**只能**描述**结构**，**不能**有任何**实现代码**，一个类可以实现**多个**接口。
 >
-> 2️⃣抽象类：既可以包含**抽象方法**，也可以包含**具体方法**， 一个类只能继承**一个**抽象类。
-
-
+> 2️⃣ 抽象类：既可以包含**抽象方法**，也可以包含**具体方法**， 一个类只能继承**一个**抽象类。
 
 # 泛型
 
@@ -1338,40 +1296,40 @@ const student: StudentType = {
 
 ```js
 function logData<T>(data: T): T {
-  console.log(data)
-  return data
+  console.log(data);
+  return data;
 }
 
-logData<number>(100)
-logData<string>('hello')
+logData < number > 100;
+logData < string > "hello";
 ```
 
 **泛型可以有多个**
 
 ```js
 function logData<T, U>(data1: T, data2: U): T | U {
-  console.log(data1,data2)
-  return Date.now() % 2 ? data1 : data2
+  console.log(data1, data2);
+  return Date.now() % 2 ? data1 : data2;
 }
 
-logData<number, string>(100, 'hello')
-logData<string, boolean>('ok', false)
+logData < number, string > (100, "hello");
+logData < string, boolean > ("ok", false);
 ```
 
 **泛型接口**
 
 ```js
 interface PersonInterface<T> {
-  name: string,
-  age: number,
-  extraInfo: T
+  name: string;
+  age: number;
+  extraInfo: T;
 }
 
-let p1: PersonInterface<string>
-let p2: PersonInterface<number>
+let p1: PersonInterface<string>;
+let p2: PersonInterface<number>;
 
-p1 = { name: '张三', age: 18, extraInfo: '一个好人' }
-p2 = { name: '李四', age: 18, extraInfo: 250 }
+p1 = { name: "张三", age: 18, extraInfo: "一个好人" };
+p2 = { name: "李四", age: 18, extraInfo: 250 };
 ```
 
 **泛型约束**
@@ -1417,8 +1375,6 @@ type JobInfo = {
 const p2 = new Person<JobInfo>("tom", 30, { title: '研发总监', company: '发发发科技公司' });
 ```
 
-
-
 # 类型声明文件
 
 > [!TIP]
@@ -1435,7 +1391,6 @@ export function add(a, b) {
 export function mul(a, b) {
   return a * b;
 }
-
 ```
 
 `demo.d.ts`
@@ -1456,40 +1411,29 @@ import { add, mul } from "./demo.js";
 const x = add(2, 3); // x 类型为 number
 const y = mul(4, 5); // y 类型为 number
 
-console.log(x,y)
+console.log(x, y);
 ```
-
-
 
 # 装饰器
 
 ## 1. 简介
 
 1. 装饰器本质是一种特殊的**函数**，它可以对：类、属性、方法、参数进行扩展，同时能让代码更简洁。
-
 2. 装饰器自`2015`年在`ECMAScript-6`中被提出到现在，已将近 `10` 年。
-
 3. 截止目前，装饰器依然是实验性特性 ，需要开发者手动调整配置，来开启装饰器支持。
-
 4. 装饰器有 `5` 种：
 
    1. 类装饰器
-
    2. 属性装饰器
-
    3. 方法装饰器
-
    4. 访问器装饰器
-
    5. 参数装饰器
 
 > [!TIP]
 >
 > 备注：虽然`TypeScript5.0`中可以直接使用`类装饰器`，但为了确保其他装饰器可用，现阶段使用时，仍建议使用`experimentalDecorators`配置来开启装饰器支持，而且不排除在来的版本中，官方会**进一步调整**装饰器的相关语法！
 >
-> 参考：[**《TypeScript 5.0发版公告》**](https://devblogs.microsoft.com/typescript/announcing-typescript-5-0-rc/)
-
-
+> 参考：[**《TypeScript 5.0 发版公告》**](https://devblogs.microsoft.com/typescript/announcing-typescript-5-0-rc/)
 
 ## 2. 类装饰器
 
@@ -1506,15 +1450,13 @@ console.log(x,y)
     ○ target参数是被装饰的类，即：Person
 */
 function Demo(target: Function) {
-  console.log(target)
+  console.log(target);
 }
 
 // 使用装饰器
 @Demo
-class Person { }
+class Person {}
 ```
-
-
 
 ### 2. 应用举例
 
@@ -1554,8 +1496,6 @@ interface Person {
 // console.log(p1.a)
 ```
 
-
-
 ### 3. 关于返回值
 
 > [!TIP]
@@ -1565,28 +1505,26 @@ interface Person {
 > **类装饰器**无返回值**：若类装饰器无返回值或返回`undefined`，那被装饰的类**不会被替换。
 
 ```js
-function demo(target:Function){
+function demo(target: Function) {
   // 装饰器有返回值时，该返回值会替换掉被装饰的类
   return class {
-    test(){
-      console.log(200)
-      console.log(300)
-      console.log(400)
+    test() {
+      console.log(200);
+      console.log(300);
+      console.log(400);
     }
-  }
+  };
 }
 
 @demo
 class Person {
-  test(){
-    console.log(100)
+  test() {
+    console.log(100);
   }
 }
 
-console.log(Person)
+console.log(Person);
 ```
-
-
 
 ### 4. 关于构造函数
 
@@ -1617,18 +1555,16 @@ test(Person)
 ```js
 // 定义一个构造类型，且包含一个静态属性 wife
 type Constructor = {
-  new(...args: any[]): {}; // 构造签名
-  wife: string; // wife属性
+  new(...args: any[]): {}, // 构造签名
+  wife: string, // wife属性
 };
 
-function test(fn:Constructor){}
+function test(fn: Constructor) {}
 class Person {
-  static wife = 'asd'
+  static wife = "asd";
 }
-test(Person)
+test(Person);
 ```
-
-
 
 ### 5. 替换被装饰的类
 
@@ -1678,11 +1614,9 @@ user1.speak()
 console.log(user1.getTime())
 ```
 
-
-
 ## 3. 装饰器工厂
 
-装饰器工厂是一个返回装饰器函数的函数，可以为装饰器添加参数，可以更灵活地控制装饰器的行为。  
+装饰器工厂是一个返回装饰器函数的函数，可以为装饰器添加参数，可以更灵活地控制装饰器的行为。
 
 > [!NOTE]
 >
@@ -1722,8 +1656,6 @@ p1.speak()
 p1.introduce()
 ```
 
-
-
 ## 4. 装饰器组合
 
 装饰器可以组合使用，执行顺序为：先【由上到下】的执行所有的装饰器工厂，依次获取到装饰器，然后再【由下到上】执行所有的装饰器。
@@ -1732,33 +1664,33 @@ p1.introduce()
 
 ```js
 //装饰器
-function test1(target:Function) {
-  console.log('test1')
+function test1(target: Function) {
+  console.log("test1");
 }
 //装饰器工厂
 function test2() {
-  console.log('test2工厂')
-  return function (target:Function) { 
-    console.log('test2')
-  }
+  console.log("test2工厂");
+  return function (target: Function) {
+    console.log("test2");
+  };
 }
 //装饰器工厂
 function test3() {
-  console.log('test3工厂')
-  return function (target:Function) { 
-    console.log('test3')
-  }
+  console.log("test3工厂");
+  return function (target: Function) {
+    console.log("test3");
+  };
 }
 //装饰器
-function test4(target:Function) {
-  console.log('test4')
+function test4(target: Function) {
+  console.log("test4");
 }
 
 @test1
 @test2()
 @test3()
 @test4
-class Person { }
+class Person {}
 
 /*
   控制台打印：
@@ -1837,8 +1769,6 @@ p1.introduce()
 console.log(p1.getTime())
 ```
 
-
-
 ## 5. 属性选择器
 
 ### 基本语法
@@ -1850,24 +1780,22 @@ console.log(p1.getTime())
     ○ propertyKey: 属性名。
 */
 function Demo(target: object, propertyKey: string) {
-  console.log(target,propertyKey)
+  console.log(target, propertyKey);
 }
 
 class Person {
-  @Demo name: string
-  @Demo age: number
-  @Demo static school:string
+  @Demo name: string;
+  @Demo age: number;
+  @Demo static school: string;
 
   constructor(name: string, age: number) {
-    this.name = name
-    this.age = age
+    this.name = name;
+    this.age = age;
   }
 }
 
-const p1 = new Person('张三', 18)
+const p1 = new Person("张三", 18);
 ```
-
-
 
 ### 关于属性遮蔽
 
@@ -1877,31 +1805,29 @@ const p1 = new Person('张三', 18)
 
 ```js
 class Person {
-  name: string
-  age: number
+  name: string;
+  age: number;
   constructor(name: string, age: number) {
-    this.name = name
-    this.age = age
+    this.name = name;
+    this.age = age;
   }
 }
 
-let value = 99
+let value = 99;
 // 使用defineProperty给Person原型添加age属性，并配置对应的get与set
-Object.defineProperty(Person.prototype, 'age', {
+Object.defineProperty(Person.prototype, "age", {
   get() {
-    return value
+    return value;
   },
   set(val) {
-    value = val
-  }
-})
+    value = val;
+  },
+});
 
-const p1 = new Person('张三', 18)
-console.log(p1.age) //18
-console.log(Person.prototype.age)//18
+const p1 = new Person("张三", 18);
+console.log(p1.age); //18
+console.log(Person.prototype.age); //18
 ```
-
-
 
 ### 应用举例
 
@@ -1918,14 +1844,14 @@ function State(target: object, propertyKey: string) {
   // 使用 Object.defineProperty 替换类的原始属性
   // 重新定义属性，使其使用自定义的 getter 和 setter
   Object.defineProperty(target, propertyKey, {
-    get () {
-      return this[key]
+    get() {
+      return this[key];
     },
-    set(newVal: string){
+    set(newVal: string) {
       console.log(`${propertyKey}的最新值为：${newVal}`);
-      this[key] = newVal
+      this[key] = newVal;
     },
-    enumerable: true, 
+    enumerable: true,
     configurable: true,
   });
 }
@@ -1934,32 +1860,30 @@ class Person {
   name: string;
   //使用State装饰器
   @State age: number;
-  school = 'atguigu';
+  school = "atguigu";
   constructor(name: string, age: number) {
     this.name = name;
     this.age = age;
   }
 }
 
-const p1 = new Person('张三', 18);
-const p2 = new Person('李四', 30);
+const p1 = new Person("张三", 18);
+const p2 = new Person("李四", 30);
 
-p1.age = 80
-p2.age = 90
+p1.age = 80;
+p2.age = 90;
 
-console.log('------------------')
-console.log(p1.age) //80
-console.log(p2.age) //90
+console.log("------------------");
+console.log(p1.age); //80
+console.log(p2.age); //90
 ```
-
-
 
 ## 6. 方法装饰器
 
 ### 基本语法
 
 ```js
-/* 
+/*
   参数说明：
     ○ target: 对于静态方法来说值是类，对于实例方法来说值是原型对象。
     ○ propertyKey:方法的名称。
@@ -2047,8 +1971,6 @@ p1.speak()
 console.log(Person.isAdult(100))
 ```
 
-
-
 ## 7. 访问器装饰器
 
 ### 基本语法
@@ -2062,20 +1984,24 @@ console.log(Person.isAdult(100))
     ○ propertyKey:访问器的名称。
     ○ descriptor: 描述对象。
 */
-function Demo(target: object, propertyKey: string, descriptor: PropertyDescriptor) {
-  console.log(target)
-  console.log(propertyKey)
-  console.log(descriptor)
+function Demo(
+  target: object,
+  propertyKey: string,
+  descriptor: PropertyDescriptor
+) {
+  console.log(target);
+  console.log(propertyKey);
+  console.log(descriptor);
 }
 
 class Person {
   @Demo
-  get address(){
-    return '北京宏福科技园'
+  get address() {
+    return "北京宏福科技园";
   }
   @Demo
-  static get country(){
-    return '中国'
+  static get country() {
+    return "中国";
   }
 }
 ```
@@ -2099,7 +2025,7 @@ function RangeValidate(min: number, max: number) {
         // 如果值不在范围内，抛出错误
         throw new Error(`${propertyKey}的值应该在 ${min} 到 ${max}之间！`);
       }
-      
+
       // 如果值在范围内，且原始 setter 方法存在，则调用原始 setter 方法
       if (originalSetter) {
         originalSetter.call(this, value);
@@ -2114,7 +2040,7 @@ class Weather {
     this._temp = _temp;
   }
   // 设置温度范围在 -50 到 50 之间
-  @RangeValidate(-50,50) 
+  @RangeValidate(-50,50)
   set temp(value) {
     this._temp = value;
   }
@@ -2129,14 +2055,12 @@ w1.temp = 67
 console.log(w1)
 ```
 
-
-
 ## 8. 参数装饰器
 
 ### 基本语法
 
 ```js
-/* 
+/*
   参数说明：
     ○ target:
       1.如果修饰的是【实例方法】的参数，target 是类的【原型对象】。
@@ -2176,15 +2100,21 @@ function NotNumber(target: any, propertyKey: string, parameterIndex: number) {
 }
 
 // 方法装饰器定义
-function Validate(target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+function Validate(
+  target: any,
+  propertyKey: string,
+  descriptor: PropertyDescriptor
+) {
   const method = descriptor.value;
   descriptor.value = function (...args: any[]) {
     // 获取被标记为不能为空的参数索引列表
     const notNumberArr: number[] = target[`__notNumber_${propertyKey}`] || [];
     // 检查参数是否为 null 或 undefined
     for (const index of notNumberArr) {
-      if (typeof args[index] === 'number') {
-        throw new Error(`方法 ${propertyKey} 中索引为 ${index} 的参数不能是数字！`)
+      if (typeof args[index] === "number") {
+        throw new Error(
+          `方法 ${propertyKey} 中索引为 ${index} 的参数不能是数字！`
+        );
       }
     }
     // 调用原始方法
@@ -2211,8 +2141,6 @@ const s1 = new Student("张三");
 s1.speak(100, 200);
 ```
 
-
-
 # TS 类型工具
 
 `TypeScript` 类型工具是一系列预定义的类型，它们可以帮助开发者更方便地进行类型转换和操作。这些工具类型在全局作用域内可用，无需额外导入。
@@ -2223,8 +2151,8 @@ s1.speak(100, 200);
 
 ```tsx
 interface Person {
-    name: string;
-    age: number;
+  name: string;
+  age: number;
 }
 ```
 
@@ -2240,8 +2168,6 @@ type PartialPerson = Partial<Person>;
 // }
 ```
 
-
-
 ## 2. `Required<T>`
 
 `Required<T>` 类型工具与 `Partial<T>` 相反，它可以将一个类型的所有属性变为必填的。例如：
@@ -2254,8 +2180,6 @@ type RequiredPerson = Required<PartialPerson>;
 //     age: number;
 // }
 ```
-
-
 
 ## 3. `Readonly<T>`
 
@@ -2271,14 +2195,12 @@ type ReadonlyPerson = Readonly<Person>;
 // }
 ```
 
-
-
 ## 4. `Pick<T, K>`
 
 `Pick<T, K>` 类型工具可以从给定的类型中选取出指定的键值，然后组成一个新的类型。例如：
 
 ```tsx
-type NewPerson = Pick<Person, 'name' | 'age'>
+type NewPerson = Pick<Person, "name" | "age">;
 // 相当于
 // interface NewPerson {
 //		name: string;
@@ -2286,60 +2208,50 @@ type NewPerson = Pick<Person, 'name' | 'age'>
 // }
 ```
 
-
-
 ## 5. `Omit<T, K>`
 
 `Omit<T, K>` 类型工具的功能是返回去除指定的键值之后的新类型。例如：
 
 ```tsx
-type NewPerson = Omit<Person, 'age'>
+type NewPerson = Omit<Person, "age">;
 // 相当于
 // interface NewPerson {
 // 		name: string;
 // }
 ```
 
-
-
 ## 6. `Exclude<T, U>`
 
 `Exclude<T, U>` 类型工具可以从联合类型中去除指定的类型。例如：
 
 ```tsx
-type T = Exclude<'a' | 'b' | 'c', 'a'>
+type T = Exclude<"a" | "b" | "c", "a">;
 // 相当于
 // type T = 'b' | 'c';
 ```
-
-
 
 ## 7. `Extract<T, U>`
 
 `Extract<T, U>` 类型工具与 `Exclude<T, U>` 相反，它从联合类型中提取指定的类型。例如：
 
 ```tsx
-type T = Extract<'a' | 'b' | 'c', 'a'>;
+type T = Extract<"a" | "b" | "c", "a">;
 // 相当于
 // type T = 'a';
 ```
-
-
 
 ## 8. `Record<K, T>`
 
 `Record<K, T>` 类型工具可以创建一个新类型，该类型具有由 `K` 中的每个键映射到 `T` 的属性。例如：
 
 ```tsx
-type RecordType = Record<'a' | 'b', string>;
+type RecordType = Record<"a" | "b", string>;
 // 相当于
 // interface RecordType {
-// 		a: string;	
+// 		a: string;
 // 		b: string;
 // }
 ```
-
-
 
 ## 9. `Awaited<T>`
 
@@ -2355,18 +2267,36 @@ type B = Awaited<Promise<Promise<number>>>;
 // type B = number;
 ```
 
-
-
 ## 10. `ReturnType<T>`
 
 `ReturnType<T>` 类型工具可以提取函数类型的返回类型。例如：
 
 ```tsx
-function bar(): {a: string} {
-    return { a: 'hello' };
+function bar(): { a: string } {
+  return { a: "hello" };
 }
 type ReturnTypeBar = ReturnType<typeof bar>;
 // 相当于
 // type ReturnTypeBar = { a: string };
 ```
 
+## 11. `XOR<T, U>`
+
+在 `TypeScript` 中实现 **XOR（异或）类型** 需要确保两个类型中**有且仅有一个属性存在**。例如：
+
+```tsx
+type UserCredentials = XOR<
+  { email: string; password: string },
+  { username: string; token: string }
+>;
+
+// ✅ 合法
+const valid1: UserCredentials = { email: "a@b.com", password: "123" };
+const valid2: UserCredentials = { username: "john", token: "abc" };
+
+// ❌ 错误
+const invalid: UserCredentials = {
+  email: "a@b.com",
+  username: "john", // 同时存在互斥属性
+};
+```
