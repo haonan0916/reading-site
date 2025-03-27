@@ -1,21 +1,198 @@
+# JS 实现优先队列
+
+## 基于堆实现方式（最优）
+
+```js
+class PriorityQueue {
+  // 默认比较器（Java 风格：a < b 返回负数，a > b 返回正数）
+  constructor(comparator = (a, b) => a.priority - b.priority) {
+    this.heap = [];
+    this.comparator = comparator; // 返回数值的比较函数
+  }
+
+  // 获取父节点索引
+  parent(i) {
+    return Math.floor((i - 1) / 2);
+  }
+
+  // 获取左子节点索引
+  leftChild(i) {
+    return 2 * i + 1;
+  }
+
+  // 获取右子节点索引
+  rightChild(i) {
+    return 2 * i + 2;
+  }
+
+  // 插入元素
+  enqueue(value) {
+    this.heap.push(value);
+    this.bubbleUp(this.heap.length - 1);
+  }
+
+  // 删除并返回最高优先级元素
+  dequeue() {
+    if (this.isEmpty()) return null;
+    const root = this.heap[0];
+    const last = this.heap.pop();
+    if (this.heap.length > 0) {
+      this.heap[0] = last;
+      this.sinkDown(0);
+    }
+    return root;
+  }
+
+  // 查看队首元素
+  peek() {
+    return this.heap[0];
+  }
+
+  // 队列大小
+  size() {
+    return this.heap.length;
+  }
+
+  // 是否为空
+  isEmpty() {
+    return this.size() === 0;
+  }
+
+  // 上浮操作
+  bubbleUp(index) {
+    while (index > 0) {
+      const parentIndex = this.parent(index);
+      // 比较结果 < 0 表示当前节点应排在父节点前
+      if (this.comparator(this.heap[index], this.heap[parentIndex]) < 0) {
+        [this.heap[parentIndex], this.heap[index]] = [
+          this.heap[index],
+          this.heap[parentIndex],
+        ];
+        index = parentIndex;
+      } else {
+        break;
+      }
+    }
+  }
+
+  // 下沉操作
+  sinkDown(index) {
+    const lastIndex = this.size() - 1;
+    while (true) {
+      const left = this.leftChild(index);
+      const right = this.rightChild(index);
+      let target = index;
+
+      if (
+        left <= lastIndex &&
+        this.comparator(this.heap[left], this.heap[target]) < 0
+      ) {
+        target = left;
+      }
+
+      if (
+        right <= lastIndex &&
+        this.comparator(this.heap[right], this.heap[target]) < 0
+      ) {
+        target = right;
+      }
+
+      if (target !== index) {
+        [this.heap[index], this.heap[target]] = [
+          this.heap[target],
+          this.heap[index],
+        ];
+        index = target;
+      } else {
+        break;
+      }
+    }
+  }
+}
+
+// 使用示例（最小堆）
+const minQueue = new PriorityQueue((a, b) => a.priority - b.priority);
+minQueue.enqueue({ value: "A", priority: 3 });
+minQueue.enqueue({ value: "B", priority: 1 });
+console.log(minQueue.dequeue().value); // 'B'
+
+// 使用示例（最大堆）
+const maxQueue = new PriorityQueue((a, b) => b.priority - a.priority);
+maxQueue.enqueue({ value: "X", priority: 2 });
+maxQueue.enqueue({ value: "Y", priority: 4 });
+console.log(maxQueue.dequeue().value); // 'Y'
+```
+
+## 基于数组实现（可能会 TLE）
+
+```js
+class SimplePriorityQueue {
+  constructor(compare = (a, b) => a.priority - b.priority) {
+    this.items = [];
+    this.compare = compare; // 现在返回数值
+  }
+
+  enqueue(item) {
+    this.items.push(item);
+    // 根据比较器结果排序（负数排在前面）
+    this.items.sort(this.compare);
+  }
+
+  dequeue() {
+    return this.items.shift();
+  }
+
+  peek() {
+    return this.items[0];
+  }
+
+  size() {
+    return this.items.length;
+  }
+
+  isEmpty() {
+    return this.items.length === 0;
+  }
+}
+
+// 使用示例（最小优先）
+const minQueue = new SimplePriorityQueue((a, b) => a.priority - b.priority);
+minQueue.enqueue({ task: "A", priority: 3 });
+minQueue.enqueue({ task: "B", priority: 1 });
+console.log(minQueue.dequeue().task); // 'B'
+
+// 使用示例（最大优先）
+const maxQueue = new SimplePriorityQueue((a, b) => b.priority - a.priority);
+maxQueue.enqueue({ task: "X", priority: 2 });
+maxQueue.enqueue({ task: "Y", priority: 4 });
+console.log(maxQueue.dequeue().task); // 'Y'
+
+// 复杂比较示例（先按优先级，再按创建时间）
+const complexQueue = new SimplePriorityQueue((a, b) => {
+  if (a.priority !== b.priority) {
+    return a.priority - b.priority; // 优先级高的先出
+  }
+  return a.createdAt - b.createdAt; // 优先级相同则先创建的先出
+});
+```
+
 # 链表
 
 ## 链表逆置
 
 ```js
 function reverse(head) {
-    let pre = null, next = null;
-    while (head !== null) {
-        next = head.next;
-        head.next = pre;
-    	pre = head;
-        head = next;
-    }
-    return pre;
+  let pre = null,
+    next = null;
+  while (head !== null) {
+    next = head.next;
+    head.next = pre;
+    pre = head;
+    head = next;
+  }
+  return pre;
 }
 ```
-
-
 
 ## 链表指定区间内反转
 
@@ -25,73 +202,74 @@ function reverse(head) {
 
 ```js
 function reverseBetween(head, m, n) {
-    let dummpy = new ListNode(-1);
-    dummpy.next = head;
-    let pre = dummpy, cur = head, next = null;
-    for (let i = 0; i < m - 1; i++) {
-        pre = pre.next;
-        cur = cur.next;
-    }
-    
-    for (let i = 0; i < n - m; i++) {
-        next = cur.next;
-        cur.next = cur.next.next;
-        next.next = pre.next;
-        pre.next = next;
-    }
-    
-    return dummpy.next;
+  let dummpy = new ListNode(-1);
+  dummpy.next = head;
+  let pre = dummpy,
+    cur = head,
+    next = null;
+  for (let i = 0; i < m - 1; i++) {
+    pre = pre.next;
+    cur = cur.next;
+  }
+
+  for (let i = 0; i < n - m; i++) {
+    next = cur.next;
+    cur.next = cur.next.next;
+    next.next = pre.next;
+    pre.next = next;
+  }
+
+  return dummpy.next;
 }
 ```
-
-
 
 ## 合并两个排序的链表
 
 ```js
-function Merge( pHead1 ,  pHead2 ) {
-    // 确定 p1 为最终答案
-    if (!pHead1) {
-        return pHead2;
+function Merge(pHead1, pHead2) {
+  // 确定 p1 为最终答案
+  if (!pHead1) {
+    return pHead2;
+  }
+  if (!pHead2) {
+    return pHead1;
+  }
+  let h1 = pHead1,
+    h2 = pHead2;
+  if (h1.val > h2.val) {
+    pHead1 = h2;
+    pHead2 = h1;
+  }
+
+  let dummpy = new ListNode(-1);
+  dummpy.next = pHead1;
+  let p1 = pHead1,
+    p2 = pHead2,
+    pre = dummpy;
+  while (p1 && p2) {
+    if (p1.val > p2.val) {
+      let next = p2.next;
+      pre.next = p2;
+      p2.next = p1;
+      p2 = next;
+    } else {
+      p1 = p1.next;
     }
-    if (!pHead2) {
-        return pHead1;
-    }
-    let h1 = pHead1, h2 = pHead2;
-    if (h1.val > h2.val) {
-        pHead1 = h2;
-        pHead2 = h1;
-    }
- 
-    let dummpy = new ListNode(-1);
-    dummpy.next = pHead1;
-    let p1 = pHead1, p2 = pHead2, pre = dummpy;
-    while (p1 && p2) {
-        if (p1.val > p2.val) {
-            let next = p2.next;
-            pre.next = p2;
-            p2.next = p1;
-            p2 = next;
-        } else {
-            p1 = p1.next;
-        }
-        pre = pre.next;
-    }
- 
-    if (p1) {
-        pre.next = p1;
-    }
-    if (p2) {
-        pre.next = p2;
-    }
- 
-    return dummpy.next;
+    pre = pre.next;
+  }
+
+  if (p1) {
+    pre.next = p1;
+  }
+  if (p2) {
+    pre.next = p2;
+  }
+
+  return dummpy.next;
 }
 ```
 
-
-
-## 合并k个已排序的链表
+## 合并 k 个已排序的链表
 
 > [!TIP]
 >
@@ -124,8 +302,6 @@ public class Solution {
 }
 ```
 
-
-
 ## 判断链表是否有环
 
 > [!TIP]
@@ -134,22 +310,21 @@ public class Solution {
 
 ```js
 function hasCycle(head) {
-    if (!head || !head.next || !head.next.next) return false;
-    let slow = head, fast = head.next.next;
-    while (fast && fast.next && slow !== fast) {
-        slow = slow.next;
-        fast = fast.next.next;
-    }
-    if (!fast || !fast.next) {
-        return false;
-    }
-    if (slow === fast) {
-        return true;
-    }
+  if (!head || !head.next || !head.next.next) return false;
+  let slow = head,
+    fast = head.next.next;
+  while (fast && fast.next && slow !== fast) {
+    slow = slow.next;
+    fast = fast.next.next;
+  }
+  if (!fast || !fast.next) {
+    return false;
+  }
+  if (slow === fast) {
+    return true;
+  }
 }
 ```
-
-
 
 ## 链表中环的入口节点
 
@@ -159,25 +334,24 @@ function hasCycle(head) {
 
 ```js
 function entryNodeOfLoop(pHead) {
-    if (!pHead || !pHead.next || !pHead.next.next) return null;
-    let slow = pHead, fast = pHead.next.next;
-    while (fast && fast.next && slow !== fast) {
-        slow = slow.next;
-        fast = fast.next.next;
-    }
-    if (!fast || !fast.next) return null;
-    fast = pHead;
-    while (fast !== slow) {
-        fast = fast.next;
-        slow = slow.next;
-    }
-    return slow;
+  if (!pHead || !pHead.next || !pHead.next.next) return null;
+  let slow = pHead,
+    fast = pHead.next.next;
+  while (fast && fast.next && slow !== fast) {
+    slow = slow.next;
+    fast = fast.next.next;
+  }
+  if (!fast || !fast.next) return null;
+  fast = pHead;
+  while (fast !== slow) {
+    fast = fast.next;
+    slow = slow.next;
+  }
+  return slow;
 }
 ```
 
-
-
-## 链表中倒数最后k个节点
+## 链表中倒数最后 k 个节点
 
 > [!TIP]
 >
@@ -185,27 +359,26 @@ function entryNodeOfLoop(pHead) {
 
 ```js
 function findKthToTail(pHead, k) {
-    if (k < 0) return null;
-    let fast = pHead, slow = pHead;
-    let length = 0;
-    while (fast) {
-        length++;
-        fast = fast.next;
-    }
-    if (k > length) return null;
-    fast = pHead;
-    while (k-- > 0 && fast) {
-        fast = fast.next;
-    }
-    while (fast) {
-        fast = fast.next;
-        slow = slow.next;
-    }
-    return slow;
+  if (k < 0) return null;
+  let fast = pHead,
+    slow = pHead;
+  let length = 0;
+  while (fast) {
+    length++;
+    fast = fast.next;
+  }
+  if (k > length) return null;
+  fast = pHead;
+  while (k-- > 0 && fast) {
+    fast = fast.next;
+  }
+  while (fast) {
+    fast = fast.next;
+    slow = slow.next;
+  }
+  return slow;
 }
 ```
-
-
 
 ## 两个链表的第一个公共节点
 
@@ -215,37 +388,64 @@ function findKthToTail(pHead, k) {
 
 ```js
 function FindFirstCommonNode(pHead1, pHead2) {
-    if (pHead1 === null || pHead2 === null) {
-        return null;
-    }
-    // 分别获取 pHead1 和 pHead2 的链表长度
-    let len1 = 0, len2 = 0;
-    let h1 = pHead1, h2 = pHead2;
-    while(h1 !== null) {
-        len1++;
-        h1 = h1.next;
-    }
-    while(h2 !== null) {
-        len2++;
-        h2 = h2.next;
-    }
-    h1 = len1 > len2 ? pHead1 : pHead2;
-    h2 = len1 <= len2 ? pHead1 : pHead2;
-    // 先让 h1 走 |len1 - len2| 个节点
-    let diff = Math.abs(len1 - len2);
-    while (diff-- > 0) {
-        h1 = h1.next;
-    }
-    // 然后 h1 和 h2 一块走，直到相遇
-    while (h1 !== h2) {
-        h1 = h1.next;
-        h2 = h2.next;
-    }
-    return h1;
+  if (pHead1 === null || pHead2 === null) {
+    return null;
+  }
+  // 分别获取 pHead1 和 pHead2 的链表长度
+  let len1 = 0,
+    len2 = 0;
+  let h1 = pHead1,
+    h2 = pHead2;
+  while (h1 !== null) {
+    len1++;
+    h1 = h1.next;
+  }
+  while (h2 !== null) {
+    len2++;
+    h2 = h2.next;
+  }
+  h1 = len1 > len2 ? pHead1 : pHead2;
+  h2 = len1 <= len2 ? pHead1 : pHead2;
+  // 先让 h1 走 |len1 - len2| 个节点
+  let diff = Math.abs(len1 - len2);
+  while (diff-- > 0) {
+    h1 = h1.next;
+  }
+  // 然后 h1 和 h2 一块走，直到相遇
+  while (h1 !== h2) {
+    h1 = h1.next;
+    h2 = h2.next;
+  }
+  return h1;
 }
 ```
 
+## 随机链表的复制
 
+> [!TIP]
+>
+> 思路：第一次遍历使用 `Map` 结构存储原链表（作为 `Key`）与复制链表（作为 `Value`）的映射关系，第二次遍历为复制链表节点的 `random` 与 `next` 赋值即可。
+
+```js
+var copyRandomList = function (head) {
+  var m = new Map();
+  var current = head;
+  // 创立新的节点
+  while (current) {
+    m.set(current, new ListNode(current.val));
+    current = current.next;
+  }
+  current = head;
+
+  while (current) {
+    const cloneNode = m.get(current);
+    cloneNode.random = current.random ? m.get(current.random) : null;
+    cloneNode.next = current.next ? m.get(current.next) : null;
+    current = current.next;
+  }
+  return m.get(head);
+};
+```
 
 ## 链表相加
 
@@ -254,55 +454,53 @@ function FindFirstCommonNode(pHead1, pHead2) {
 > 思路：先将两个链表逆置，然后再进行链表相加即可。
 
 ```js
-function addInList( head1 ,  head2 ) {
-    // write code here
-    if (head1.val === 0 || head2.val === 0) {
-        return head1.val === 0 ? head2 : head1;
-    }
-    return reverse(add(reverse(head1), reverse(head2)));
+function addInList(head1, head2) {
+  // write code here
+  if (head1.val === 0 || head2.val === 0) {
+    return head1.val === 0 ? head2 : head1;
+  }
+  return reverse(add(reverse(head1), reverse(head2)));
 }
- 
+
 const reverse = (head) => {
-    let last = null;
-    let cur = head;
-    while (cur) {
-        let tmp = cur.next;
-        cur.next = last;
-        last = cur;
-        cur = tmp;
-    }
-    return last;
-}
- 
+  let last = null;
+  let cur = head;
+  while (cur) {
+    let tmp = cur.next;
+    cur.next = last;
+    last = cur;
+    cur = tmp;
+  }
+  return last;
+};
+
 const add = (h1, h2) => {
-    // 进制数
-    let carry = 0;
-    let ans = null, cur = null;
-    for (let sum = 0, value = 0;
-     h1 !== null || h2 !== null;
-     h1 = h1 === null ? null : h1.next,
-     h2 = h2 === null ? null : h2.next) {
-        sum = (h1 === null ? 0 : h1.val) +
-              (h2 === null ? 0 : h2.val) +
-              carry;
-        value = sum % 10;
-        carry = Math.floor(sum / 10);
-        if (!ans) {
-            ans = new ListNode(value);
-            cur = ans;
-        } else {
-            cur.next = new ListNode(value);
-            cur = cur.next;
-        }
+  // 进制数
+  let carry = 0;
+  let ans = null,
+    cur = null;
+  for (
+    let sum = 0, value = 0;
+    h1 !== null || h2 !== null;
+    h1 = h1 === null ? null : h1.next, h2 = h2 === null ? null : h2.next
+  ) {
+    sum = (h1 === null ? 0 : h1.val) + (h2 === null ? 0 : h2.val) + carry;
+    value = sum % 10;
+    carry = Math.floor(sum / 10);
+    if (!ans) {
+      ans = new ListNode(value);
+      cur = ans;
+    } else {
+      cur.next = new ListNode(value);
+      cur = cur.next;
     }
-    if (carry !== 0) {
-        cur.next = new ListNode(carry);
-    }
-    return ans;
-}
+  }
+  if (carry !== 0) {
+    cur.next = new ListNode(carry);
+  }
+  return ans;
+};
 ```
-
-
 
 # 双指针
 
@@ -316,20 +514,18 @@ const add = (h1, h2) => {
 
 ```js
 function maxArea(height) {
-    let ans = 0;
-    for (let l = 0, r = height.length - 1; l < r; ) {
-        ans = Math.max(ans, Math.min(height[l], height[r]) * (r - l));
-        if (height[l] <= height[r]) {
-            l++;
-        } else {
-            r--;
-        }
+  let ans = 0;
+  for (let l = 0, r = height.length - 1; l < r; ) {
+    ans = Math.max(ans, Math.min(height[l], height[r]) * (r - l));
+    if (height[l] <= height[r]) {
+      l++;
+    } else {
+      r--;
     }
-    return ans;
+  }
+  return ans;
 }
 ```
-
-
 
 ## 三数之和
 
@@ -341,31 +537,30 @@ function maxArea(height) {
 
 ```js
 function threeSum(nums) {
-    let ans = [];
-    for (let i = 0; i < nums.length; i++) {
-        if (nums[i] > 0) return ans;
-        if (i > 0 && ums[i] === nums[i - 1]) continue;
-        let l = i + 1, r = nums.length - 1;
-        while (l < r) {
-            let sum = nums[i] + nums[l] + nums[r];
-            if (sum === 0) {
-                ans.push([nums[i], nums[l], nums[r]]);
-                while (r > l && nums[r] === nums[r - 1]) r--;
-                while (r > l && nums[l] === nums[l - 1]) l++;
-                r--;
-                l++;
-            } else if (sum < 0) {
-                l++;
-            } else {
-                r--;
-            }
-        }  
+  let ans = [];
+  for (let i = 0; i < nums.length; i++) {
+    if (nums[i] > 0) return ans;
+    if (i > 0 && ums[i] === nums[i - 1]) continue;
+    let l = i + 1,
+      r = nums.length - 1;
+    while (l < r) {
+      let sum = nums[i] + nums[l] + nums[r];
+      if (sum === 0) {
+        ans.push([nums[i], nums[l], nums[r]]);
+        while (r > l && nums[r] === nums[r - 1]) r--;
+        while (r > l && nums[l] === nums[l - 1]) l++;
+        r--;
+        l++;
+      } else if (sum < 0) {
+        l++;
+      } else {
+        r--;
+      }
     }
-    return ans;
+  }
+  return ans;
 }
 ```
-
-
 
 ## 接雨水
 
@@ -380,53 +575,52 @@ function threeSum(nums) {
 > 1. 分别维护一个左边最大值和右边最大值的数组
 > 2. 直接使用双指针
 
-方法1：
+方法 1：
 
 ```js
 function trap(height) {
-    let n = height.length;
-    let lmax = Array.from(n, () => 0), rmax = Array.from(n, () => 0);
-    lmax[0] = height[0];
-    for (let i = 1; i < n; i++) {
-        lmax[i] = Math.max(lmax[i - 1], height[i]);
-    }
-    rmax[n - 1] = height[n - 1];
-    for (let i = n - 2; i >= 0; i--) {
-        rmax[i] = Math.max(rmax[i + 1], height[i]);
-    }
-    let ans = 0;
-    for (let i = 1; i < n - 1; i++) {
-        ans += Math.max(0, Math.min(lmax[i - 1], rmax[i + 1]) - height[i]);
-    }
-    return ans;
+  let n = height.length;
+  let lmax = Array.from(n, () => 0),
+    rmax = Array.from(n, () => 0);
+  lmax[0] = height[0];
+  for (let i = 1; i < n; i++) {
+    lmax[i] = Math.max(lmax[i - 1], height[i]);
+  }
+  rmax[n - 1] = height[n - 1];
+  for (let i = n - 2; i >= 0; i--) {
+    rmax[i] = Math.max(rmax[i + 1], height[i]);
+  }
+  let ans = 0;
+  for (let i = 1; i < n - 1; i++) {
+    ans += Math.max(0, Math.min(lmax[i - 1], rmax[i + 1]) - height[i]);
+  }
+  return ans;
 }
 ```
 
-方法2：
+方法 2：
 
 ```js
 function trap(height) {
-    let n = height.length, lmax = height[0], rmax = height[n - 1], l = 1, r = n - 2;
-   	let ans = 0;
-    while (l <= r) {
-        if (lmax <= rmax) {
-            ans += Math.max(0, lmax - height[l]);
-            lmax = Math.max(lmax, height[l++]);
-        } else {
-            ans += Math.max(0, rmax - height[r]);
-            rmax = Math.max(rmax, height[r--]);
-        }
+  let n = height.length,
+    lmax = height[0],
+    rmax = height[n - 1],
+    l = 1,
+    r = n - 2;
+  let ans = 0;
+  while (l <= r) {
+    if (lmax <= rmax) {
+      ans += Math.max(0, lmax - height[l]);
+      lmax = Math.max(lmax, height[l++]);
+    } else {
+      ans += Math.max(0, rmax - height[r]);
+      rmax = Math.max(rmax, height[r--]);
     }
-    
-    return ans;
+  }
+
+  return ans;
 }
 ```
-
-
-
-
-
-
 
 # 归并排序
 
@@ -437,8 +631,6 @@ function trap(height) {
 > 1. 对数组不断等长**拆分**，直到一个数的长度。
 > 2. 回溯时，按升序**合并**左右两段。
 > 3. 重复以上两个过程，直到递归结束。
-
-
 
 ![归并排序](/algorithm_images/归并排序.png)
 
@@ -453,7 +645,7 @@ function merge(l, r) {
     let mid = Math.floor((l + r) / 2);
     merge(l, mid);
     merge(mid + 1, r);
-    
+
     let i = l, j = mid + 1, k = l;
     while (l <= mid && j <= r) {
         if (nums[i] <= nums[j]) {
@@ -462,14 +654,12 @@ function merge(l, r) {
             help[k++] = nums[j];
         }
     }
-    
+
     while (i <= mid) help[k++] = nums[i++];
     while (j <= r) help[k++] = nums[j++];
     for (i = l, i <= r; i++) nums[i] = help[i];
 }
 ```
-
-
 
 ## 逆序对
 
@@ -478,36 +668,35 @@ function merge(l, r) {
 ```js
 const MOD = 1000000007;
 function InversePairs(nums) {
-    let help = [], ans = 0;
-    function merge(l, r) {
-        if (l === r) return;
-        let mid = Math.floor((l + r) / 2);
-        merge(l, mid);
-        merge(mid + 1, r);
-        
-        let i = l, j = mid + 1, k = l;
-        while (i <= mid && j <= r) {
-            if (nums[i] <= nums[j]) {
-                help[k++] = nums[i++];
-            } else {
-                help[k++] = nums[j++];
-                ans += (mid - i + 1) % MOD;
-            }
-        }
-        while (i <= mid) help[k++] = nums[i++];
-        while (j <= mid) help[k++] = nums[j++];
-        for (i = l; i <= r; i++) {
-            nums[i] = help[i];
-        }
+  let help = [],
+    ans = 0;
+  function merge(l, r) {
+    if (l === r) return;
+    let mid = Math.floor((l + r) / 2);
+    merge(l, mid);
+    merge(mid + 1, r);
+
+    let i = l,
+      j = mid + 1,
+      k = l;
+    while (i <= mid && j <= r) {
+      if (nums[i] <= nums[j]) {
+        help[k++] = nums[i++];
+      } else {
+        help[k++] = nums[j++];
+        ans += (mid - i + 1) % MOD;
+      }
     }
-    merge(0, nums.length - 1);
-    return ans % MOD;
+    while (i <= mid) help[k++] = nums[i++];
+    while (j <= mid) help[k++] = nums[j++];
+    for (i = l; i <= r; i++) {
+      nums[i] = help[i];
+    }
+  }
+  merge(0, nums.length - 1);
+  return ans % MOD;
 }
 ```
-
-
-
-
 
 # bfs 及其拓展
 
@@ -535,51 +724,55 @@ function InversePairs(nums) {
 const MAXN = 101;
 const MAXM = 101;
 
-let queue = Array.from({length: MAXM * MAXN}, () => Array.from({length: 2}, () => 0));
+let queue = Array.from({ length: MAXM * MAXN }, () =>
+  Array.from({ length: 2 }, () => 0)
+);
 let l, r;
-let visited = Array.from({length: MAXN}, () => Array.from({length: MAXM}, () => false));
+let visited = Array.from({ length: MAXN }, () =>
+  Array.from({ length: MAXM }, () => false)
+);
 
 let move = [-1, 0, 1, 0, -1];
 
 const maxDistance = (grid) => {
-    l = r = 0;
-    let n = grid.length;
-    let m = grid[0].length;
-    let seas = 0;
-    for (let i = 0; i < n; i++) {
-        for (let j = 0; j < m; j++) {
-            if (grid[i][j] === 1) {
-                visited[i][j] = true;
-                queue[r][0] = i;
-                queue[r++][1] = j;
-            } else {
-                visited[i][j] = false;
-                seas++;
-            }
+  l = r = 0;
+  let n = grid.length;
+  let m = grid[0].length;
+  let seas = 0;
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < m; j++) {
+      if (grid[i][j] === 1) {
+        visited[i][j] = true;
+        queue[r][0] = i;
+        queue[r++][1] = j;
+      } else {
+        visited[i][j] = false;
+        seas++;
+      }
+    }
+  }
+  if (seas === 0 || seas === n * m) {
+    return -1;
+  }
+  let level = 0;
+  while (l < r) {
+    level++;
+    let size = r - l;
+    for (let k = 0, x, y, nx, ny; k < size; k++) {
+      x = queue[l][0];
+      y = queue[l++][1];
+      for (let i = 0; i < 4; i++) {
+        nx = x + move[i];
+        ny = y + move[i + 1];
+        if (nx >= 0 && nx < n && ny >= 0 && ny < m && !visited[nx][ny]) {
+          visited[nx][ny] = true;
+          queue[r][0] = nx;
+          queue[r++][1] = ny;
         }
+      }
     }
-    if (seas === 0 || seas === n * m) {
-        return -1;
-    }
-    let level = 0;
-    while (l < r) {
-        level++;
-        let size = r - l;
-        for (let k = 0, x, y, nx, ny; k < size; k++) {
-            x = queue[l][0];
-            y = queue[l++][1];
-            for (let i = 0; i < 4; i++) {
-                nx = x + move[i];
-                ny = y + move[i + 1];
-                if (nx >= 0 && nx < n && ny >= 0 && ny < m && !visited[nx][ny]) {
-                    visited[nx][ny] = true;
-                    queue[r][0] = nx;
-                    queue[r++][1] = ny;
-                }
-            }
-        }
-    }
-    return level - 1;
+  }
+  return level - 1;
 };
 ```
 
@@ -593,24 +786,42 @@ const maxDistance = (grid) => {
 > 时间复杂度为 **O(节点数量+边的数量)**
 >
 > 1. `distance[i]` 表示从源点到 `i` 点的最短距离，初始时所有点的 `distance` 设置为**无穷大**
->
 > 2. 源点进入 `双端队列`，`distance[源点]=0`
->
 > 3. 双端队列 `头部弹出 x`，
 >
->       A. 如果 `x` 是目标点，返回 `distance[x]` 表示源点到目标点的最短距离
+>    A. 如果 `x` 是目标点，返回 `distance[x]` 表示源点到目标点的最短距离
 >
->       B. 考察从 `x` 出发的每一条边，假设某边去 `y` 点，边权为 `w`
+>    B. 考察从 `x` 出发的每一条边，假设某边去 `y` 点，边权为 `w`
 >
->    ​      	1）如果 `distance[y] > distance[x] + w`，处理该边；否则忽略该边
+>    ```
+>    1）如果
+>    ```
 >
->    ​      	2）处理时，更新 `distance[y] = distance[x] + w`
+>    `distance[y] > distance[x] + w`，处理该边；否则忽略该边
 >
->    ​         	如果 `w==0`，`y` 从头部进入双端队列；
+>    ```
+>    2）处理时，更新
+>    ```
 >
->    ​		   	如果 `w==1`，`y` 从尾部进入双端队列。
+>    `distance[y] = distance[x] + w`
 >
->    ​      	3）考察完 `x` 出发的所有边之后，重复步骤 `3`
+>    ```
+>    如果
+>    ```
+>
+>    `w==0`，`y` 从头部进入双端队列；
+>
+>    ```
+>    如果
+>    ```
+>
+>    `w==1`，`y` 从尾部进入双端队列。
+>
+>    ```
+>    3）考察完
+>    ```
+>
+>    `x` 出发的所有边之后，重复步骤 `3`
 >
 > 4. 双端队列为空停止
 
@@ -618,97 +829,113 @@ const maxDistance = (grid) => {
 
 ```js
 const minimumObstacles = (grid) => {
-    let move = [-1, 0, 1, 0, -1];
-    let m  = grid.length;
-    let n = grid[0].length;
-    let distance = Array.from({length: m}, () => Array.from({length: n}, () => Number.MAX_VALUE));
-    let deque = [];
-    let l = 0, r = 0;
-    deque.push([0, 0]);
-    distance[0][0] = 0;
-    while (deque.length !== 0) {
-        let record = deque.shift();
-        let x = record[0];
-        let y = record[1];
-        if (x === m - 1 && y === n - 1) {
-            return distance[x][y];
-        }
-        for (let i = 0; i < 4; i++) {
-            let nx = x + move[i], ny = y + move[i + 1];
-            if (nx >= 0 && nx < m && ny >= 0 && ny < n && distance[x][y] + grid[nx][ny] < distance[nx][ny]) {
-                distance[nx][ny] = distance[x][y] + grid[nx][ny];
-                if (grid[nx][ny] === 0) {
-                    deque.unshift([nx, ny]);
-                } else {
-                    deque.push([nx, ny]);
-                }
-            }
-        }
+  let move = [-1, 0, 1, 0, -1];
+  let m = grid.length;
+  let n = grid[0].length;
+  let distance = Array.from({ length: m }, () =>
+    Array.from({ length: n }, () => Number.MAX_VALUE)
+  );
+  let deque = [];
+  let l = 0,
+    r = 0;
+  deque.push([0, 0]);
+  distance[0][0] = 0;
+  while (deque.length !== 0) {
+    let record = deque.shift();
+    let x = record[0];
+    let y = record[1];
+    if (x === m - 1 && y === n - 1) {
+      return distance[x][y];
     }
-    return -1;
-}
+    for (let i = 0; i < 4; i++) {
+      let nx = x + move[i],
+        ny = y + move[i + 1];
+      if (
+        nx >= 0 &&
+        nx < m &&
+        ny >= 0 &&
+        ny < n &&
+        distance[x][y] + grid[nx][ny] < distance[nx][ny]
+      ) {
+        distance[nx][ny] = distance[x][y] + grid[nx][ny];
+        if (grid[nx][ny] === 0) {
+          deque.unshift([nx, ny]);
+        } else {
+          deque.push([nx, ny]);
+        }
+      }
+    }
+  }
+  return -1;
+};
 ```
 
 [使网格图至少有一条有效路径的最小代价](https://leetcode.cn/problems/minimum-cost-to-make-at-least-one-valid-path-in-a-grid)
 
 ```js
 const minCost = (grid) => {
-    let move = [[], [0, 1], [0, -1], [1, 0], [-1, 0]];
-    let n = grid.length;
-    let m = grid[0].length;
-    let distance = Array.from({length: n}, () => Array.from({length: m}, () => Number.MAX_VALUE));
-    let deque = [];
-    deque.push([0, 0]);
-    distance[0][0] = 0;
-    while (deque.length !== 0) {
-        let record = deque.shift();
-        let x = record[0];
-        let y = record[1];
-        if (x === n - 1 && y === m - 1) {
-            return distance[x][y];
-        }
-        for (let i = 1; i <= 4; i++) {
-            let nx = x + move[i][0];
-            let ny = y + move[i][1];
-            let weight = grid[x][y] !== i ? 1 : 0;
-            if (nx >= 0 && nx < n && ny >= 0 && ny < m && distance[x][y] + weight < distance[nx][ny]) {
-                distance[nx][ny] = distance[x][y] + weight;
-                if (weight === 0) {
-                    deque.unshift([nx, ny]);
-                } else {
-                    deque.push([nx, ny]);
-                }
-            }
-        }
+  let move = [[], [0, 1], [0, -1], [1, 0], [-1, 0]];
+  let n = grid.length;
+  let m = grid[0].length;
+  let distance = Array.from({ length: n }, () =>
+    Array.from({ length: m }, () => Number.MAX_VALUE)
+  );
+  let deque = [];
+  deque.push([0, 0]);
+  distance[0][0] = 0;
+  while (deque.length !== 0) {
+    let record = deque.shift();
+    let x = record[0];
+    let y = record[1];
+    if (x === n - 1 && y === m - 1) {
+      return distance[x][y];
     }
-    return -1;
+    for (let i = 1; i <= 4; i++) {
+      let nx = x + move[i][0];
+      let ny = y + move[i][1];
+      let weight = grid[x][y] !== i ? 1 : 0;
+      if (
+        nx >= 0 &&
+        nx < n &&
+        ny >= 0 &&
+        ny < m &&
+        distance[x][y] + weight < distance[nx][ny]
+      ) {
+        distance[nx][ny] = distance[x][y] + weight;
+        if (weight === 0) {
+          deque.unshift([nx, ny]);
+        } else {
+          deque.push([nx, ny]);
+        }
+      }
+    }
+  }
+  return -1;
 };
 ```
 
-
-
-# Dijkstra算法
+# Dijkstra 算法
 
 > [!IMPORTANT]
 >
 > 普通堆实现的 `Dijkstra` 算法，时间复杂度 `O(m * log m)`，`m` 为边数
-> 
 >
 > 1. `distance[i]` 表示从源点到 `i` 点的最短距离，`visited[i]` 表示 `i` 节点是否从小根堆弹出过
->
 > 2. 准备好小根堆，小根堆存放记录：( `x` 点，源点到 `x` 的距离)，小根堆根据距离组织
->
 > 3. 令 `distance[源点]=0`，(源点，`0` )进入小根堆
->
 > 4. 从小根堆弹出( `u` 点，源点到 `u` 的距离)
->       a. 如果 `visited[u] == true`，不做任何处理，重复步骤 `4`
+>    a. 如果 `visited[u] == true`，不做任何处理，重复步骤 `4`
 >
->       b. 如果 `visited[u] == false`，令 `visited[u] = true`，`u` 就算弹出过了
+>    b. 如果 `visited[u] == false`，令 `visited[u] = true`，`u` 就算弹出过了
 >
->    ​      然后考察 `u` 的每一条边，假设某边去往 `v`，边权为 `w`
->    ​      1）如果 `visited[v] == false` 并且 `distance[u] + w < distance[v]`
->    ​         令 `distance[v] = distance[u] + w`，把 `(v, distance[u] + w)` 加入小根堆
->    ​      2）处理完 `u` 的每一条边之后，重复步骤 `4`
+>    ```
+>    然后考察
+>    ```
+>
+>    `u` 的每一条边，假设某边去往 `v`，边权为 `w`
+>    1）如果 `visited[v] == false` 并且 `distance[u] + w < distance[v]`
+>    令 `distance[v] = distance[u] + w`，把 `(v, distance[u] + w)` 加入小根堆
+>    2）处理完 `u` 的每一条边之后，重复步骤 `4`
 >    5，小根堆为空过程结束，`distance` 表记录了源点到每个节点的最短距离。
 
 ## 普通堆实现 Dijkstra 算法模板
@@ -852,9 +1079,7 @@ class Solution {
 }
 ```
 
-
-
-# A* 算法
+# A\* 算法
 
 > [!IMPORTANT]
 >
@@ -872,11 +1097,9 @@ class Solution {
 > 2）保证 预估距离 <= 真实最短距离 的情况下，尽量接近真实最短距离，可以做到功能正确 且 最快
 >
 > 预估终点距离经常选择：
-> **曼哈顿距离**	
-> **欧式距离**
-> **对角线距离**
+> **曼哈顿距离** > **欧式距离** > **对角线距离**
 
-## A* 模板
+## A\* 模板
 
 ```java
 public class Solution {
@@ -909,13 +1132,13 @@ public class Solution {
             if (x == targetX && y == targetY) {
                 return distance[x][y];
             }
-            
+
             for (int i = 0; i < 4; i++) {
                 let nx = x + move[i];
                 let ny = y + move[i + 1];
-                if (nx >= 0 && nx < n && ny >= 0 && ny < m 
+                if (nx >= 0 && nx < n && ny >= 0 && ny < m
                     && grid[nx][ny] == 1
-                    && !visited[nx])[ny] 
+                    && !visited[nx])[ny]
                     && distance[x][y] + 1 < distance[nx][ny]) {
                     distance[nx][ny] = distance[x][y] + 1;
                     heap.add(new int[]{nx, ny, distance[x][y] + 1 + f1(nx, ny, targetX, targetY)});
@@ -933,7 +1156,7 @@ public static int f1(int x, int y, int targetX, int targetY) {
 
 // 对角线距离
 public static int f2(int x, int y, int targetX, int targetY) {
-	return Math.max(Math.abs(targetX - x), Math.abs(targetY - y));	
+	return Math.max(Math.abs(targetX - x), Math.abs(targetY - y));
 }
 
 // 欧式距离
@@ -952,7 +1175,6 @@ public static double f3(int x, int y, int targetX, int targetY) {
 >
 > 适用于任何图，不管有向无向、不管边权正负、但是不能有负环（保证最短路存在）
 >
->
 > 过程简述:
 >
 > `distance[i][j]` 表示 `i` 和 `j` 之间的最短距离
@@ -961,7 +1183,7 @@ public static double f3(int x, int y, int targetX, int targetY) {
 >
 > 枚举所有的 `k` 即可，实现时一定要最先枚举跳板！
 
-[Floyd算法模板](https://www.luogu.com.cn/problem/P2910)
+[Floyd 算法模板](https://www.luogu.com.cn/problem/P2910)
 
 ```java
 public class Sloution {
@@ -970,7 +1192,7 @@ public class Sloution {
     public static int[] path = new int[MAXM];
     public static int[][] distance = new int[MAXN][MAXM];
     public static int n, m, ans;
-    
+
     // 初始时设置任意两点之间的最短距离为无穷大，表示任何路不存在
     public static void build() {
         for (int i = 0; i < n; i++) {
@@ -979,7 +1201,7 @@ public class Sloution {
             }
         }
     }
-    
+
     public static void main(String[] args) throws IOException {
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		StreamTokenizer in = new StreamTokenizer(br);
@@ -1014,7 +1236,7 @@ public class Sloution {
 		out.close();
 		br.close();
 	}
-    
+
     public static void floyd() {
         // O(N^3)的过程
 		// 枚举每个跳板
@@ -1025,7 +1247,7 @@ public class Sloution {
                     // i -> .....bridge .... -> j
 					// distance[i][j]能不能缩短
 					// distance[i][j] = min ( distance[i][j] , distance[i][bridge] + distance[bridge][j])
-                    if (distance[i][bridge] != Integer.MAX_VALUE 
+                    if (distance[i][bridge] != Integer.MAX_VALUE
                        && distance[bridge][j] != Integer.MAX_VALUE
                        && distance[i][j] > distance[i][bridge] + distance[bridge][j]) {
                         distance[i][j] = distance[i][bridge] + distance[bridge][j];
@@ -1036,8 +1258,6 @@ public class Sloution {
     }
 }
 ```
-
-
 
 # 一维动态规划
 
@@ -1069,17 +1289,15 @@ public class Sloution {
 
 ```js
 const fib = (n) => {
-    if (n === 0) {
-        return 0;
-    }
-    if (n === 1) {
-        return 1;
-    }
-    return fib(n - 1) + fib(n - 2);
-}
+  if (n === 0) {
+    return 0;
+  }
+  if (n === 1) {
+    return 1;
+  }
+  return fib(n - 1) + fib(n - 2);
+};
 ```
-
-
 
 ### 2. 记忆化搜索
 
@@ -1091,27 +1309,25 @@ const fib = (n) => {
 
 ```js
 const f = (n) => {
-    let dp = Array.from({length: n + 1}, () => -1);
-    return f(n, dp);
-}
+  let dp = Array.from({ length: n + 1 }, () => -1);
+  return f(n, dp);
+};
 
 const fib = (i, dp) => {
-    if (i === 0) {
-        return 0;
-    }
-    if (i === 1) {
-        return 1;
-    }
-    if (dp[i] !== -1) {
-        return dp[i];
-    }
-    let ans = fib(i - 1, dp) + fib(i - 2, dp);
-    dp[i] = ans;
-    return ans;
-}
+  if (i === 0) {
+    return 0;
+  }
+  if (i === 1) {
+    return 1;
+  }
+  if (dp[i] !== -1) {
+    return dp[i];
+  }
+  let ans = fib(i - 1, dp) + fib(i - 2, dp);
+  dp[i] = ans;
+  return ans;
+};
 ```
-
-
 
 ### 3. 自底向上的动态规划
 
@@ -1121,22 +1337,20 @@ const fib = (i, dp) => {
 
 ```js
 const fib = (n) => {
-    if (n === 0) {
-        return 0;
-    }
-    if (n === 1) {
-        return 1;
-    }
-    let dp = Array.from({length: n + 1}, () => 0);
-    dp[1] = 1;
-    for (let i = 2; i <= n; i++) {
-        dp[i] = dp[i - 1] + dp[i - 2];
-    }
-    return dp[n];
-}
+  if (n === 0) {
+    return 0;
+  }
+  if (n === 1) {
+    return 1;
+  }
+  let dp = Array.from({ length: n + 1 }, () => 0);
+  dp[1] = 1;
+  for (let i = 2; i <= n; i++) {
+    dp[i] = dp[i - 1] + dp[i - 2];
+  }
+  return dp[n];
+};
 ```
-
-
 
 ### 4. 常数空间的自底向上的动态规划
 
@@ -1146,23 +1360,22 @@ const fib = (n) => {
 
 ```js
 const fib = (n) => {
-    if (n === 0) {
-        return 0;
-    }
-    if (n === 1) {
-        return 1;
-    }
-    let lastlast = 0, last = 1;
-    for (let i = 2; i <= n; i++) {
-        let cur = lastlast + last;
-        lastlast = last;
-        last = cur;
-    }
-    return last;
-}
+  if (n === 0) {
+    return 0;
+  }
+  if (n === 1) {
+    return 1;
+  }
+  let lastlast = 0,
+    last = 1;
+  for (let i = 2; i <= n; i++) {
+    let cur = lastlast + last;
+    lastlast = last;
+    last = cur;
+  }
+  return last;
+};
 ```
-
-
 
 ## 最低票价问题
 
@@ -1172,56 +1385,52 @@ const fib = (n) => {
 
 ```js
 const durations = [1, 7, 30];
-var mincostTickets = function(days, costs) {
-    return f(days, costs, 0);
+var mincostTickets = function (days, costs) {
+  return f(days, costs, 0);
 };
 
 const f = (days, costs, i) => {
-    if (i === days.length) {
-        return 0;
+  if (i === days.length) {
+    return 0;
+  }
+  let ans = Number.MAX_VALUE;
+  for (let k = 0, j = i; k < 3; k++) {
+    while (j < days.length && days[i] + durations[k] > days[j]) {
+      j++;
     }
-    let ans = Number.MAX_VALUE;
-    for (let k = 0, j = i; k < 3; k++) {
-        while (j < days.length && days[i] + durations[k] > days[j]) {
-            j++;
-        }
-        ans = Math.min(ans, costs[k] + f(days, costs, j));
-    }
-    return ans;
-}
+    ans = Math.min(ans, costs[k] + f(days, costs, j));
+  }
+  return ans;
+};
 ```
 
-
-
-### 2.  记忆化搜索
+### 2. 记忆化搜索
 
 ```js
 const durations = [1, 7, 30];
-var mincostTickets = function(days, costs) {
-    let dp = Array.from({length: days.length + 1}, () => Number.MAX_VALUE);
-    return f(days, costs, 0, dp);
+var mincostTickets = function (days, costs) {
+  let dp = Array.from({ length: days.length + 1 }, () => Number.MAX_VALUE);
+  return f(days, costs, 0, dp);
 };
 
 const f = (days, costs, i, dp) => {
-    if (i === days.length) {
-        return 0;
+  if (i === days.length) {
+    return 0;
+  }
+  if (dp[i] !== Number.MAX_VALUE) {
+    return dp[i];
+  }
+  let ans = Number.MAX_VALUE;
+  for (let k = 0, j = i; k < 3; k++) {
+    while (j < days.length && days[i] + durations[k] > days[j]) {
+      j++;
     }
-    if (dp[i] !== Number.MAX_VALUE) {
-        return dp[i];
-    }
-    let ans = Number.MAX_VALUE;
-    for (let k = 0, j = i; k < 3; k++) {
-        while (j < days.length && days[i] + durations[k] > days[j]) {
-            j++;
-        }
-        ans = Math.min(ans, costs[k] + f(days, costs, j, dp));
-    }
-    dp[i] = ans;
-    return ans;
-}
+    ans = Math.min(ans, costs[k] + f(days, costs, j, dp));
+  }
+  dp[i] = ans;
+  return ans;
+};
 ```
-
-
 
 ### 3. 自底向上的动态规划
 
@@ -1230,63 +1439,63 @@ const f = (days, costs, i, dp) => {
 > 我们可以看到**状态转移方程其实就是尝试策略**
 >
 > ```js
->  while (j < days.length && days[i] + durations[k] > days[j]) {
->         j++;
+> while (j < days.length && days[i] + durations[k] > days[j]) {
+>   j++;
 > }
 > ans = Math.min(ans, costs[k] + f(days, costs, j, dp));
 > ```
->
-> 
 
 ```js
 const durations = [1, 7, 30];
-var mincostTickets = function(days, costs) {
-    let n = days.length;
-    let dp = Array.from({length: n + 1}, () => Number.MAX_VALUE);
-    // 初始化 dp[n]
-    dp[n] = 0;
-    for (let i = n - 1; i >= 0; i--) {
-        for (let k = 0, j = i; k < 3; k++) {
-            while (j < n && days[i] + durations[k] > days[j]) {
-                j++;
-            }
-            dp[i] = Math.min(dp[i], costs[k] + dp[j]);
-        }
+var mincostTickets = function (days, costs) {
+  let n = days.length;
+  let dp = Array.from({ length: n + 1 }, () => Number.MAX_VALUE);
+  // 初始化 dp[n]
+  dp[n] = 0;
+  for (let i = n - 1; i >= 0; i--) {
+    for (let k = 0, j = i; k < 3; k++) {
+      while (j < n && days[i] + durations[k] > days[j]) {
+        j++;
+      }
+      dp[i] = Math.min(dp[i], costs[k] + dp[j]);
     }
-    return dp[0];
+  }
+  return dp[0];
 };
 ```
-
-
 
 ## 解码方法
 
 [解码方法](https://leetcode.cn/problems/decode-ways/)
 
 ```js
-var numDecodings = function(s) {
-    let n = s.length;
-    let dp = Array.from({length: n + 1}, () => 0);
-    dp[n] = 1;
-    for (let i = n - 1; i >= 0; i--) {
-        if (s[i] === '0') {
-            dp[i] = 0;
-        } else {
-            dp[i] = dp[i + 1];
-            if (i + 1 < n && ((s[i].charCodeAt() - '0'.charCodeAt()) * 10 + s[i + 1].charCodeAt() - '0'.charCodeAt()) <= 26) {
-                dp[i] += dp[i + 2];
-            }
-        }
+var numDecodings = function (s) {
+  let n = s.length;
+  let dp = Array.from({ length: n + 1 }, () => 0);
+  dp[n] = 1;
+  for (let i = n - 1; i >= 0; i--) {
+    if (s[i] === "0") {
+      dp[i] = 0;
+    } else {
+      dp[i] = dp[i + 1];
+      if (
+        i + 1 < n &&
+        (s[i].charCodeAt() - "0".charCodeAt()) * 10 +
+          s[i + 1].charCodeAt() -
+          "0".charCodeAt() <=
+          26
+      ) {
+        dp[i] += dp[i + 2];
+      }
     }
-    return dp[0];
+  }
+  return dp[0];
 };
 ```
 
+## 解码方法 Ⅱ
 
-
-## 解码方法Ⅱ
-
-[解码方法Ⅱ](https://leetcode.cn/problems/decode-ways-ii/)
+[解码方法 Ⅱ](https://leetcode.cn/problems/decode-ways-ii/)
 
 ```java
 public class Code04_DecodeWaysII {
@@ -1485,11 +1694,9 @@ public class Code04_DecodeWaysII {
 }
 ```
 
+## 丑数 Ⅱ
 
-
-## 丑数Ⅱ
-
-[丑数Ⅱ](https://leetcode.cn/problems/ugly-number-ii/)
+[丑数 Ⅱ](https://leetcode.cn/problems/ugly-number-ii/)
 
 ```java
 public class Code05_UglyNumberII {
@@ -1522,8 +1729,6 @@ public class Code05_UglyNumberII {
 }
 ```
 
-
-
 ## 最长有效括号
 
 [最长有效括号](https://leetcode.cn/problems/longest-valid-parentheses/)
@@ -1554,8 +1759,6 @@ public class Code06_LongestValidParentheses {
 
 }
 ```
-
-
 
 ## 环绕字符串中唯一的子字符串
 
@@ -1599,8 +1802,6 @@ public class Code07_UniqueSubstringsWraparoundString {
 }
 ```
 
-
-
 ## 不同的子序列 II
 
 [不同的子序列 II](https://leetcode.cn/problems/distinct-subsequences-ii/)
@@ -1625,19 +1826,15 @@ public class Code08_DistinctSubsequencesII {
 }
 ```
 
-
-
-
-
 # 二维动态规划
 
 > [!IMPORTANT]
 >
-> 尝试函数有 `1` 个可变参数可以完全决定返回值，进而可以改出1维动态规划表的实现
+> 尝试函数有 `1` 个可变参数可以完全决定返回值，进而可以改出 1 维动态规划表的实现
 >
 > 同理
 >
-> 尝试函数有 `2` 个可变参数可以完全决定返回值，那么就可以改出2维动态规划的实现
+> 尝试函数有 `2` 个可变参数可以完全决定返回值，那么就可以改出 2 维动态规划的实现
 >
 > 一维、二维、三维甚至多维动态规划问题，大体过程都是：
 >
@@ -1666,7 +1863,6 @@ public class Code08_DistinctSubsequencesII {
 > 一定要 写出可变参数类型简单（不比 `int` 类型更复杂），并且 可以完全决定返回值的递归，
 > 保证做到 这些可变参数可以完全代表之前决策过程对后续过程的影响！再去改动态规划！
 >
->
 > 不管几维动态规划
 > 经常从递归的定义出发，避免后续进行很多边界讨论
 > 这需要一定的经验来预知
@@ -1674,8 +1870,6 @@ public class Code08_DistinctSubsequencesII {
 ## 最小路径和
 
 [最小路径和](https://leetcode.cn/problems/minimum-path-sum/)
-
-
 
 ```java
 public class Code01_MinimumPathSum {
@@ -1784,8 +1978,6 @@ public class Code01_MinimumPathSum {
 }
 ```
 
-
-
 ## 单词搜索（无法改成动态规划）
 
 [单词搜索](https://leetcode.cn/problems/word-search/)
@@ -1819,8 +2011,8 @@ public class Code02_WordSearch {
 		// 不越界，b[i][j] == w[k]
 		char tmp = b[i][j];
 		b[i][j] = 0;
-		boolean ans = f(b, i - 1, j, w, k + 1) 
-				|| f(b, i + 1, j, w, k + 1) 
+		boolean ans = f(b, i - 1, j, w, k + 1)
+				|| f(b, i + 1, j, w, k + 1)
 				|| f(b, i, j - 1, w, k + 1)
 				|| f(b, i, j + 1, w, k + 1);
 		b[i][j] = tmp;
@@ -1829,8 +2021,6 @@ public class Code02_WordSearch {
 
 }
 ```
-
-
 
 ## 最长公共子序列
 
@@ -1967,42 +2157,43 @@ public class Code03_LongestCommonSubsequence {
 }
 ```
 
+## 最长公共子序列 Ⅱ
 
-
-## 最长公共子序列Ⅱ
-
-[最长公共子序列Ⅱ](https://www.nowcoder.com/practice/6d29638c85bb4ffd80c020fe244baf11?tpId=295&tqId=991075&ru=/exam/oj&qru=/ta/format-top101/question-ranking&sourceUrl=%2Fexam%2Foj)
+[最长公共子序列 Ⅱ](https://www.nowcoder.com/practice/6d29638c85bb4ffd80c020fe244baf11?tpId=295&tqId=991075&ru=/exam/oj&qru=/ta/format-top101/question-ranking&sourceUrl=%2Fexam%2Foj)
 
 > [!TIP]
 >
-> 与最长公共子序列的不同之处在于：**最长公共子序列是让求长度**，最长公共子序列Ⅱ是求出该最长公共子序列的字符串
+> 与最长公共子序列的不同之处在于：**最长公共子序列是让求长度**，最长公共子序列 Ⅱ 是求出该最长公共子序列的字符串
 
 ```js
-function LCS( s1 ,  s2 ) {
-    // write code here
-    if (s1 === '' || s2 === '') return "-1";
-    let n = s1.length;
-    let m = s2.length;
-    // dp[i][j]：表示以 s1 以第 i 个字符结尾且 s2 以第 j 个字符结尾的最长公共子序列的长度
-    let dp = Array.from({length: n + 1}, () => Array.from({length: m + 1}, () => ""));
-    for (let i = 1; i <= n; i++) {
-        let pre = '';
-        for (let j = 1; j <= m; j++) {
-            const tmp = dp[i - 1][j];
-            if (s1[i - 1] === s2[j - 1]) {
-                dp[i][j] = pre + s2[j - 1];
-            } else { 
-                dp[i][j] = dp[i - 1][j].length > dp[i][j - 1].length ? dp[i - 1][j] : dp[i][j - 1];
-            }
-            pre = tmp;
-        }
+function LCS(s1, s2) {
+  // write code here
+  if (s1 === "" || s2 === "") return "-1";
+  let n = s1.length;
+  let m = s2.length;
+  // dp[i][j]：表示以 s1 以第 i 个字符结尾且 s2 以第 j 个字符结尾的最长公共子序列的长度
+  let dp = Array.from({ length: n + 1 }, () =>
+    Array.from({ length: m + 1 }, () => "")
+  );
+  for (let i = 1; i <= n; i++) {
+    let pre = "";
+    for (let j = 1; j <= m; j++) {
+      const tmp = dp[i - 1][j];
+      if (s1[i - 1] === s2[j - 1]) {
+        dp[i][j] = pre + s2[j - 1];
+      } else {
+        dp[i][j] =
+          dp[i - 1][j].length > dp[i][j - 1].length
+            ? dp[i - 1][j]
+            : dp[i][j - 1];
+      }
+      pre = tmp;
     }
-    let res = dp[n][m];
-    return res === '' ? "-1" : res;
+  }
+  let res = dp[n][m];
+  return res === "" ? "-1" : res;
 }
 ```
-
-
 
 ## 最长公共子串
 
@@ -2010,7 +2201,7 @@ function LCS( s1 ,  s2 ) {
 
 > [!TIP]
 >
-> 定义**`dp[i][j]`表示字符串str1中第i个字符和str2种第j个字符为最后一个元素所构成的最长公共子串**。如果要求`dp[i][j]`，也就是 `str1` 的第 `i` 个字符和 `str2` 的第 `j` 个字符为最后一个元素所构成的最长公共子串，我们首先需要判断这两个字符是否相等。
+> 定义**`dp[i][j]`表示字符串 str1 中第 i 个字符和 str2 种第 j 个字符为最后一个元素所构成的最长公共子串**。如果要求`dp[i][j]`，也就是 `str1` 的第 `i` 个字符和 `str2` 的第 `j` 个字符为最后一个元素所构成的最长公共子串，我们首先需要判断这两个字符是否相等。
 >
 > - 如果不相等，那么他们就不能构成公共子串，也就是
 >   `dp[i][j]=0;`
@@ -2018,33 +2209,34 @@ function LCS( s1 ,  s2 ) {
 >   `dp[i][j]=dp[i-1][j-1]+1;`
 
 ```js
-function LCS( str1 ,  str2 ) {
-    // write code here
-    if (str1 === '' || str2 === '') {
-        return "";
-    }
-    let n = str1.length;
-    let m = str2.length;
-    let dp = Array.from({length: n + 1}, () => Array.from({length: m + 1}, () => 0));
-    let maxLength = 0, maxIndex = 0;
-    for (let i = 1; i <= n; i++) {
-        for (let j = 1; j <= m; j++) {
-            if (str1[i - 1] === str2[j - 1]) {
-                dp[i][j] = dp[i - 1][j - 1] + 1;
-                if (dp[i][j] > maxLength) {
-                    maxLength = dp[i][j];
-                    maxIndex = i - 1;
-                }
-            } else {
-                dp[i][j] = 0;
-            }         
+function LCS(str1, str2) {
+  // write code here
+  if (str1 === "" || str2 === "") {
+    return "";
+  }
+  let n = str1.length;
+  let m = str2.length;
+  let dp = Array.from({ length: n + 1 }, () =>
+    Array.from({ length: m + 1 }, () => 0)
+  );
+  let maxLength = 0,
+    maxIndex = 0;
+  for (let i = 1; i <= n; i++) {
+    for (let j = 1; j <= m; j++) {
+      if (str1[i - 1] === str2[j - 1]) {
+        dp[i][j] = dp[i - 1][j - 1] + 1;
+        if (dp[i][j] > maxLength) {
+          maxLength = dp[i][j];
+          maxIndex = i - 1;
         }
+      } else {
+        dp[i][j] = 0;
+      }
     }
-    return str1.substring(maxIndex - maxLength + 1, maxIndex + 1);
+  }
+  return str1.substring(maxIndex - maxLength + 1, maxIndex + 1);
 }
 ```
-
-
 
 ## 最长回文子序列
 
@@ -2153,11 +2345,9 @@ public class Code04_LongestPalindromicSubsequence {
 }
 ```
 
+## 节点数为 n 高度不大于 m 的二叉树个数
 
-
-## 节点数为n高度不大于m的二叉树个数
-
-[节点数为n高度不大于m的二叉树个数](https://www.nowcoder.com/practice/aaefe5896cce4204b276e213e725f3ea)
+[节点数为 n 高度不大于 m 的二叉树个数](https://www.nowcoder.com/practice/aaefe5896cce4204b276e213e725f3ea)
 
 ```java
 import java.io.BufferedReader;
@@ -2270,8 +2460,6 @@ public class Code05_NodenHeightNotLargerThanm {
 }
 ```
 
-
-
 ## 矩阵中的最长递增路径
 
 [矩阵中的最长递增路径](https://leetcode.cn/problems/longest-increasing-path-in-a-matrix/)
@@ -2343,8 +2531,6 @@ public class Code06_LongestIncreasingPath {
 
 }
 ```
-
-
 
 ## 不同的子序列
 
@@ -2422,8 +2608,6 @@ public class Code01_DistinctSubsequences {
 
 }
 ```
-
-
 
 ## 编辑距离
 
@@ -2545,8 +2729,6 @@ public class Code02_EditDistance {
 }
 ```
 
-
-
 ## 交错字符串
 
 [交错字符串](https://leetcode.cn/problems/interleaving-string/)
@@ -2624,8 +2806,6 @@ public class Code03_InterleavingString {
 
 }
 ```
-
-
 
 ## 有效涂色问题
 
@@ -2736,8 +2916,6 @@ public class Code04_FillCellsUseAllColorsWays {
 
 }
 ```
-
-
 
 ## 删除至少几个字符可以变成另一个字符串的子串
 
@@ -2850,34 +3028,32 @@ public class Code05_MinimumDeleteBecomeSubstring {
 }
 ```
 
-
-
 # 三维动态规划
 
 ## 一和零(多维费用背包)
 
 [一和零(多维费用背包)](https://leetcode.cn/problems/ones-and-zeroes/)
 
-
-
 ```js
 let zeros, ones;
 
 const zerosAndOnes = (str) => {
-    zeros = 0;
-    ones = 0;
-    for (let i = 0; i < str.length; i++) {
-        if (str[i] === '0') {
-            zeros++;
-        } else {
-            ones++;
-        }
+  zeros = 0;
+  ones = 0;
+  for (let i = 0; i < str.length; i++) {
+    if (str[i] === "0") {
+      zeros++;
+    } else {
+      ones++;
     }
-}
+  }
+};
 
-var findMaxForm = function(strs, m, n) {
-    let dp = Array.from({length: strs.length}, () => Array.from({length: m + 1}, () => Array.from({length: n + 1}, () => -1)));
-    return f2(strs, 0, m, n, dp)
+var findMaxForm = function (strs, m, n) {
+  let dp = Array.from({ length: strs.length }, () =>
+    Array.from({ length: m + 1 }, () => Array.from({ length: n + 1 }, () => -1))
+  );
+  return f2(strs, 0, m, n, dp);
 };
 
 // const f1 = (strs, i, z, o) => {
@@ -2896,58 +3072,60 @@ var findMaxForm = function(strs, m, n) {
 // }
 
 const f2 = (strs, i, z, o, dp) => {
-    if (i === strs.length) {
-        return 0;
-    }
-    if (dp[i][z][o] !== -1) {
-        return dp[i][z][o];
-    }
-    let p1 = f2(strs, i + 1, z, o, dp);
-    let p2 = 0;
-    zerosAndOnes(strs[i]);
-    if (zeros <= z && ones <= o) {
-        p2 = 1 + f2(strs, i + 1, z - zeros, o - ones, dp);
-    }
-    let ans = Math.max(p1, p2);
-    dp[i][z][o] = ans;
-    return ans;
-}
-
-var findMaxForm = function(strs, m, n) {
-    let len = strs.length;
-    let dp = Array.from({length: len + 1}, () => Array.from({length: m + 1}, () => Array.from({length: n + 1}, () => 0)));
-    for (let i = len - 1; i >= 0; i--) {
-        zerosAndOnes(strs[i]);
-        for (let z = 0, p1, p2; z <= m; z++) {
-            for (let o = 0; o <= n; o++) {
-                p1 = dp[i + 1][z][o];
-                p2 = 0;
-                if (zeros <= z && ones <= o) {
-                    p2 = 1 + dp[i + 1][z - zeros][o - ones];
-                }
-                dp[i][z][o] = Math.max(p1, p2);
-            }
-        }
-    }
-    return dp[0][m][n];
+  if (i === strs.length) {
+    return 0;
+  }
+  if (dp[i][z][o] !== -1) {
+    return dp[i][z][o];
+  }
+  let p1 = f2(strs, i + 1, z, o, dp);
+  let p2 = 0;
+  zerosAndOnes(strs[i]);
+  if (zeros <= z && ones <= o) {
+    p2 = 1 + f2(strs, i + 1, z - zeros, o - ones, dp);
+  }
+  let ans = Math.max(p1, p2);
+  dp[i][z][o] = ans;
+  return ans;
 };
 
-var findMaxForm = function(strs, m, n) {
-    let len = strs.length;
-    let dp = Array.from({length: m + 1}, () => Array.from({length: n + 1}, () => 0));
-    strs.forEach(s => {
-        zerosAndOnes(s);
-        for (let z = m; z >= zeros; z--) {
-            for (let o = n; o >= ones; o--) {
-                dp[z][o] = Math.max(dp[z][o], 1 + dp[z - zeros][o - ones]);
-            }
+var findMaxForm = function (strs, m, n) {
+  let len = strs.length;
+  let dp = Array.from({ length: len + 1 }, () =>
+    Array.from({ length: m + 1 }, () => Array.from({ length: n + 1 }, () => 0))
+  );
+  for (let i = len - 1; i >= 0; i--) {
+    zerosAndOnes(strs[i]);
+    for (let z = 0, p1, p2; z <= m; z++) {
+      for (let o = 0; o <= n; o++) {
+        p1 = dp[i + 1][z][o];
+        p2 = 0;
+        if (zeros <= z && ones <= o) {
+          p2 = 1 + dp[i + 1][z - zeros][o - ones];
         }
-    })
-    return dp[m][n];
+        dp[i][z][o] = Math.max(p1, p2);
+      }
+    }
+  }
+  return dp[0][m][n];
+};
+
+var findMaxForm = function (strs, m, n) {
+  let len = strs.length;
+  let dp = Array.from({ length: m + 1 }, () =>
+    Array.from({ length: n + 1 }, () => 0)
+  );
+  strs.forEach((s) => {
+    zerosAndOnes(s);
+    for (let z = m; z >= zeros; z--) {
+      for (let o = n; o >= ones; o--) {
+        dp[z][o] = Math.max(dp[z][o], 1 + dp[z - zeros][o - ones]);
+      }
+    }
+  });
+  return dp[m][n];
 };
 ```
-
-
 
 ## 盈利计划(多维费用背包)
 
@@ -3056,8 +3234,6 @@ public class Code02_ProfitableSchemes {
 }
 ```
 
-
-
 # 子数组最大累加和问题与扩展
 
 [子数组最大累加和](https://leetcode.cn/problems/maximum-subarray/)
@@ -3098,8 +3274,6 @@ public class Code01_MaximumSubarray {
 
 }
 ```
-
-
 
 ## 子数组中找到拥有最大累加和的子数组
 
@@ -3143,8 +3317,6 @@ public class Code01_MaximumSubarray {
 		}
 	}
 ```
-
-
 
 ## 打家劫舍
 
@@ -3199,4 +3371,3 @@ public class Code02_HouseRobber {
 
 }
 ```
-
