@@ -123,6 +123,10 @@ export default defineConfig({
             text: '前端项目上线',
             link: '/orther/前端项目上线'
           },
+          {
+            text: '人工智能',
+            link: '/orther/人工智能'
+          }
         ]
       },
       { text: '简历', link: '/note/简历文档' },
@@ -229,6 +233,10 @@ export default defineConfig({
             text: '前端项目上线',
             link: '/orther/前端项目上线'
           },
+          {
+            text: '人工智能',
+            link: '/orther/人工智能'
+          }
         ]
       },
       {
