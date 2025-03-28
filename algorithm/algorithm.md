@@ -502,6 +502,98 @@ const add = (h1, h2) => {
 };
 ```
 
+## LRU 缓存
+
+> [!TIP]
+>
+> 思路：哈希表 + 双向链表。
+>
+> `LRU` 缓存机制可以通过哈希表辅以双向链表实现，用一个哈希表和一个双向链表维护所有在缓存中的键值对。
+>
+> - 双向链表按照被使用的顺序存储了这些键值对，靠近头部的键值对是最近使用的，而靠近尾部的键值对是最久未使用的。
+> - 哈希表即为普通的哈希映射（`HashMap`），通过缓存数据的键映射到其在双向链表中的位置。
+
+```js
+class ListNode {
+  constructor(key, value) {
+    //双向链表的单个节点
+    this.key = key;
+    this.value = value;
+    this.next = null; //指向后一个节点
+    this.prev = null; //指向前一个节点
+  }
+}
+
+class LRUCache {
+  constructor(capacity) {
+    this.capacity = capacity; //容量
+    this.hashTable = {}; //存放键值对信息
+    this.count = 0; //键值对数量
+    this.dummyHead = new ListNode(); //dummy头节点 方便在链表从开始的地方插入
+    this.dummyTail = new ListNode(); //dummy尾节点 方便在链表从末尾删除
+    this.dummyHead.next = this.dummyTail; //dummyHead和dummyTail相互连接
+    this.dummyTail.prev = this.dummyHead;
+  }
+
+  get(key) {
+    let node = this.hashTable[key]; //查找哈希表中的键值对
+    if (node == null) return -1; //不存在该键值对 返回-1
+    this._moveToHead(node); //移动到链表头
+    return node.value;
+  }
+
+  put(key, value) {
+    let node = this.hashTable[key]; //哈希表中查找该键值对
+    if (node == null) {
+      let newNode = new ListNode(key, value); //不存在就创建节点
+      this.hashTable[key] = newNode; //加入哈希表
+      this._addToHead(newNode); //直接加入链表头
+      this.count++; //节点数+1
+      if (this.count > this.capacity) {
+        //超过容量 从队尾删除一个
+        this._removeLRUItem();
+      }
+    } else {
+      node.value = value; //键值对存在于哈希表中 就更新
+      this._moveToHead(node); //移动到队头
+    }
+  }
+
+  _moveToHead(node) {
+    this._removeFromList(node); //从链表中删除节点
+    this._addToHead(node); //将该节点添加到链表头
+  }
+
+  _removeFromList(node) {
+    //删除的指针操作
+    let tempForPrev = node.prev;
+    let tempForNext = node.next;
+    tempForPrev.next = tempForNext;
+    tempForNext.prev = tempForPrev;
+  }
+
+  _addToHead(node) {
+    //加入链表头的指针操作
+    node.prev = this.dummyHead;
+    node.next = this.dummyHead.next;
+    this.dummyHead.next.prev = node;
+    this.dummyHead.next = node;
+  }
+
+  _removeLRUItem() {
+    let tail = this._popTail(); //从链表中删除
+    delete this.hashTable[tail.key]; //从哈希表中删除
+    this.count--;
+  }
+
+  _popTail() {
+    let tailItem = this.dummyTail.prev; //通过dummyTail拿到最后一个节点 然后删除
+    this._removeFromList(tailItem);
+    return tailItem;
+  }
+}
+```
+
 # 双指针
 
 ## 盛最多水的容器
@@ -696,6 +788,61 @@ function InversePairs(nums) {
   merge(0, nums.length - 1);
   return ans % MOD;
 }
+```
+
+# 二叉树
+
+## 二叉树的最大深度
+
+> [!TIP]
+>
+> 思路：递归。
+
+```js
+var maxDepth = function (root) {
+  return root === null
+    ? 0
+    : Math.max(maxDepth(root.left), maxDepth(root.right)) + 1;
+};
+```
+
+## 翻转二叉树
+
+> [!TIP]
+>
+> 思路：递归。
+>
+> 从根节点开始，递归地对树进行遍历，并从叶子节点先开始翻转。如果当前遍历到的节点 `root` 的左右两棵子树都已经翻转，那么我们只需要交换两棵子树的位置，即可完成以 `root` 为根节点的整棵子树的翻转。
+
+```js
+var invertTree = function (root) {
+  if (!root) return null;
+  let left = invertTree(root.left);
+  let right = invertTree(root.right);
+  root.left = right;
+  root.right = left;
+  return root;
+};
+```
+
+## 对称二叉树
+
+> [!TIP]
+>
+> 思路：递归。
+
+```js
+var isSymmetric = function (root) {
+  const isSameTree = (p, q) => {
+    if (p === null || q === null) return p === q;
+    return (
+      p.val === q.val &&
+      isSameTree(p.left, q.right) &&
+      isSameTree(p.right, q.left)
+    );
+  };
+  return isSameTree(root.left, root.right);
+};
 ```
 
 # bfs 及其拓展
