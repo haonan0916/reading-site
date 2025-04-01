@@ -845,6 +845,26 @@ var isSymmetric = function (root) {
 };
 ```
 
+## 将有序数组转换为二叉搜索树
+
+> [!TIP]
+>
+> 思路：每次选取中间元素作为根节点，这样分给左右子树的数字个数相同或只相差 **1**，可以使得树保持平衡。
+
+```js
+var sortedArrayToBST = function (nums) {
+  const build = (nums, l, r) => {
+    if (l > r) return null;
+    let mid = l + Math.floor((r - l) >> 1);
+    let node = new TreeNode(nums[mid]);
+    node.left = build(nums, l, mid - 1);
+    node.right = build(nums, mid + 1, r);
+    return node;
+  };
+  return build(nums, 0, nums.length - 1);
+};
+```
+
 # bfs 及其拓展
 
 ## bfs 模板
