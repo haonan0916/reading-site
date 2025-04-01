@@ -4784,6 +4784,8 @@ ReactDOM.createRoot(document.getElementById("root")).render(
 
 # Redux
 
+转载自：[tabzzz](https://juejin.cn/post/7369211590364069899?searchId=2025040111052076A482F5CFB228C13AFB)
+
 ## Redux 基本原理
 
 > [!CAUTION]
