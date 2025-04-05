@@ -2682,3 +2682,283 @@ ws.onclose = function () {
 - **Socket.IO**：提供自动重连和丰富的事件系统。
 - **ReconnectingWebSocket**：自动处理断线重连。
 - **SockJS**：提供向后兼容性，能在不支持 `WebSocket` 的浏览器上工作。
+
+# Proxy
+
+> [!IMPORTANT]
+>
+> 首先要明确一点，`Proxy` **只能代理引用数据类型**
+
+ES6 的 **Proxy** 机制是 JavaScript 元编程的重要特性，它通过创建对象的代理层，实现了对对象操作的**拦截和自定义处理**。
+
+## **1. 基础结构**
+
+`Proxy` 通过**目标对象**和**处理器对象**共同工作：
+
+```js
+const target = {}; // 被代理的原始对象
+const handler = {}; // 定义拦截行为的处理器
+const proxy = new Proxy(target, handler); // 创建代理对象
+```
+
+## **2. 核心拦截机制**
+
+### **(1) 常用陷阱方法（Trap）**
+
+| 陷阱方法         | 触发场景           | 示例用法                 |
+| ---------------- | ------------------ | ------------------------ |
+| `get`            | 读取属性           | 访问`proxy.property`     |
+| `set`            | 设置属性           | `proxy.property = value` |
+| `has`            | `in` 操作符        | `'prop' in proxy`        |
+| `deleteProperty` | `delete` 操作符    | `delete proxy.property`  |
+| `apply`          | 函数调用           | `proxy()`                |
+| `construct`      | `new` 操作符       | `new Proxy()`            |
+| `ownKeys`        | `Object.keys()` 等 | `Object.keys(proxy)`     |
+
+### (2) 典型拦截示例
+
+```js
+const validator = {
+  set(obj, prop, value) {
+    if (prop === "age") {
+      if (!Number.isInteger(value)) {
+        throw new TypeError("Age must be integer");
+      }
+      if (value < 0) {
+        throw new RangeError("Age cannot be negative");
+      }
+    }
+    return Reflect.set(...arguments);
+  },
+};
+
+const person = new Proxy({}, validator);
+person.age = 25; // 正常
+person.age = -5; // 抛出 RangeError
+person.age = "30"; // 抛出 TypeError
+```
+
+## **3. 反射 API 配合**
+
+`Reflect` 对象方法与 `Proxy` 陷阱方法一一对应：
+
+```js
+const handler = {
+  get(target, prop, receiver) {
+    console.log(`Getting ${prop}`);
+    return Reflect.get(...arguments);
+  },
+};
+```
+
+## **4. 注意事项**
+
+| 要点             | 说明                                                               |
+| ---------------- | ------------------------------------------------------------------ |
+| **目标对象隔离** | 直接修改目标对象会绕过代理拦截                                     |
+| **性能损耗**     | 频繁操作代理对象比直接操作原生对象慢约 50%（V8 引擎基准测试）      |
+| **不可撤销代理** | 标准`Proxy` 不可撤销，需使用`Proxy.revocable()` 创建可撤销代理     |
+| **原型链拦截**   | 无法拦截`Object.create(proxy)` 的原型链访问                        |
+| **严格模式要求** | `set` 陷阱在成功时必须返回 `true`（严格模式下返回 `false` 会报错） |
+
+## **5. 与 Object.defineProperty 对比**
+
+| 特性       | Proxy          | Object.defineProperty |
+| ---------- | -------------- | --------------------- |
+| 拦截范围   | 全操作类型     | 仅限于属性访问/修改   |
+| 数组处理   | 完美支持       | 需要重写数组方法      |
+| 性能开销   | 较高           | 较低                  |
+| 动态属性   | 自动处理新属性 | 需要预先定义          |
+| 代码侵入性 | 无侵入         | 需要修改对象描述符    |
+
+# 6. Reflect
+
+`ES6` 引入的 **Reflect** 对象是 `JavaScript` 元编程的核心工具之一，它提供了一套**标准化、函数式**的操作对象方法，与 `Proxy` 的**陷阱( Trap )方法**一一对应。
+
+## **1. 设计目标**
+
+- **统一对象操作**：将 `Object` 的分散方法（如 `defineProperty`）和操作符（如 `in`、`delete`）转化为统一函数式 API
+- **完善返回值**：所有操作返回布尔值或结果值（替代可能抛出错误的操作符）
+- **配合 Proxy**：为 `Proxy` 陷阱提供**标准化**的默认行为实现
+
+## **2. 核心方法对照表**
+
+| Reflect 方法                                 | 等效操作                    | 特殊差异                   |
+| -------------------------------------------- | --------------------------- | -------------------------- |
+| `Reflect.get(target, prop, receiver)`        | `target[prop]`              | 支持`receiver` 绑定 `this` |
+| `Reflect.set(target, prop, value, receiver)` | `target[prop] = value`      | 返回布尔值表示是否成功     |
+| `Reflect.has(target, prop)`                  | `prop in target`            | 更安全的类型检查           |
+| `Reflect.deleteProperty(target, prop)`       | `delete target[prop]`       | 返回删除是否成功           |
+| `Reflect.construct(target, args)`            | `new target(...args)`       | 支持`newTarget` 参数       |
+| `Reflect.apply(func, thisArg, args)`         | `func.apply(thisArg, args)` | 统一函数调用方式           |
+| `Reflect.defineProperty(target, prop, desc)` | `Object.defineProperty()`   | 返回是否定义成功           |
+
+## **3. 关键特性**
+
+### **(1) 标准化返回值**
+
+```js
+// 传统方式
+try {
+  Object.defineProperty(obj, "prop", { value: 1 });
+} catch (e) {
+  console.error("定义失败");
+}
+
+// Reflect 方式
+if (!Reflect.defineProperty(obj, "prop", { value: 1 })) {
+  console.error("定义失败"); // 通过返回值判断
+}
+```
+
+### **(2) 接收器(receiver)参数**
+
+```js
+const parent = { a: 1 };
+const child = {
+  get a() {
+    return super.a * 2;
+  },
+};
+Object.setPrototypeOf(child, parent);
+
+console.log(Reflect.get(child, "a", child)); // 2（正确绑定this）
+console.log(child.a); // 2
+```
+
+### **(3) 函数式编程支持**
+
+```js
+// 操作符转函数
+const ops = {
+  get: Reflect.get,
+  set: Reflect.set,
+  has: Reflect.has,
+};
+
+function operate(target, opName, ...args) {
+  return ops[opName](target, ...args);
+}
+
+const obj = { x: 10 };
+operate(obj, "set", "x", 20); // 设置成功返回true
+console.log(operate(obj, "get", "x")); // 20
+```
+
+## **4. 与 Proxy 的配合**
+
+**最佳实践**：在 Proxy 陷阱中始终使用 Reflect 方法保持默认行为
+
+```js
+const proxy = new Proxy(
+  {},
+  {
+    get(target, prop, receiver) {
+      console.log(`访问属性: ${prop}`);
+      return Reflect.get(...arguments); // 保持默认获取行为
+    },
+    set(target, prop, value, receiver) {
+      if (prop === "age" && value < 0) {
+        throw new Error("年龄不能为负");
+      }
+      return Reflect.set(...arguments); // 保持默认设置行为
+    },
+  }
+);
+
+proxy.name = "Alice"; // 正常设置
+proxy.age = -5; // 抛出错误
+```
+
+## **5. 实际应用场景**
+
+### **(1) 元编程框架**
+
+```js
+function createObservable(target) {
+  return new Proxy(target, {
+    set(target, prop, value, receiver) {
+      const success = Reflect.set(...arguments);
+      if (success) {
+        console.log(`属性 ${prop} 已更新为 ${value}`);
+      }
+      return success;
+    },
+  });
+}
+
+const data = createObservable({});
+data.count = 0; // 输出 "属性 count 已更新为 0"
+```
+
+### **(2) 安全属性访问**
+
+```js
+function safeGet(obj, path) {
+  return path
+    .split(".")
+    .reduce(
+      (acc, key) => (acc !== undefined ? Reflect.get(acc, key) : undefined),
+      obj
+    );
+}
+
+const obj = { a: { b: { c: 42 } } };
+console.log(safeGet(obj, "a.b.c")); // 42
+console.log(safeGet(obj, "a.x.y")); // undefined（不会报错）
+```
+
+### **(3) 动态方法调用**
+
+```js
+class API {
+  getUsers() {
+    return ["Alice", "Bob"];
+  }
+  getPosts() {
+    return ["Post1", "Post2"];
+  }
+}
+
+function callMethod(instance, method, ...args) {
+  if (Reflect.has(instance, method)) {
+    return Reflect.apply(instance[method], instance, args);
+  }
+  throw new Error(`方法 ${method} 不存在`);
+}
+
+const api = new API();
+console.log(callMethod(api, "getUsers")); // ['Alice', 'Bob']
+```
+
+## **6. 与传统方式的对比**
+
+| 场景         | 传统方式                     | Reflect 方式                          |
+| ------------ | ---------------------------- | ------------------------------------- |
+| 属性定义     | `Object.defineProperty()`    | `Reflect.defineProperty()`            |
+| 属性检查     | `'prop' in obj`              | `Reflect.has(obj, 'prop')`            |
+| 函数调用     | `func.apply(thisAr`g, args)` | `Reflect.apply(func, thisArg, args)`  |
+| 构造函数调用 | `new Func(...args)`          | `Reflect.construct(Func, args)`       |
+| 删除属性     | `delete obj.prop`            | `Reflect.deleteProperty(obj, 'prop')` |
+
+## **7. 注意事项**
+
+- **不可用于原始值**：所有方法第一个参数必须是对象
+- **严格模式影响**：`Reflect.set` 在严格模式下更安全
+- **性能考量**：直接操作 vs Reflect 方法性能差异可忽略（现代引擎优化后）
+- **错误处理**：优先使用返回值而非 `try/catch`
+
+## **总结**
+
+Reflect 的核心价值：
+
+1. **标准化 API**：统一对象操作方式
+2. **函数式接口**：更适合现代编程范式
+3. **Proxy 最佳拍档**：确保代理行为的正确性
+4. **安全增强**：避免操作符的意外行为
+
+实际开发建议：
+
+- 在编写 Proxy 处理器时优先使用 Reflect 方法
+- 替代易出错的 `Object` 方法（如 `defineProperty`）
+- 需要精确控制操作结果时使用（如判断属性是否删除成功）

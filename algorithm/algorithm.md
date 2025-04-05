@@ -865,6 +865,122 @@ var sortedArrayToBST = function (nums) {
 };
 ```
 
+## 验证二叉搜索树
+
+> [!TIP]
+>
+> 思路：
+>
+> 二叉搜索树定义如下：
+>
+> - 节点的左子树只包含 **小于** 当前节点的数。
+> - 节点的右子树只包含 **大于** 当前节点的数。
+> - 所有左子树和右子树自身必须也是二叉搜索树。
+>
+> 根据定义我们不难发现其规律，我们需要设计一个递归函数 `helper(root, min, max)` 来递归判断，函数表示考虑以 `root` 为根的子树，判断子树中所有节点的值是否都在 `(l,r)` 的范围内（注意是开区间）。如果 `root` 节点的值 `val` 不在 `(l,r)` 的范围内说明不满足条件直接返回，否则我们要继续递归调用检查它的左右子树是否满足，如果都满足才说明这是一棵二叉搜索树。
+
+```js
+var isValidBST = functon (root) {
+  const helper = (root, min, max) => {
+    if (!root) return true;
+    if (root.val <= min || root.val >= max) return false;
+    return helper(root.left, min, root.val) && helper(root.right, root.val, right);
+  };
+  return helper(root, -Infinity, Infinity);
+};
+```
+
+## 二叉树展开为链表
+
+[二叉树展开为链表](https://leetcode.cn/problems/flatten-binary-tree-to-linked-list/?envType=study-plan-v2&envId=top-100-liked)
+
+> [!TIP]
+>
+> 思路 1：前序遍历。时间复杂度：`O(n)` 空间复杂度：`O(n)`
+>
+> 思路 2：寻找前驱节点。时间复杂度：`O(n)` 空间复杂度：`O(1)`
+>
+> 前序遍历访问各节点的顺序是根左右。如果一个节点的左子节点为空，则该节点不需要进行展开操作。如果一个节点的左子节点不为空，则该节点的左子树中的最后一个节点被访问之后，该节点的右子节点被访问。该节点的左子树中最后一个被访问的节点是左子树中的最右边的节点，也是该节点的前驱节点。因此，问题转化成寻找当前节点的前驱节点。
+>
+> 具体做法是，对于当前节点，如果其左子节点不为空，则在其左子树中找到最右边的节点，作为前驱节点，将当前节点的右子节点赋给前驱节点的右子节点，然后将当前节点的左子节点赋给当前节点的右子节点，并将当前节点的左子节点设为空。对当前节点处理结束后，继续处理链表中的下一个节点，直到所有节点都处理结束。
+
+前序遍历
+
+```js
+var flatten = function (root) {
+  let list = [];
+  const preorder = (root) => {
+    if (!root) return;
+    list.push(root);
+    preorder(root.left);
+    preorder(root.right);
+  };
+  preorder(root);
+
+  for (let i = 1; i < list.length; i++) {
+    let prev = list[i - 1],
+      cur = list[i];
+    prev.left = null;
+    prev.right = cur;
+  }
+};
+```
+
+寻找前驱节点
+
+```js
+var flatten = function (root) {
+  let cur = root;
+  while (cur) {
+    if (cur.left) {
+      const next = cur.left;
+      let pre = next;
+      while (pre.right) {
+        pre = pre.right;
+      }
+      pre.right = cur.right;
+      cur.left = null;
+      cur.right = next;
+    }
+    cur = cur.right;
+  }
+};
+```
+
+## 从前序与中序遍历序列构造二叉树
+
+> [!TIP]
+>
+> 思路：递归
+>
+> 只要我们在中序遍历中定位到根节点，那么我们就可以分别知道左子树和右子树中的节点数目。由于同一颗子树的前序遍历和中序遍历的长度显然是相同的，因此我们就可以对应到前序遍历的结果中。
+>
+> 这样以来，我们就知道了左子树的前序遍历和中序遍历结果，以及右子树的前序遍历和中序遍历结果，我们就可以递归地对构造出左子树和右子树，再将这两颗子树接到根节点的左右位置。
+>
+> 细节
+>
+> 在中序遍历中对根节点进行定位时，一种简单的方法是直接扫描整个中序遍历的结果并找出根节点，但这样做的时间复杂度较高。我们可以考虑使用哈希表来帮助我们快速地定位根节点。对于哈希映射中的每个键值对，键表示一个元素（节点的值），值表示其在中序遍历中的出现位置。在构造二叉树的过程之前，我们可以对中序遍历的列表进行一遍扫描，就可以构造出这个哈希映射。在此后构造二叉树的过程中，我们就只需要 O(1) 的时间对根节点进行定位了。
+
+```js
+var buildTree = function (preorder, inorder) {
+  if (!preorder || !inorder || preorder.length !== inorder.length) return null;
+  let map = new Map();
+  for (let i = 0; i < inorder.length; i++) {
+    map.set(inorder[i], i);
+  }
+  const f = (l1, r1, l2, r2) => {
+    if (l1 > r1) return null;
+    let head = new TreeNode(preorder[l1]);
+    if (l1 === r1) return head;
+    let k = map.get(preorder[l1]);
+    head.left = f(l1 + 1, l1 + k - l2, l2, k - 1);
+    head.right = f(l1 + k - l2 + 1, r1, k + 1, r2);
+    return head;
+  };
+  return f(0, preorder.length - 1, 0, inorder.length);
+};
+```
+
 # bfs 及其拓展
 
 ## bfs 模板

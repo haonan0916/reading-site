@@ -8,7 +8,7 @@
 
 **步骤 1：** 基于 `Vite` 创建 `React + TypeScript` 的项目，具体创建项目的步骤，请参考 [Vite 官方文档](https://vitejs.cn/vite3-cn/guide/)。
 
-**步骤 2**：在 `Vite` 项目中配置 `@ `路径提示：
+**步骤 2**：在 `Vite` 项目中配置 `@`路径提示：
 
 2.1 安装 `node` 的类型声明：
 
@@ -34,7 +34,7 @@ export default defineConfig({
 });
 ```
 
-**步骤 3：**配置 `tsconfig.json` 文件，在 `compilerOptions ` 节点下，新增 `"baseUrl": "."` 和 `"paths": { "@/*": [ "src/*" ] } `两项：
+**步骤 3：**配置 `tsconfig.json` 文件，在 `compilerOptions` 节点下，新增 `"baseUrl": "."` 和 `"paths": { "@/*": [ "src/*" ] }`两项：
 
 ```json
 {
@@ -298,9 +298,9 @@ export const Count: React.FC = () => {
 };
 ```
 
-经过测试，我们发现上述代码执行的结果，只是让 `count` 从 `0` 变成了 `1`，最终的 `count` 值并不是 ` 2`。`Why？`
+经过测试，我们发现上述代码执行的结果，只是让 `count` 从 `0` 变成了 `1`，最终的 `count` 值并不是 `2`。`Why？`
 
-因为 `setCount `是异步地更新状态值的，所以前后两次调用 `setCount  `传递进去的新值都是 `1`。`React` 内部如果遇到两次相同的状态，则会默认阻止组件再次更新。
+因为 `setCount`是**异步**地更新状态值的，所以前后两次调用 `setCount`传递进去的新值都是 `1`。`React` 内部如果遇到两次相同的状态，则会默认阻止组件再次更新。
 
 为了解决上述的问题，我们可以使用函数的方式给状态赋新值。当函数执行时才通过函数的形参，拿到当前的状态值，并基于它返回新的状态值。示例代码如下：
 
@@ -351,7 +351,7 @@ export const FUpdate: React.FC = () => {
 
 ### 1. useRef 的两个主要作用
 
-`useRef` 函数返回一个可变的 `ref` 对象，该对象只有一个 `current` 属性。可以在调用 `useRef` 函数时为其指定初始值。并且这个返回的 `ref `对象在组件的整个生命周期内保持不变。语法格式如下：
+`useRef` 函数返回一个可变的 `ref` 对象，该对象只有一个 `current` 属性。可以在调用 `useRef` 函数时为其指定初始值。并且这个返回的 `ref`对象在组件的整个生命周期内保持不变。语法格式如下：
 
 ```tsx
 // 1. 导入 useRef
@@ -598,7 +598,7 @@ const Child = React.forwardRef((props, ref) => {
 });
 ```
 
-然后，在父组件 `Father` 中，就可以给子组件 `Child` 绑定 `ref `了：
+然后，在父组件 `Father` 中，就可以给子组件 `Child` 绑定 `ref`了：
 
 ```tsx
 // 父组件
@@ -1362,7 +1362,7 @@ export const useCountDown: UseCountDown = (seconds = 10) => {
 
 ### 3. useLayoutEffect 的使用示例
 
-点击按钮，把 num 值设置为 0，当页面更新完成后，判断 num 是否等于 0，如果等于 0，则在 `useEffect `中把 num 赋值为随机的数字：
+点击按钮，把 num 值设置为 0，当页面更新完成后，判断 num 是否等于 0，如果等于 0，则在 `useEffect`中把 num 赋值为随机的数字：
 
 ```tsx
 export const RandomNumber: React.FC = () => {
@@ -1739,7 +1739,7 @@ const onChangeName = () => {
 
 ### 6. 把用户信息渲染到子组件中
 
-在 Father 父组件中，通过展开运算符把 state 数据对象绑定为 `Son1` 和 ` Son2` 的 `props` 属性：
+在 Father 父组件中，通过展开运算符把 state 数据对象绑定为 `Son1` 和 `Son2` 的 `props` 属性：
 
 ```tsx
 // 父组件
@@ -2031,7 +2031,7 @@ const GrandSon: React.FC<{ dispatch: React.Dispatch<ActionType> }> = (
 
 安装 `immer` 相关的依赖包：
 
-> `npm install immer use-immer -S `
+> `npm install immer use-immer -S`
 
 从 `use-immer` 中导入 `useImmerReducer` 函数，并替换掉 React 官方的 `useReducer` 函数的调用：
 
@@ -2234,7 +2234,7 @@ export const AppContextWrapper: React.FC<React.PropsWithChildren> = (props) => {
 };
 ```
 
-定义好 `Wrapper` 组件后，我们可以在 `App.tsx` 中导入并使用 `Wrapper` 和 `LevelA `组件，代码如下：
+定义好 `Wrapper` 组件后，我们可以在 `App.tsx` 中导入并使用 `Wrapper` 和 `LevelA`组件，代码如下：
 
 ```tsx
 import React from 'react'
@@ -2253,7 +2253,7 @@ const App: React.FC = () => {
 export default App
 ```
 
-这样，组件树的嵌套关系为：`App => Wrapper => LevelA => LevelB => LevelC`。因此在 `LevelA、LevelB` 和 `LevelC` 组件中，都可以使用 `context` 中的数据。例如，`LevelA `组件中的代码如下：
+这样，组件树的嵌套关系为：`App => Wrapper => LevelA => LevelB => LevelC`。因此在 `LevelA、LevelB` 和 `LevelC` 组件中，都可以使用 `context` 中的数据。例如，`LevelA`组件中的代码如下：
 
 ```tsx
 export const LevelA: React.FC = () => {
@@ -2438,7 +2438,7 @@ const GrandSon: React.FC = () => {
 const 组件 = React.memo(函数式组件);
 ```
 
-例如，在下面的代码中，父组件声明了 `count` 和 `flag `两个状态，子组件依赖于父组件通过 `props` 传递的 `num`。当父组件修改 `flag` 的值时，会导致子组件的重新渲染：
+例如，在下面的代码中，父组件声明了 `count` 和 `flag`两个状态，子组件依赖于父组件通过 `props` 传递的 `num`。当父组件修改 `flag` 的值时，会导致子组件的重新渲染：
 
 ```tsx
 import React, { useEffect, useState } from "react";
@@ -2475,7 +2475,7 @@ export const Son: React.FC<{ num: number }> = ({ num }) => {
 };
 ```
 
-我们使用 `React.memo`(函数式组件) 将子组件包裹起来，只有子组件依赖的 `props `发生变化的时候，才会触发子组件的重新渲染。示例代码如下：
+我们使用 `React.memo`(函数式组件) 将子组件包裹起来，只有子组件依赖的 `props`发生变化的时候，才会触发子组件的重新渲染。示例代码如下：
 
 ```tsx
 // 子组件：依赖于父组件通过 props 传递进来的 num
@@ -2527,7 +2527,7 @@ export const Father: React.FC = () => {
 };
 ```
 
-代码编写完毕后，我们点击父组件中的 `+1` 按钮，发现 `count `在自增，而 `flag` 的值不会发生变化。此时也会触发 `tips` 函数的重新执行，这就造成了性能的浪费。
+代码编写完毕后，我们点击父组件中的 `+1` 按钮，发现 `count`在自增，而 `flag` 的值不会发生变化。此时也会触发 `tips` 函数的重新执行，这就造成了性能的浪费。
 
 我们希望如果 `flag` 没有发生变化，则避免 `tips` 函数的重新计算，从而优化性能。此时需要用到 `React Hooks` 提供的 `useMemo API`。
 
@@ -2578,7 +2578,7 @@ const tips = useMemo(() => {
 }, [flag]);
 ```
 
-此时，点击 `Father `中的 `+1` 按钮，并不会触发 `tips` 的重新计算，而是会使用上一次缓存的值进行渲染。只有依赖项 `flag` 变化时，才会触发 `tips` 的重新计算。
+此时，点击 `Father`中的 `+1` 按钮，并不会触发 `tips` 的重新计算，而是会使用上一次缓存的值进行渲染。只有依赖项 `flag` 变化时，才会触发 `tips` 的重新计算。
 
 ## 11. useCallback
 
@@ -2724,7 +2724,7 @@ const SearchResult: React.FC<{ query: string }> = (props) => {
 };
 ```
 
-定义父组件 `SearchBox` 并渲染 `SearchInput` 组件和 `SearchResult` 组件。在父组件中监听 `SearchInput` 的 `onChange` 事件，并把父组件中定义的处理函数 `onKwChange` 传递进去。同时，把父组件中定义的搜索关键字 `kw `传递给 `SearchResult` 组件。示例代码如下：
+定义父组件 `SearchBox` 并渲染 `SearchInput` 组件和 `SearchResult` 组件。在父组件中监听 `SearchInput` 的 `onChange` 事件，并把父组件中定义的处理函数 `onKwChange` 传递进去。同时，把父组件中定义的搜索关键字 `kw`传递给 `SearchResult` 组件。示例代码如下：
 
 ```tsx
 // 父组件
@@ -2758,7 +2758,7 @@ export const SearchBox: React.FC = () => {
 
 #### 3.2 问题解决
 
-首先，我们需要让子组件 `SearchInput` 被缓存，所以我们需要使用 `React.memo `对其进行改造：
+首先，我们需要让子组件 `SearchInput` 被缓存，所以我们需要使用 `React.memo`对其进行改造：
 
 ```tsx
 // 子组件：搜索框
@@ -2789,7 +2789,7 @@ const onKwChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
 
 ### 1. 问题引入
 
-`useTransition` 可以将一个更新转为低优先级更新，使其可以被打断，不阻塞 `UI `对用户操作的响应，能够提高用户的使用体验。它常用于优化视图切换时的用户体验。
+`useTransition` 可以将一个更新转为低优先级更新，使其可以被打断，不阻塞 `UI`对用户操作的响应，能够提高用户的使用体验。它常用于优化视图切换时的用户体验。
 
 例如有以下**3**个标签页组件，分别是 `Home、Movie、About`，其中 `Movie` 是一个渲染特别耗时的组件，在渲染 `Movie` 组件期间页面的 `UI` 会被阻塞，用户会感觉页面十分卡顿，示例代码如下：
 
@@ -3171,7 +3171,7 @@ export const SearchBox: React.FC = () => {
 >
 > 一旦受控，表单元素变为只读的，用户输入不可修改。如果想让用户可以输入，需要添加 `onChange` 事件，在事件回调中，获取用户最新的输入，用来给状态赋值。
 >
-> `type='text' `：通过 `value` 进行受控
+> `type='text'`：通过 `value` 进行受控
 >
 > `type='radio'` : 通过 `checked` 进行受控
 >
@@ -3624,6 +3624,23 @@ const App = () => {
 
 ## 5. 高阶函数 HOC 的应用
 
+> [!TIP]
+>
+> **高阶组件（HOC）就是一个函数，且该函数接受一个组件作为参数，并返回一个新的组件，它只是一种组件的设计模式，这种设计模式是由 react 自身的组合性质必然产生的。我们将它们称为纯组件，因为它们可以接受任何动态提供的子组件，但它们不会修改或复制其输入组件中的任何行为。**
+
+**1）HOC 的优缺点**
+
+- **优点 ∶ 逻辑服用、不影响被包裹组件的内部逻辑。**
+- **缺点 ∶hoc 传递给被包裹组件的 props 容易和被包裹后的组件重名，进而被覆盖**
+
+**2）适用场景**
+
+- 代码复用，逻辑抽象
+- 条件渲染，权限控制
+- 渲染劫持
+- 反向继承
+- 组件渲染性能追踪
+
 1. 属性代理 —— 条件渲染
 
 ```jsx
@@ -3638,7 +3655,7 @@ function HOC(WrappedComponent) {
 
 ```jsx
 const HOC = (WrappedCompoent) => {
-	return class extends WrappedComponent {
+    return class extends WrappedComponent {
         render {
             return super.render();
         }
@@ -3646,7 +3663,7 @@ const HOC = (WrappedCompoent) => {
 }
 ```
 
-3. 反向继承——实现所谓声明周期的拦截
+3. 反向继承——实现所谓生命周期的拦截
 
 ```jsx
 function HOC(WrappedComponent) {
@@ -3669,6 +3686,9 @@ function HOC(WrappedComponent) {
 ```
 
 4. 反向继承——计算组件的渲染时间
+
+> [!TIP]
+> `withTiming` 是利用 反向继承 实现的一个高阶组件，功能是计算被包裹组件（这里是 Home 组件）的渲染时间。
 
 ```jsx
 class Home entends React.Component {
@@ -3703,6 +3723,94 @@ function withTiming(WrappedComponent) {
         }
     }
 }
+```
+
+5. 权限控制
+
+> [!TIP]
+> 利用高阶组件的 **条件渲染** 特性可以对页面进行权限控制，权限控制一般分为两个维度：**页面级别** 和 **页面元素级别**
+
+```jsx
+// HOC.js
+function withAdminAuth(WrappedComponent) {
+    return class extends React.Component {
+        state = {
+            isAdmin: false,
+        }
+        async UNSAFE_componentWillMount() {
+            const currentRole = await getCurrentUserRole();
+            this.setState({
+                isAdmin: currentRole === 'Admin',
+            });
+        }
+        render() {
+            if (this.state.isAdmin) {
+                return <WrappedComponent {...this.props} />;
+            } else {
+                return (<div>您没有权限查看该页面，请联系管理员！</div>);
+            }
+        }
+    };
+}
+
+// pages/page-a.js
+class PageA extends React.Component {
+    constructor(props) {
+        super(props);
+        // something here...
+    }
+    UNSAFE_componentWillMount() {
+        // fetching data
+    }
+    render() {
+        // render page with data
+    }
+}
+export default withAdminAuth(PageA);
+
+
+// pages/page-b.js
+class PageB extends React.Component {
+    constructor(props) {
+        super(props);
+    // something here...
+        }
+    UNSAFE_componentWillMount() {
+    // fetching data
+    }
+    render() {
+    // render page with data
+    }
+}
+export default withAdminAuth(PageB);
+```
+
+6. 页面复用
+
+```jsx
+const withFetching = fetching => WrappedComponent => {
+    return class extends React.Component {
+        state = {
+            data: [],
+        }
+        async UNSAFE_componentWillMount() {
+            const data = await fetching();
+            this.setState({
+                data,
+            });
+        }
+        render() {
+            return <WrappedComponent data={this.state.data} {...this.props} />;
+        }
+    }
+}
+
+// pages/page-a.js
+export default withFetching(fetching('science-fiction'))(MovieList);
+// pages/page-b.js
+export default withFetching(fetching('action'))(MovieList);
+// pages/page-other.js
+export default withFetching(fetching('some-other-type'))(MovieList);
 ```
 
 ### 属性代理和反向继承对比
@@ -3846,6 +3954,83 @@ export const Counter: React.FC = () => {
 >   );
 > };
 > ```
+
+## 8. React.createClass 与 React.Component区别
+
+1. 函数 `this` 自绑定
+
+- `React.createClass` 创建的组件，其每一个成员函数的 `this` 都有 `React` 自动绑定，函数中的 `this` 会被正确设置。
+- `React.Component` 创建的组件，其成员函数不会自动绑定 `this`，需要开发者手动绑定，否则 `this` 不能获取当前组件实例对象。
+
+2. 组件属性类型 `propTypes` 及其默认 `props` 属性 `defaultProps` 配置不同
+
+- `React.createClass` 在创建组件时，有关组件 `props` 的属性类型及组件默认的属性会作为组件实例的属性来配置，其中 `defaultProps` 是使用 `getDefaultProps` 的方法来获取默认组件属性的
+- `React.Component` 在创建组件时配置这两个对应信息时，他们是作为组件类的属性，不是组件实例的属性，也就是所谓的类的静态属性来配置的。
+
+3. 组件初始状态 `state` 的配置不同
+
+- `React.createClass` 创建的组件，其状态 `state` 是通过`getInitialState` 方法来配置组件相关的状态；
+- `React.Component` 创建的组件，其状态 `state` 是在`constructor` 中像初始化组件属性一样声明的。
+
+## 9. 有状态组件和无状态组件区别
+
+- 有状态组件：类组件可以维护自身的状态变量，即组件的 `state` ，类组件还有不同的生命周期方法，可以让开发者能够在组件的不同阶段（挂载、更新、卸载），对组件做更多的控制。类组件则既可以充当无状态组件，也可以充当有状态组件。当一个类组件不需要管理自身状态时，也可称为无状态组件。
+
+- 无状态组件：组件内部状态与外部无关的组件，可以考虑用状态组件，这样状态树就不会过于复杂，易于理解和管理。当一个组件不需要管理自身状态时，也就是无状态组件，应该优先设计为函数组件。比如自定义的 `<Button/>`、 `<Input />` 等组件。
+
+## 10. React setState 调用之后发生了什么？是同步还是异步？
+
+> [!IMPORTANT]
+> **react18 之后，setState 都为异步，无论写在什么样的语法环境中。但可以使用 flushSync 方法，使之变为同步**
+>
+> ```jsx
+>import { flushSync } from 'react-dom'
+>function handleClick(){
+>   flushSync(()=>{
+>     setCounter((count)=>count+1)
+>   })
+>}
+>```
+>
+
+### 1. `React` 中 `setState` 后 发生了什么
+
+在代码中调用 `setState` 函数之后，`React` 会将传入的参数对象与组件当前的状态合并，然后触发调和过程(`Reconciliation`)。经过调和过程，`React` 会以相对高效的方式根据新的状态构建 `React` 元素树并且着手重新渲染整个 `UI` 界面。
+在 `React` 得到元素树之后，`React` 会自动计算出新的树与老树的节点差异，然后根据差异对界面进行最小化重渲染。在差异计算算法中，`React` 能够相对精确地知道哪些位置发生了改变以及应该如何改变，这就保证了按需更新，而不是全部重新渲染。
+如果在短时间内频繁 `setState`。`React` 会将 `state` 的改变压入栈中，在合适的时机，批量更新 `state` 和视图，达到提高性能的效果。
+
+### 2. `setState` 是同步还是异步的
+
+假如所有 `setState` 是同步的，意味着每执行一次 `setState` 时（有可能一个同步代码中，多次 `setState`），都重新 `vnode diff + dom` 修改，这对性能来说是极为不好的。如果是异步，则可以把一个同步代码中的多个 `setState` 合并成一次组件更新。所以**默认是异步的，但是在一些情况下是同步的。**
+`setState` 并不是单纯同步/异步的，**它的表现会因调用场景的不同而不同**。在源码中，通过 `isBatchingUpdates` 来判断 `setState` 是先存进 `state` 队列还是直接更新，如果值为 `true` 则执行异步操作，为 `false` 则直接更新。
+
+- 异步：在 `React` 可以控制的地方，就为 `true`，比如在 `React` **生命周期事件和合成事件中，都会走合并操作，延迟更新的策略。**
+
+- 同步：在 `React` 无法控制的地方，比如**原生事件**，具体就是在 `addEventListener 、setTimeout、setInterval` 等事件中，就只能同步更新。
+
+一般认为，**做异步设计是为了性能优化、减少渲染次数**：
+
+- `setState` 设计为异步，可以显著的提升性能。如果每次调用 `setState` 都进行一次更新，那么意味着 `render` 函数会被频繁调用，界面重新渲染，这样效率是很低的；最好的办法应该是获取到多个更新，之后进行批量更新；
+- 如果同步更新了 `state`，但是还没有执行 `render` 函数，那么`state` 和 `props` 不能保持同步。`state` 和 `props` 不能保持一致性，会在开发中产生很多的问题。
+
+## React 中的 setState 批量更新的过程是什么？
+
+调用 `setState` 时，组件的 `state` 并不会立即改变， `setState` 只是把要修改的 `state` 放入一个队列， `React` 会优化真正的执行时机，并出于性能原因，会将 `React` 事件处理程序中的多次 `React` 事件处理程序中的多次 `setState` 的状态修改合并成一次状态修改。 最终更新只产生一次组件及其子组件的重新渲染，这对于大型应用程序中的性能提升至关重要。
+
+```jsx
+setState({
+  count: this.state.count + 1    ===>    入队，[count+1的任务]
+});
+this.setState({
+  count: this.state.count + 1    ===>    入队，[count+1的任务，count+1的任务]
+});
+                                          ↓
+                                         合并 state，[count+1的任务]
+                                          ↓
+                                         执行 count+1的任务
+```
+
+需要注意的是，只要同步代码还在执行，“攒起来”这个动作就不会停止。（注：这里之所以多次 `+1` 最终只有一次生效，是因为在同一个方法中多次 `setState` 的合并动作不是单纯地将更新累加。比如这里对于相同属性的设置，`React` **只会为其保留最后一次的更新**）。
 
 ## React 的 fiber 架构
 
@@ -4179,7 +4364,7 @@ function cloneChildFibers(current, workInProgress) {
 
 `current` 是当前屏幕上显示内容对应的 `FiberNode`，`workInProgress` 指的是正在内存中构建的 `FiberNode`。
 
-两个 `FiberNode` 会通过 `alternate `属性相互指向：
+两个 `FiberNode` 会通过 `alternate`属性相互指向：
 
 ```js
 current.alternate = workInProgress;
@@ -4211,7 +4396,7 @@ const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(<App />);
 ```
 
-##### 流程一：
+##### 流程一
 
 当执行 `ReactDOM.createRoot` 时：
 
@@ -4302,18 +4487,18 @@ Diff 算法具有以下特点：
 
 ### 关于 key
 
-key 是 React 中用于标识节点的唯一性的一种机制。在 Diff 算法中，React 使用 `key `属性来快速定位到需要更新的节点，从而提高 Diff 算法的性能。
+key 是 React 中用于标识节点的唯一性的一种机制。在 Diff 算法中，React 使用 `key`属性来快速定位到需要更新的节点，从而提高 Diff 算法的性能。
 
 我们经常强调在列表渲染中要使用 key 来提高性能，那么 key 到底是怎么帮助我们识别的呢？看一个简单的例子：
 
 ```jsx
 <div>
-	<p key="a">a</p>
-	<span key="b">b</span>
+ <p key="a">a</p>
+ <span key="b">b</span>
 </div>
 <div>
-	<span key="b">b</span>
-	<p key="a">a</p>
+ <span key="b">b</span>
+ <p key="a">a</p>
 </div>
 ```
 
@@ -4540,7 +4725,7 @@ React 的 diff 算法分为两轮遍历：
 
 ![image.png](https://p3-xtjj-sign.byteimg.com/tos-cn-i-73owjymdk6/1cf09de8537244adb03371e14bc06cef~tplv-73owjymdk6-jj-mark-v1:0:0:0:0:5o6Y6YeR5oqA5pyv56S-5Yy6IEAg5pys54uX6LaF57qn5b-Z55qE:q75.awebp?rk3s=f64ab15b&x-expires=1732076499&x-signature=8GfPI0jWclL6naN5XvDbg9hSxTE%3D)
 
-#### 第二轮遍历：
+#### 第二轮遍历
 
 剩余的旧的 FiberNode 放入到一个 map 里：
 
@@ -4589,7 +4774,7 @@ JSX 数组遍历完成，map 中还剩下 `li.d`:
 
 ## React 类组件生命周期（17 版本）
 
-![image.png](https://cdn.nlark.com/yuque/0/2021/png/1500604/1611822510207-8101671e-8b5a-4968-88b1-85d44e078b0b.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_63%2Ctext_5b6u5L-h5YWs5LyX5Y-377ya5YmN56uv5YWF55S15a6d%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10%2Fformat%2Cwebp%2Fresize%2Cw_1125%2Climit_0)
+![生命周期.png](/react_images/生命周期.png)
 
 ### getDerivedStateFromProps
 
@@ -4691,7 +4876,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
 
 ### 2. 声明式导航
 
-> 声明式导航是指通过在模版中通过 `<Link/> ` 组件描述出要跳转到哪里去，比如后台管理系统的左侧菜单通常使用这种方式进行
+> 声明式导航是指通过在模版中通过 `<Link/>` 组件描述出要跳转到哪里去，比如后台管理系统的左侧菜单通常使用这种方式进行
 
 ![image.png](/react_images/5.png)
 
@@ -5091,7 +5276,7 @@ export default App;
 
 ## Redux 异步 action 处理
 
-虽然 `Redux` 主要用于处理同步的状态更新，但有时我们需要处理异步的操作，例如从服务器获取数据或执行一些异步任务。在 `Redux `中处理异步操作通常需要使用中间件来实现。
+虽然 `Redux` 主要用于处理同步的状态更新，但有时我们需要处理异步的操作，例如从服务器获取数据或执行一些异步任务。在 `Redux`中处理异步操作通常需要使用中间件来实现。
 
 ### Redux Thunk 中间件
 
