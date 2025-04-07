@@ -981,6 +981,34 @@ var buildTree = function (preorder, inorder) {
 };
 ```
 
+## 路径总和
+
+[路径总和](https://leetcode.cn/problems/path-sum/description/)
+
+> [!TIP]
+>
+> 思路：递归
+>
+> 求是否有从根节点到叶子节点的路径和等于 targetSum，同时根节点的值为 value，我们可以将其转换为判断根节点左子树或者右子树，看是否存在一个节点和为 targetSum - value 的路径。
+
+```js
+var hasPathSum = function(root, targetSum) {
+ if (!root) return fasle;
+ if (!root.left && !root.right) return root.val === targetSum;
+ return hasPathSum(root.left, targetSum - root.val) || hasPathSum(root.right, targetSum - root.val);
+};
+```
+
+## 路径总和 III
+
+[路径总和 III](https://leetcode.cn/problems/path-sum-iii/description/?envType=study-plan-v2&envId=top-100-liked)
+
+> [!TIP]
+>
+> 思路：递归 + 前缀和
+>
+>
+
 # bfs 及其拓展
 
 ## bfs 模板
@@ -1343,8 +1371,8 @@ class Solution {
             }
             visited[x][y] = true;
             if (x == n - 1 && y == m - 1) {
-				return c;
-			}
+    return c;
+   }
             for (int i = 0; i < 4; i++) {
                 int nx = x + move[i];
                 int ny = y + move[i + 1];
@@ -1434,17 +1462,17 @@ public class Solution {
 
 // 曼哈顿距离
 public static int f1(int x, int y, int targetX, int targetY) {
-	return (Math.abs(targetX - x) + Math.abs(targetY - y));
+ return (Math.abs(targetX - x) + Math.abs(targetY - y));
 }
 
 // 对角线距离
 public static int f2(int x, int y, int targetX, int targetY) {
-	return Math.max(Math.abs(targetX - x), Math.abs(targetY - y));
+ return Math.max(Math.abs(targetX - x), Math.abs(targetY - y));
 }
 
 // 欧式距离
 public static double f3(int x, int y, int targetX, int targetY) {
-	return Math.sqrt(Math.pow(targetX - x, 2) + Math.pow(targetY - y, 2));
+ return Math.sqrt(Math.pow(targetX - x, 2) + Math.pow(targetY - y, 2));
 }
 ```
 
@@ -1486,50 +1514,50 @@ public class Sloution {
     }
 
     public static void main(String[] args) throws IOException {
-		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		StreamTokenizer in = new StreamTokenizer(br);
-		PrintWriter out = new PrintWriter(new OutputStreamWriter(System.out));
-		while (in.nextToken() != StreamTokenizer.TT_EOF) {
-			n = (int) in.nval;
-			in.nextToken();
-			m = (int) in.nval;
-			for (int i = 0; i < m; i++) {
-				in.nextToken();
-				path[i] = (int) in.nval - 1;
-			}
-			// 这道题给的图是邻接矩阵的形式
-			// 任意两点之间的边权都会给定
-			// 所以显得distance初始化不太必要
-			// 但是一般情况下，distance初始化一定要做
-			build();
-			for (int i = 0; i < n; i++) {
-				for (int j = 0; j < n; j++) {
-					in.nextToken();
-					distance[i][j] = (int) in.nval;
-				}
-			}
-			floyd();
-			ans = 0;
-			for (int i = 1; i < m; i++) {
-				ans += distance[path[i - 1]][path[i]];
-			}
-			out.println(ans);
-		}
-		out.flush();
-		out.close();
-		br.close();
-	}
+  BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+  StreamTokenizer in = new StreamTokenizer(br);
+  PrintWriter out = new PrintWriter(new OutputStreamWriter(System.out));
+  while (in.nextToken() != StreamTokenizer.TT_EOF) {
+   n = (int) in.nval;
+   in.nextToken();
+   m = (int) in.nval;
+   for (int i = 0; i < m; i++) {
+    in.nextToken();
+    path[i] = (int) in.nval - 1;
+   }
+   // 这道题给的图是邻接矩阵的形式
+   // 任意两点之间的边权都会给定
+   // 所以显得distance初始化不太必要
+   // 但是一般情况下，distance初始化一定要做
+   build();
+   for (int i = 0; i < n; i++) {
+    for (int j = 0; j < n; j++) {
+     in.nextToken();
+     distance[i][j] = (int) in.nval;
+    }
+   }
+   floyd();
+   ans = 0;
+   for (int i = 1; i < m; i++) {
+    ans += distance[path[i - 1]][path[i]];
+   }
+   out.println(ans);
+  }
+  out.flush();
+  out.close();
+  br.close();
+ }
 
     public static void floyd() {
         // O(N^3)的过程
-		// 枚举每个跳板
-		// 注意，跳板要最先枚举！跳板要最先枚举！跳板要最先枚举！
+  // 枚举每个跳板
+  // 注意，跳板要最先枚举！跳板要最先枚举！跳板要最先枚举！
         for (int bridge = 0; bridge < n; bridge++) {
             for (int i = 0; i < n; i++) {
                 for (int j = 0; j < n; j++) {
                     // i -> .....bridge .... -> j
-					// distance[i][j]能不能缩短
-					// distance[i][j] = min ( distance[i][j] , distance[i][bridge] + distance[bridge][j])
+     // distance[i][j]能不能缩短
+     // distance[i][j] = min ( distance[i][j] , distance[i][bridge] + distance[bridge][j])
                     if (distance[i][bridge] != Integer.MAX_VALUE
                        && distance[bridge][j] != Integer.MAX_VALUE
                        && distance[i][j] > distance[i][bridge] + distance[bridge][j]) {
@@ -1783,196 +1811,196 @@ var numDecodings = function (s) {
 ```java
 public class Code04_DecodeWaysII {
 
-	// 没有取模逻辑
-	// 最自然的暴力尝试
-	public static int numDecodings1(String str) {
-		return f1(str.toCharArray(), 0);
-	}
+ // 没有取模逻辑
+ // 最自然的暴力尝试
+ public static int numDecodings1(String str) {
+  return f1(str.toCharArray(), 0);
+ }
 
-	// s[i....] 有多少种有效转化
-	public static int f1(char[] s, int i) {
-		if (i == s.length) {
-			return 1;
-		}
-		if (s[i] == '0') {
-			return 0;
-		}
-		// s[i] != '0'
-		// 2) i想单独转
-		int ans = f1(s, i + 1) * (s[i] == '*' ? 9 : 1);
-		// 3) i i+1 一起转化 <= 26
-		if (i + 1 < s.length) {
-			// 有i+1位置
-			if (s[i] != '*') {
-				if (s[i + 1] != '*') {
-					// num num
-					//  i  i+1
-					if ((s[i] - '0') * 10 + s[i + 1] - '0' <= 26) {
-						ans += f1(s, i + 2);
-					}
-				} else {
-					// num  *
-					//  i  i+1
-					if (s[i] == '1') {
-						ans += f1(s, i + 2) * 9;
-					}
-					if (s[i] == '2') {
-						ans += f1(s, i + 2) * 6;
-					}
-				}
-			} else {
-				if (s[i + 1] != '*') {
-					// *  num
-					// i  i+1
-					if (s[i + 1] <= '6') {
-						ans += f1(s, i + 2) * 2;
-					} else {
-						ans += f1(s, i + 2);
-					}
-				} else {
-					// *  *
-					// i  i+1
-					// 11 12 ... 19 21 22 ... 26 -> 一共15种可能
-					// 没有10、20，因为*只能变1~9，并不包括0
-					ans += f1(s, i + 2) * 15;
-				}
-			}
-		}
-		return ans;
-	}
+ // s[i....] 有多少种有效转化
+ public static int f1(char[] s, int i) {
+  if (i == s.length) {
+   return 1;
+  }
+  if (s[i] == '0') {
+   return 0;
+  }
+  // s[i] != '0'
+  // 2) i想单独转
+  int ans = f1(s, i + 1) * (s[i] == '*' ? 9 : 1);
+  // 3) i i+1 一起转化 <= 26
+  if (i + 1 < s.length) {
+   // 有i+1位置
+   if (s[i] != '*') {
+    if (s[i + 1] != '*') {
+     // num num
+     //  i  i+1
+     if ((s[i] - '0') * 10 + s[i + 1] - '0' <= 26) {
+      ans += f1(s, i + 2);
+     }
+    } else {
+     // num  *
+     //  i  i+1
+     if (s[i] == '1') {
+      ans += f1(s, i + 2) * 9;
+     }
+     if (s[i] == '2') {
+      ans += f1(s, i + 2) * 6;
+     }
+    }
+   } else {
+    if (s[i + 1] != '*') {
+     // *  num
+     // i  i+1
+     if (s[i + 1] <= '6') {
+      ans += f1(s, i + 2) * 2;
+     } else {
+      ans += f1(s, i + 2);
+     }
+    } else {
+     // *  *
+     // i  i+1
+     // 11 12 ... 19 21 22 ... 26 -> 一共15种可能
+     // 没有10、20，因为*只能变1~9，并不包括0
+     ans += f1(s, i + 2) * 15;
+    }
+   }
+  }
+  return ans;
+ }
 
-	public static long mod = 1000000007;
+ public static long mod = 1000000007;
 
-	public static int numDecodings2(String str) {
-		char[] s = str.toCharArray();
-		long[] dp = new long[s.length];
-		Arrays.fill(dp, -1);
-		return (int) f2(s, 0, dp);
-	}
+ public static int numDecodings2(String str) {
+  char[] s = str.toCharArray();
+  long[] dp = new long[s.length];
+  Arrays.fill(dp, -1);
+  return (int) f2(s, 0, dp);
+ }
 
-	public static long f2(char[] s, int i, long[] dp) {
-		if (i == s.length) {
-			return 1;
-		}
-		if (s[i] == '0') {
-			return 0;
-		}
-		if (dp[i] != -1) {
-			return dp[i];
-		}
-		long ans = f2(s, i + 1, dp) * (s[i] == '*' ? 9 : 1);
-		if (i + 1 < s.length) {
-			if (s[i] != '*') {
-				if (s[i + 1] != '*') {
-					if ((s[i] - '0') * 10 + s[i + 1] - '0' <= 26) {
-						ans += f2(s, i + 2, dp);
-					}
-				} else {
-					if (s[i] == '1') {
-						ans += f2(s, i + 2, dp) * 9;
-					}
-					if (s[i] == '2') {
-						ans += f2(s, i + 2, dp) * 6;
-					}
-				}
-			} else {
-				if (s[i + 1] != '*') {
-					if (s[i + 1] <= '6') {
-						ans += f2(s, i + 2, dp) * 2;
-					} else {
-						ans += f2(s, i + 2, dp);
-					}
-				} else {
-					ans += f2(s, i + 2, dp) * 15;
-				}
-			}
-		}
-		ans %= mod;
-		dp[i] = ans;
-		return ans;
-	}
+ public static long f2(char[] s, int i, long[] dp) {
+  if (i == s.length) {
+   return 1;
+  }
+  if (s[i] == '0') {
+   return 0;
+  }
+  if (dp[i] != -1) {
+   return dp[i];
+  }
+  long ans = f2(s, i + 1, dp) * (s[i] == '*' ? 9 : 1);
+  if (i + 1 < s.length) {
+   if (s[i] != '*') {
+    if (s[i + 1] != '*') {
+     if ((s[i] - '0') * 10 + s[i + 1] - '0' <= 26) {
+      ans += f2(s, i + 2, dp);
+     }
+    } else {
+     if (s[i] == '1') {
+      ans += f2(s, i + 2, dp) * 9;
+     }
+     if (s[i] == '2') {
+      ans += f2(s, i + 2, dp) * 6;
+     }
+    }
+   } else {
+    if (s[i + 1] != '*') {
+     if (s[i + 1] <= '6') {
+      ans += f2(s, i + 2, dp) * 2;
+     } else {
+      ans += f2(s, i + 2, dp);
+     }
+    } else {
+     ans += f2(s, i + 2, dp) * 15;
+    }
+   }
+  }
+  ans %= mod;
+  dp[i] = ans;
+  return ans;
+ }
 
-	public static int numDecodings3(String str) {
-		char[] s = str.toCharArray();
-		int n = s.length;
-		long[] dp = new long[n + 1];
-		dp[n] = 1;
-		for (int i = n - 1; i >= 0; i--) {
-			if (s[i] != '0') {
-				dp[i] = (s[i] == '*' ? 9 : 1) * dp[i + 1];
-				if (i + 1 < n) {
-					if (s[i] != '*') {
-						if (s[i + 1] != '*') {
-							if ((s[i] - '0') * 10 + s[i + 1] - '0' <= 26) {
-								dp[i] += dp[i + 2];
-							}
-						} else {
-							if (s[i] == '1') {
-								dp[i] += dp[i + 2] * 9;
-							}
-							if (s[i] == '2') {
-								dp[i] += dp[i + 2] * 6;
-							}
-						}
-					} else {
-						if (s[i + 1] != '*') {
-							if (s[i + 1] <= '6') {
-								dp[i] += dp[i + 2] * 2;
-							} else {
-								dp[i] += dp[i + 2];
-							}
-						} else {
-							dp[i] += dp[i + 2] * 15;
-						}
-					}
-				}
-				dp[i] %= mod;
-			}
-		}
-		return (int) dp[0];
-	}
+ public static int numDecodings3(String str) {
+  char[] s = str.toCharArray();
+  int n = s.length;
+  long[] dp = new long[n + 1];
+  dp[n] = 1;
+  for (int i = n - 1; i >= 0; i--) {
+   if (s[i] != '0') {
+    dp[i] = (s[i] == '*' ? 9 : 1) * dp[i + 1];
+    if (i + 1 < n) {
+     if (s[i] != '*') {
+      if (s[i + 1] != '*') {
+       if ((s[i] - '0') * 10 + s[i + 1] - '0' <= 26) {
+        dp[i] += dp[i + 2];
+       }
+      } else {
+       if (s[i] == '1') {
+        dp[i] += dp[i + 2] * 9;
+       }
+       if (s[i] == '2') {
+        dp[i] += dp[i + 2] * 6;
+       }
+      }
+     } else {
+      if (s[i + 1] != '*') {
+       if (s[i + 1] <= '6') {
+        dp[i] += dp[i + 2] * 2;
+       } else {
+        dp[i] += dp[i + 2];
+       }
+      } else {
+       dp[i] += dp[i + 2] * 15;
+      }
+     }
+    }
+    dp[i] %= mod;
+   }
+  }
+  return (int) dp[0];
+ }
 
-	public static int numDecodings4(String str) {
-		char[] s = str.toCharArray();
-		int n = s.length;
-		long cur = 0, next = 1, nextNext = 0;
-		for (int i = n - 1; i >= 0; i--) {
-			if (s[i] != '0') {
-				cur = (s[i] == '*' ? 9 : 1) * next;
-				if (i + 1 < n) {
-					if (s[i] != '*') {
-						if (s[i + 1] != '*') {
-							if ((s[i] - '0') * 10 + s[i + 1] - '0' <= 26) {
-								cur += nextNext;
-							}
-						} else {
-							if (s[i] == '1') {
-								cur += nextNext * 9;
-							}
-							if (s[i] == '2') {
-								cur += nextNext * 6;
-							}
-						}
-					} else {
-						if (s[i + 1] != '*') {
-							if (s[i + 1] <= '6') {
-								cur += nextNext * 2;
-							} else {
-								cur += nextNext;
-							}
-						} else {
-							cur += nextNext * 15;
-						}
-					}
-				}
-				cur %= mod;
-			}
-			nextNext = next;
-			next = cur;
-			cur = 0;
-		}
-		return (int) next;
-	}
+ public static int numDecodings4(String str) {
+  char[] s = str.toCharArray();
+  int n = s.length;
+  long cur = 0, next = 1, nextNext = 0;
+  for (int i = n - 1; i >= 0; i--) {
+   if (s[i] != '0') {
+    cur = (s[i] == '*' ? 9 : 1) * next;
+    if (i + 1 < n) {
+     if (s[i] != '*') {
+      if (s[i + 1] != '*') {
+       if ((s[i] - '0') * 10 + s[i + 1] - '0' <= 26) {
+        cur += nextNext;
+       }
+      } else {
+       if (s[i] == '1') {
+        cur += nextNext * 9;
+       }
+       if (s[i] == '2') {
+        cur += nextNext * 6;
+       }
+      }
+     } else {
+      if (s[i + 1] != '*') {
+       if (s[i + 1] <= '6') {
+        cur += nextNext * 2;
+       } else {
+        cur += nextNext;
+       }
+      } else {
+       cur += nextNext * 15;
+      }
+     }
+    }
+    cur %= mod;
+   }
+   nextNext = next;
+   next = cur;
+   cur = 0;
+  }
+  return (int) next;
+ }
 
 }
 ```
@@ -1984,30 +2012,30 @@ public class Code04_DecodeWaysII {
 ```java
 public class Code05_UglyNumberII {
 
-	// 时间复杂度O(n)，n代表第n个丑数
-	public static int nthUglyNumber(int n) {
-		// dp 0 1 2 ...  n
-		//      1 2 ...  ?
-		int[] dp = new int[n + 1];
-		dp[1] = 1;
-		for (int i = 2, i2 = 1, i3 = 1, i5 = 1, a, b, c, cur; i <= n; i++) {
-			a = dp[i2] * 2;
-			b = dp[i3] * 3;
-			c = dp[i5] * 5;
-			cur = Math.min(Math.min(a, b), c);
-			if (cur == a) {
-				i2++;
-			}
-			if (cur == b) {
-				i3++;
-			}
-			if (cur == c) {
-				i5++;
-			}
-			dp[i] = cur;
-		}
-		return dp[n];
-	}
+ // 时间复杂度O(n)，n代表第n个丑数
+ public static int nthUglyNumber(int n) {
+  // dp 0 1 2 ...  n
+  //      1 2 ...  ?
+  int[] dp = new int[n + 1];
+  dp[1] = 1;
+  for (int i = 2, i2 = 1, i3 = 1, i5 = 1, a, b, c, cur; i <= n; i++) {
+   a = dp[i2] * 2;
+   b = dp[i3] * 3;
+   c = dp[i5] * 5;
+   cur = Math.min(Math.min(a, b), c);
+   if (cur == a) {
+    i2++;
+   }
+   if (cur == b) {
+    i3++;
+   }
+   if (cur == c) {
+    i5++;
+   }
+   dp[i] = cur;
+  }
+  return dp[n];
+ }
 
 }
 ```
@@ -2019,26 +2047,26 @@ public class Code05_UglyNumberII {
 ```java
 public class Code06_LongestValidParentheses {
 
-	// 时间复杂度O(n)，n是str字符串的长度
-	public static int longestValidParentheses(String str) {
-		char[] s = str.toCharArray();
-		// dp[0...n-1]
-		// dp[i] : 子串必须以i位置的字符结尾的情况下，往左整体有效的最大长度
-		int[] dp = new int[s.length];
-		int ans = 0;
-		for (int i = 1, p; i < s.length; i++) {
-			if (s[i] == ')') {
-				p = i - dp[i - 1] - 1;
-				//  ?         )
-				//  p         i
-				if (p >= 0 && s[p] == '(') {
-					dp[i] = dp[i - 1] + 2 + (p - 1 >= 0 ? dp[p - 1] : 0);
-				}
-			}
-			ans = Math.max(ans, dp[i]);
-		}
-		return ans;
-	}
+ // 时间复杂度O(n)，n是str字符串的长度
+ public static int longestValidParentheses(String str) {
+  char[] s = str.toCharArray();
+  // dp[0...n-1]
+  // dp[i] : 子串必须以i位置的字符结尾的情况下，往左整体有效的最大长度
+  int[] dp = new int[s.length];
+  int ans = 0;
+  for (int i = 1, p; i < s.length; i++) {
+   if (s[i] == ')') {
+    p = i - dp[i - 1] - 1;
+    //  ?         )
+    //  p         i
+    if (p >= 0 && s[p] == '(') {
+     dp[i] = dp[i - 1] + 2 + (p - 1 >= 0 ? dp[p - 1] : 0);
+    }
+   }
+   ans = Math.max(ans, dp[i]);
+  }
+  return ans;
+ }
 
 }
 ```
@@ -2050,37 +2078,37 @@ public class Code06_LongestValidParentheses {
 ```java
 public class Code07_UniqueSubstringsWraparoundString {
 
-	// 时间复杂度O(n)，n是字符串s的长度，字符串base长度为正无穷
-	public static int findSubstringInWraproundString(String str) {
-		int n = str.length();
-		int[] s = new int[n];
-		// abcde...z -> 0, 1, 2, 3, 4....25
-		for (int i = 0; i < n; i++) {
-			s[i] = str.charAt(i) - 'a';
-		}
-		// dp[0] : s中必须以'a'的子串，最大延伸长度是多少，延伸一定要跟据base串的规则
-		int[] dp = new int[26];
-		// s : c d e....
-		//     2 3 4
-		dp[s[0]] = 1;
-		for (int i = 1, cur, pre, len = 1; i < n; i++) {
-			cur = s[i];
-			pre = s[i - 1];
-			// pre cur
-			if ((pre == 25 && cur == 0) || pre + 1 == cur) {
-				// (前一个字符是'z' && 当前字符是'a') || 前一个字符比当前字符的ascii码少1
-				len++;
-			} else {
-				len = 1;
-			}
-			dp[cur] = Math.max(dp[cur], len);
-		}
-		int ans = 0;
-		for (int i = 0; i < 26; i++) {
-			ans += dp[i];
-		}
-		return ans;
-	}
+ // 时间复杂度O(n)，n是字符串s的长度，字符串base长度为正无穷
+ public static int findSubstringInWraproundString(String str) {
+  int n = str.length();
+  int[] s = new int[n];
+  // abcde...z -> 0, 1, 2, 3, 4....25
+  for (int i = 0; i < n; i++) {
+   s[i] = str.charAt(i) - 'a';
+  }
+  // dp[0] : s中必须以'a'的子串，最大延伸长度是多少，延伸一定要跟据base串的规则
+  int[] dp = new int[26];
+  // s : c d e....
+  //     2 3 4
+  dp[s[0]] = 1;
+  for (int i = 1, cur, pre, len = 1; i < n; i++) {
+   cur = s[i];
+   pre = s[i - 1];
+   // pre cur
+   if ((pre == 25 && cur == 0) || pre + 1 == cur) {
+    // (前一个字符是'z' && 当前字符是'a') || 前一个字符比当前字符的ascii码少1
+    len++;
+   } else {
+    len = 1;
+   }
+   dp[cur] = Math.max(dp[cur], len);
+  }
+  int ans = 0;
+  for (int i = 0; i < 26; i++) {
+   ans += dp[i];
+  }
+  return ans;
+ }
 
 }
 ```
@@ -2092,19 +2120,19 @@ public class Code07_UniqueSubstringsWraparoundString {
 ```java
 public class Code08_DistinctSubsequencesII {
 
-	// 时间复杂度O(n)，n是字符串s的长度
-	public static int distinctSubseqII(String s) {
-		int mod = 1000000007;
-		char[] str = s.toCharArray();
-		int[] cnt = new int[26];
-		int all = 1, newAdd;
-		for (char x : str) {
-			newAdd = (all - cnt[x - 'a'] + mod) % mod;
-			cnt[x - 'a'] = (cnt[x - 'a'] + newAdd) % mod;
-			all = (all + newAdd) % mod;
-		}
-		return (all - 1 + mod) % mod;
-	}
+ // 时间复杂度O(n)，n是字符串s的长度
+ public static int distinctSubseqII(String s) {
+  int mod = 1000000007;
+  char[] str = s.toCharArray();
+  int[] cnt = new int[26];
+  int all = 1, newAdd;
+  for (char x : str) {
+   newAdd = (all - cnt[x - 'a'] + mod) % mod;
+   cnt[x - 'a'] = (cnt[x - 'a'] + newAdd) % mod;
+   all = (all + newAdd) % mod;
+  }
+  return (all - 1 + mod) % mod;
+ }
 
 }
 ```
@@ -2157,106 +2185,106 @@ public class Code08_DistinctSubsequencesII {
 ```java
 public class Code01_MinimumPathSum {
 
-	// 暴力递归
-	public static int minPathSum1(int[][] grid) {
-		return f1(grid, grid.length - 1, grid[0].length - 1);
-	}
+ // 暴力递归
+ public static int minPathSum1(int[][] grid) {
+  return f1(grid, grid.length - 1, grid[0].length - 1);
+ }
 
-	// 从(0,0)到(i,j)最小路径和
-	// 一定每次只能向右或者向下
-	public static int f1(int[][] grid, int i, int j) {
-		if (i == 0 && j == 0) {
-			return grid[0][0];
-		}
-		int up = Integer.MAX_VALUE;
-		int left = Integer.MAX_VALUE;
-		if (i - 1 >= 0) {
-			up = f1(grid, i - 1, j);
-		}
-		if (j - 1 >= 0) {
-			left = f1(grid, i, j - 1);
-		}
-		return grid[i][j] + Math.min(up, left);
-	}
+ // 从(0,0)到(i,j)最小路径和
+ // 一定每次只能向右或者向下
+ public static int f1(int[][] grid, int i, int j) {
+  if (i == 0 && j == 0) {
+   return grid[0][0];
+  }
+  int up = Integer.MAX_VALUE;
+  int left = Integer.MAX_VALUE;
+  if (i - 1 >= 0) {
+   up = f1(grid, i - 1, j);
+  }
+  if (j - 1 >= 0) {
+   left = f1(grid, i, j - 1);
+  }
+  return grid[i][j] + Math.min(up, left);
+ }
 
-	// 记忆化搜索
-	public static int minPathSum2(int[][] grid) {
-		int n = grid.length;
-		int m = grid[0].length;
-		int[][] dp = new int[n][m];
-		for (int i = 0; i < n; i++) {
-			for (int j = 0; j < m; j++) {
-				dp[i][j] = -1;
-			}
-		}
-		return f2(grid, grid.length - 1, grid[0].length - 1, dp);
-	}
+ // 记忆化搜索
+ public static int minPathSum2(int[][] grid) {
+  int n = grid.length;
+  int m = grid[0].length;
+  int[][] dp = new int[n][m];
+  for (int i = 0; i < n; i++) {
+   for (int j = 0; j < m; j++) {
+    dp[i][j] = -1;
+   }
+  }
+  return f2(grid, grid.length - 1, grid[0].length - 1, dp);
+ }
 
-	public static int f2(int[][] grid, int i, int j, int[][] dp) {
-		if (dp[i][j] != -1) {
-			return dp[i][j];
-		}
-		int ans;
-		if (i == 0 && j == 0) {
-			ans = grid[0][0];
-		} else {
-			int up = Integer.MAX_VALUE;
-			int left = Integer.MAX_VALUE;
-			if (i - 1 >= 0) {
-				up = f2(grid, i - 1, j, dp);
-			}
-			if (j - 1 >= 0) {
-				left = f2(grid, i, j - 1, dp);
-			}
-			ans = grid[i][j] + Math.min(up, left);
-		}
-		dp[i][j] = ans;
-		return ans;
-	}
+ public static int f2(int[][] grid, int i, int j, int[][] dp) {
+  if (dp[i][j] != -1) {
+   return dp[i][j];
+  }
+  int ans;
+  if (i == 0 && j == 0) {
+   ans = grid[0][0];
+  } else {
+   int up = Integer.MAX_VALUE;
+   int left = Integer.MAX_VALUE;
+   if (i - 1 >= 0) {
+    up = f2(grid, i - 1, j, dp);
+   }
+   if (j - 1 >= 0) {
+    left = f2(grid, i, j - 1, dp);
+   }
+   ans = grid[i][j] + Math.min(up, left);
+  }
+  dp[i][j] = ans;
+  return ans;
+ }
 
-	// 严格位置依赖的动态规划
-	public static int minPathSum3(int[][] grid) {
-		int n = grid.length;
-		int m = grid[0].length;
-		int[][] dp = new int[n][m];
-		dp[0][0] = grid[0][0];
-		for (int i = 1; i < n; i++) {
-			dp[i][0] = dp[i - 1][0] + grid[i][0];
-		}
-		for (int j = 1; j < m; j++) {
-			dp[0][j] = dp[0][j - 1] + grid[0][j];
-		}
-		for (int i = 1; i < n; i++) {
-			for (int j = 1; j < m; j++) {
-				dp[i][j] = Math.min(dp[i - 1][j], dp[i][j - 1]) + grid[i][j];
-			}
-		}
-		return dp[n - 1][m - 1];
-	}
+ // 严格位置依赖的动态规划
+ public static int minPathSum3(int[][] grid) {
+  int n = grid.length;
+  int m = grid[0].length;
+  int[][] dp = new int[n][m];
+  dp[0][0] = grid[0][0];
+  for (int i = 1; i < n; i++) {
+   dp[i][0] = dp[i - 1][0] + grid[i][0];
+  }
+  for (int j = 1; j < m; j++) {
+   dp[0][j] = dp[0][j - 1] + grid[0][j];
+  }
+  for (int i = 1; i < n; i++) {
+   for (int j = 1; j < m; j++) {
+    dp[i][j] = Math.min(dp[i - 1][j], dp[i][j - 1]) + grid[i][j];
+   }
+  }
+  return dp[n - 1][m - 1];
+ }
 
-	// 严格位置依赖的动态规划 + 空间压缩技巧
-	public static int minPathSum4(int[][] grid) {
-		int n = grid.length;
-		int m = grid[0].length;
-		// 先让dp表，变成想象中的表的第0行的数据
-		int[] dp = new int[m];
-		dp[0] = grid[0][0];
-		for (int j = 1; j < m; j++) {
-			dp[j] = dp[j - 1] + grid[0][j];
-		}
-		for (int i = 1; i < n; i++) {
-			// i = 1，dp表变成想象中二维表的第1行的数据
-			// i = 2，dp表变成想象中二维表的第2行的数据
-			// i = 3，dp表变成想象中二维表的第3行的数据
-			// ...
-			// i = n-1，dp表变成想象中二维表的第n-1行的数据
-			dp[0] += grid[i][0];
-			for (int j = 1; j < m; j++) {
-				dp[j] = Math.min(dp[j - 1], dp[j]) + grid[i][j];
-			}
-		}
-		return dp[m - 1];
-	}
+ // 严格位置依赖的动态规划 + 空间压缩技巧
+ public static int minPathSum4(int[][] grid) {
+  int n = grid.length;
+  int m = grid[0].length;
+  // 先让dp表，变成想象中的表的第0行的数据
+  int[] dp = new int[m];
+  dp[0] = grid[0][0];
+  for (int j = 1; j < m; j++) {
+   dp[j] = dp[j - 1] + grid[0][j];
+  }
+  for (int i = 1; i < n; i++) {
+   // i = 1，dp表变成想象中二维表的第1行的数据
+   // i = 2，dp表变成想象中二维表的第2行的数据
+   // i = 3，dp表变成想象中二维表的第3行的数据
+   // ...
+   // i = n-1，dp表变成想象中二维表的第n-1行的数据
+   dp[0] += grid[i][0];
+   for (int j = 1; j < m; j++) {
+    dp[j] = Math.min(dp[j - 1], dp[j]) + grid[i][j];
+   }
+  }
+  return dp[m - 1];
+ }
 
 }
 ```
@@ -2268,39 +2296,39 @@ public class Code01_MinimumPathSum {
 ```java
 public class Code02_WordSearch {
 
-	public static boolean exist(char[][] board, String word) {
-		char[] w = word.toCharArray();
-		for (int i = 0; i < board.length; i++) {
-			for (int j = 0; j < board[0].length; j++) {
-				if (f(board, i, j, w, 0)) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
+ public static boolean exist(char[][] board, String word) {
+  char[] w = word.toCharArray();
+  for (int i = 0; i < board.length; i++) {
+   for (int j = 0; j < board[0].length; j++) {
+    if (f(board, i, j, w, 0)) {
+     return true;
+    }
+   }
+  }
+  return false;
+ }
 
-	// 因为board会改其中的字符
-	// 用来标记哪些字符无法再用
-	// 带路径的递归无法改成动态规划或者说没必要
-	// 从(i,j)出发，来到w[k]，请问后续能不能把word走出来w[k...]
-	public static boolean f(char[][] b, int i, int j, char[] w, int k) {
-		if (k == w.length) {
-			return true;
-		}
-		if (i < 0 || i == b.length || j < 0 || j == b[0].length || b[i][j] != w[k]) {
-			return false;
-		}
-		// 不越界，b[i][j] == w[k]
-		char tmp = b[i][j];
-		b[i][j] = 0;
-		boolean ans = f(b, i - 1, j, w, k + 1)
-				|| f(b, i + 1, j, w, k + 1)
-				|| f(b, i, j - 1, w, k + 1)
-				|| f(b, i, j + 1, w, k + 1);
-		b[i][j] = tmp;
-		return ans;
-	}
+ // 因为board会改其中的字符
+ // 用来标记哪些字符无法再用
+ // 带路径的递归无法改成动态规划或者说没必要
+ // 从(i,j)出发，来到w[k]，请问后续能不能把word走出来w[k...]
+ public static boolean f(char[][] b, int i, int j, char[] w, int k) {
+  if (k == w.length) {
+   return true;
+  }
+  if (i < 0 || i == b.length || j < 0 || j == b[0].length || b[i][j] != w[k]) {
+   return false;
+  }
+  // 不越界，b[i][j] == w[k]
+  char tmp = b[i][j];
+  b[i][j] = 0;
+  boolean ans = f(b, i - 1, j, w, k + 1)
+    || f(b, i + 1, j, w, k + 1)
+    || f(b, i, j - 1, w, k + 1)
+    || f(b, i, j + 1, w, k + 1);
+  b[i][j] = tmp;
+  return ans;
+ }
 
 }
 ```
@@ -2312,130 +2340,130 @@ public class Code02_WordSearch {
 ```java
 public class Code03_LongestCommonSubsequence {
 
-	public static int longestCommonSubsequence1(String str1, String str2) {
-		char[] s1 = str1.toCharArray();
-		char[] s2 = str2.toCharArray();
-		int n = s1.length;
-		int m = s2.length;
-		return f1(s1, s2, n - 1, m - 1);
-	}
+ public static int longestCommonSubsequence1(String str1, String str2) {
+  char[] s1 = str1.toCharArray();
+  char[] s2 = str2.toCharArray();
+  int n = s1.length;
+  int m = s2.length;
+  return f1(s1, s2, n - 1, m - 1);
+ }
 
-	// s1[0....i1]与s2[0....i2]最长公共子序列长度
-	public static int f1(char[] s1, char[] s2, int i1, int i2) {
-		if (i1 < 0 || i2 < 0) {
-			return 0;
-		}
-		int p1 = f1(s1, s2, i1 - 1, i2 - 1);
-		int p2 = f1(s1, s2, i1 - 1, i2);
-		int p3 = f1(s1, s2, i1, i2 - 1);
-		int p4 = s1[i1] == s2[i2] ? (p1 + 1) : 0;
-		return Math.max(Math.max(p1, p2), Math.max(p3, p4));
-	}
+ // s1[0....i1]与s2[0....i2]最长公共子序列长度
+ public static int f1(char[] s1, char[] s2, int i1, int i2) {
+  if (i1 < 0 || i2 < 0) {
+   return 0;
+  }
+  int p1 = f1(s1, s2, i1 - 1, i2 - 1);
+  int p2 = f1(s1, s2, i1 - 1, i2);
+  int p3 = f1(s1, s2, i1, i2 - 1);
+  int p4 = s1[i1] == s2[i2] ? (p1 + 1) : 0;
+  return Math.max(Math.max(p1, p2), Math.max(p3, p4));
+ }
 
-	// 为了避免很多边界讨论
-	// 很多时候往往不用下标来定义尝试，而是用长度来定义尝试
-	// 因为长度最短是0，而下标越界的话讨论起来就比较麻烦
-	public static int longestCommonSubsequence2(String str1, String str2) {
-		char[] s1 = str1.toCharArray();
-		char[] s2 = str2.toCharArray();
-		int n = s1.length;
-		int m = s2.length;
-		return f2(s1, s2, n, m);
-	}
+ // 为了避免很多边界讨论
+ // 很多时候往往不用下标来定义尝试，而是用长度来定义尝试
+ // 因为长度最短是0，而下标越界的话讨论起来就比较麻烦
+ public static int longestCommonSubsequence2(String str1, String str2) {
+  char[] s1 = str1.toCharArray();
+  char[] s2 = str2.toCharArray();
+  int n = s1.length;
+  int m = s2.length;
+  return f2(s1, s2, n, m);
+ }
 
-	// s1[前缀长度为len1]对应s2[前缀长度为len2]
-	// 最长公共子序列长度
-	public static int f2(char[] s1, char[] s2, int len1, int len2) {
-		if (len1 == 0 || len2 == 0) {
-			return 0;
-		}
-		int ans;
-		if (s1[len1 - 1] == s2[len2 - 1]) {
-			ans = f2(s1, s2, len1 - 1, len2 - 1) + 1;
-		} else {
-			ans = Math.max(f2(s1, s2, len1 - 1, len2), f2(s1, s2, len1, len2 - 1));
-		}
-		return ans;
-	}
+ // s1[前缀长度为len1]对应s2[前缀长度为len2]
+ // 最长公共子序列长度
+ public static int f2(char[] s1, char[] s2, int len1, int len2) {
+  if (len1 == 0 || len2 == 0) {
+   return 0;
+  }
+  int ans;
+  if (s1[len1 - 1] == s2[len2 - 1]) {
+   ans = f2(s1, s2, len1 - 1, len2 - 1) + 1;
+  } else {
+   ans = Math.max(f2(s1, s2, len1 - 1, len2), f2(s1, s2, len1, len2 - 1));
+  }
+  return ans;
+ }
 
-	// 记忆化搜索
-	public static int longestCommonSubsequence3(String str1, String str2) {
-		char[] s1 = str1.toCharArray();
-		char[] s2 = str2.toCharArray();
-		int n = s1.length;
-		int m = s2.length;
-		int[][] dp = new int[n + 1][m + 1];
-		for (int i = 0; i <= n; i++) {
-			for (int j = 0; j <= m; j++) {
-				dp[i][j] = -1;
-			}
-		}
-		return f3(s1, s2, n, m, dp);
-	}
+ // 记忆化搜索
+ public static int longestCommonSubsequence3(String str1, String str2) {
+  char[] s1 = str1.toCharArray();
+  char[] s2 = str2.toCharArray();
+  int n = s1.length;
+  int m = s2.length;
+  int[][] dp = new int[n + 1][m + 1];
+  for (int i = 0; i <= n; i++) {
+   for (int j = 0; j <= m; j++) {
+    dp[i][j] = -1;
+   }
+  }
+  return f3(s1, s2, n, m, dp);
+ }
 
-	public static int f3(char[] s1, char[] s2, int len1, int len2, int[][] dp) {
-		if (len1 == 0 || len2 == 0) {
-			return 0;
-		}
-		if (dp[len1][len2] != -1) {
-			return dp[len1][len2];
-		}
-		int ans;
-		if (s1[len1 - 1] == s2[len2 - 1]) {
-			ans = f3(s1, s2, len1 - 1, len2 - 1, dp) + 1;
-		} else {
-			ans = Math.max(f3(s1, s2, len1 - 1, len2, dp), f3(s1, s2, len1, len2 - 1, dp));
-		}
-		dp[len1][len2] = ans;
-		return ans;
-	}
+ public static int f3(char[] s1, char[] s2, int len1, int len2, int[][] dp) {
+  if (len1 == 0 || len2 == 0) {
+   return 0;
+  }
+  if (dp[len1][len2] != -1) {
+   return dp[len1][len2];
+  }
+  int ans;
+  if (s1[len1 - 1] == s2[len2 - 1]) {
+   ans = f3(s1, s2, len1 - 1, len2 - 1, dp) + 1;
+  } else {
+   ans = Math.max(f3(s1, s2, len1 - 1, len2, dp), f3(s1, s2, len1, len2 - 1, dp));
+  }
+  dp[len1][len2] = ans;
+  return ans;
+ }
 
-	// 严格位置依赖的动态规划
-	public static int longestCommonSubsequence4(String str1, String str2) {
-		char[] s1 = str1.toCharArray();
-		char[] s2 = str2.toCharArray();
-		int n = s1.length;
-		int m = s2.length;
-		int[][] dp = new int[n + 1][m + 1];
-		for (int len1 = 1; len1 <= n; len1++) {
-			for (int len2 = 1; len2 <= m; len2++) {
-				if (s1[len1 - 1] == s2[len2 - 1]) {
-					dp[len1][len2] = 1 + dp[len1 - 1][len2 - 1];
-				} else {
-					dp[len1][len2] = Math.max(dp[len1 - 1][len2], dp[len1][len2 - 1]);
-				}
-			}
-		}
-		return dp[n][m];
-	}
+ // 严格位置依赖的动态规划
+ public static int longestCommonSubsequence4(String str1, String str2) {
+  char[] s1 = str1.toCharArray();
+  char[] s2 = str2.toCharArray();
+  int n = s1.length;
+  int m = s2.length;
+  int[][] dp = new int[n + 1][m + 1];
+  for (int len1 = 1; len1 <= n; len1++) {
+   for (int len2 = 1; len2 <= m; len2++) {
+    if (s1[len1 - 1] == s2[len2 - 1]) {
+     dp[len1][len2] = 1 + dp[len1 - 1][len2 - 1];
+    } else {
+     dp[len1][len2] = Math.max(dp[len1 - 1][len2], dp[len1][len2 - 1]);
+    }
+   }
+  }
+  return dp[n][m];
+ }
 
-	// 严格位置依赖的动态规划 + 空间压缩
-	public static int longestCommonSubsequence5(String str1, String str2) {
-		char[] s1, s2;
-		if (str1.length() >= str2.length()) {
-			s1 = str1.toCharArray();
-			s2 = str2.toCharArray();
-		} else {
-			s1 = str2.toCharArray();
-			s2 = str1.toCharArray();
-		}
-		int n = s1.length;
-		int m = s2.length;
-		int[] dp = new int[m + 1];
-		for (int len1 = 1; len1 <= n; len1++) {
-			int leftUp = 0, backup;
-			for (int len2 = 1; len2 <= m; len2++) {
-				backup = dp[len2];
-				if (s1[len1 - 1] == s2[len2 - 1]) {
-					dp[len2] = 1 + leftUp;
-				} else {
-					dp[len2] = Math.max(dp[len2], dp[len2 - 1]);
-				}
-				leftUp = backup;
-			}
-		}
-		return dp[m];
-	}
+ // 严格位置依赖的动态规划 + 空间压缩
+ public static int longestCommonSubsequence5(String str1, String str2) {
+  char[] s1, s2;
+  if (str1.length() >= str2.length()) {
+   s1 = str1.toCharArray();
+   s2 = str2.toCharArray();
+  } else {
+   s1 = str2.toCharArray();
+   s2 = str1.toCharArray();
+  }
+  int n = s1.length;
+  int m = s2.length;
+  int[] dp = new int[m + 1];
+  for (int len1 = 1; len1 <= n; len1++) {
+   int leftUp = 0, backup;
+   for (int len2 = 1; len2 <= m; len2++) {
+    backup = dp[len2];
+    if (s1[len1 - 1] == s2[len2 - 1]) {
+     dp[len2] = 1 + leftUp;
+    } else {
+     dp[len2] = Math.max(dp[len2], dp[len2 - 1]);
+    }
+    leftUp = backup;
+   }
+  }
+  return dp[m];
+ }
 
 }
 ```
@@ -2528,102 +2556,102 @@ function LCS(str1, str2) {
 ```java
 public class Code04_LongestPalindromicSubsequence {
 
-	// 最长回文子序列问题可以转化成最长公共子序列问题
-	// 不过这里讲述区间动态规划的思路
-	// 区间dp还会有单独的视频做详细讲述
-	public static int longestPalindromeSubseq1(String str) {
-		char[] s = str.toCharArray();
-		int n = s.length;
-		return f1(s, 0, n - 1);
-	}
+ // 最长回文子序列问题可以转化成最长公共子序列问题
+ // 不过这里讲述区间动态规划的思路
+ // 区间dp还会有单独的视频做详细讲述
+ public static int longestPalindromeSubseq1(String str) {
+  char[] s = str.toCharArray();
+  int n = s.length;
+  return f1(s, 0, n - 1);
+ }
 
-	// s[l...r]最长回文子序列长度
-	// l <= r
-	public static int f1(char[] s, int l, int r) {
-		if (l == r) {
-			return 1;
-		}
-		if (l + 1 == r) {
-			return s[l] == s[r] ? 2 : 1;
-		}
-		if (s[l] == s[r]) {
-			return 2 + f1(s, l + 1, r - 1);
-		} else {
-			return Math.max(f1(s, l + 1, r), f1(s, l, r - 1));
-		}
-	}
+ // s[l...r]最长回文子序列长度
+ // l <= r
+ public static int f1(char[] s, int l, int r) {
+  if (l == r) {
+   return 1;
+  }
+  if (l + 1 == r) {
+   return s[l] == s[r] ? 2 : 1;
+  }
+  if (s[l] == s[r]) {
+   return 2 + f1(s, l + 1, r - 1);
+  } else {
+   return Math.max(f1(s, l + 1, r), f1(s, l, r - 1));
+  }
+ }
 
-	public static int longestPalindromeSubseq2(String str) {
-		char[] s = str.toCharArray();
-		int n = s.length;
-		int[][] dp = new int[n][n];
-		return f2(s, 0, n - 1, dp);
-	}
+ public static int longestPalindromeSubseq2(String str) {
+  char[] s = str.toCharArray();
+  int n = s.length;
+  int[][] dp = new int[n][n];
+  return f2(s, 0, n - 1, dp);
+ }
 
-	public static int f2(char[] s, int l, int r, int[][] dp) {
-		if (l == r) {
-			return 1;
-		}
-		if (l + 1 == r) {
-			return s[l] == s[r] ? 2 : 1;
-		}
-		if (dp[l][r] != 0) {
-			return dp[l][r];
-		}
-		int ans;
-		if (s[l] == s[r]) {
-			ans = 2 + f2(s, l + 1, r - 1, dp);
-		} else {
-			ans = Math.max(f2(s, l + 1, r, dp), f2(s, l, r - 1, dp));
-		}
-		dp[l][r] = ans;
-		return ans;
-	}
+ public static int f2(char[] s, int l, int r, int[][] dp) {
+  if (l == r) {
+   return 1;
+  }
+  if (l + 1 == r) {
+   return s[l] == s[r] ? 2 : 1;
+  }
+  if (dp[l][r] != 0) {
+   return dp[l][r];
+  }
+  int ans;
+  if (s[l] == s[r]) {
+   ans = 2 + f2(s, l + 1, r - 1, dp);
+  } else {
+   ans = Math.max(f2(s, l + 1, r, dp), f2(s, l, r - 1, dp));
+  }
+  dp[l][r] = ans;
+  return ans;
+ }
 
-	public static int longestPalindromeSubseq3(String str) {
-		char[] s = str.toCharArray();
-		int n = s.length;
-		int[][] dp = new int[n][n];
-		for (int l = n - 1; l >= 0; l--) {
-			dp[l][l] = 1;
-			if (l + 1 < n) {
-				dp[l][l + 1] = s[l] == s[l + 1] ? 2 : 1;
-			}
-			for (int r = l + 2; r < n; r++) {
-				if (s[l] == s[r]) {
-					dp[l][r] = 2 + dp[l + 1][r - 1];
-				} else {
-					dp[l][r] = Math.max(dp[l + 1][r], dp[l][r - 1]);
-				}
-			}
-		}
-		return dp[0][n - 1];
-	}
+ public static int longestPalindromeSubseq3(String str) {
+  char[] s = str.toCharArray();
+  int n = s.length;
+  int[][] dp = new int[n][n];
+  for (int l = n - 1; l >= 0; l--) {
+   dp[l][l] = 1;
+   if (l + 1 < n) {
+    dp[l][l + 1] = s[l] == s[l + 1] ? 2 : 1;
+   }
+   for (int r = l + 2; r < n; r++) {
+    if (s[l] == s[r]) {
+     dp[l][r] = 2 + dp[l + 1][r - 1];
+    } else {
+     dp[l][r] = Math.max(dp[l + 1][r], dp[l][r - 1]);
+    }
+   }
+  }
+  return dp[0][n - 1];
+ }
 
-	public static int longestPalindromeSubseq4(String str) {
-		char[] s = str.toCharArray();
-		int n = s.length;
-		int[] dp = new int[n];
-		for (int l = n - 1, leftDown = 0, backup; l >= 0; l--) {
-			// dp[l] : 想象中的dp[l][l]
-			dp[l] = 1;
-			if (l + 1 < n) {
-				leftDown = dp[l + 1];
-				// dp[l+1] : 想象中的dp[l][l+1]
-				dp[l + 1] = s[l] == s[l + 1] ? 2 : 1;
-			}
-			for (int r = l + 2; r < n; r++) {
-				backup = dp[r];
-				if (s[l] == s[r]) {
-					dp[r] = 2 + leftDown;
-				} else {
-					dp[r] = Math.max(dp[r], dp[r - 1]);
-				}
-				leftDown = backup;
-			}
-		}
-		return dp[n - 1];
-	}
+ public static int longestPalindromeSubseq4(String str) {
+  char[] s = str.toCharArray();
+  int n = s.length;
+  int[] dp = new int[n];
+  for (int l = n - 1, leftDown = 0, backup; l >= 0; l--) {
+   // dp[l] : 想象中的dp[l][l]
+   dp[l] = 1;
+   if (l + 1 < n) {
+    leftDown = dp[l + 1];
+    // dp[l+1] : 想象中的dp[l][l+1]
+    dp[l + 1] = s[l] == s[l + 1] ? 2 : 1;
+   }
+   for (int r = l + 2; r < n; r++) {
+    backup = dp[r];
+    if (s[l] == s[r]) {
+     dp[r] = 2 + leftDown;
+    } else {
+     dp[r] = Math.max(dp[r], dp[r - 1]);
+    }
+    leftDown = backup;
+   }
+  }
+  return dp[n - 1];
+ }
 
 }
 ```
@@ -2642,103 +2670,103 @@ import java.io.StreamTokenizer;
 
 public class Code05_NodenHeightNotLargerThanm {
 
-	public static void main(String[] args) throws IOException {
-		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		StreamTokenizer in = new StreamTokenizer(br);
-		PrintWriter out = new PrintWriter(new OutputStreamWriter(System.out));
-		while (in.nextToken() != StreamTokenizer.TT_EOF) {
-			int n = (int) in.nval;
-			in.nextToken();
-			int m = (int) in.nval;
-			out.println(compute3(n, m));
-		}
-		out.flush();
-		out.close();
-		br.close();
-	}
+ public static void main(String[] args) throws IOException {
+  BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+  StreamTokenizer in = new StreamTokenizer(br);
+  PrintWriter out = new PrintWriter(new OutputStreamWriter(System.out));
+  while (in.nextToken() != StreamTokenizer.TT_EOF) {
+   int n = (int) in.nval;
+   in.nextToken();
+   int m = (int) in.nval;
+   out.println(compute3(n, m));
+  }
+  out.flush();
+  out.close();
+  br.close();
+ }
 
-	public static int MAXN = 51;
+ public static int MAXN = 51;
 
-	public static int MOD = 1000000007;
+ public static int MOD = 1000000007;
 
-	// 记忆化搜索
-	public static long[][] dp1 = new long[MAXN][MAXN];
+ // 记忆化搜索
+ public static long[][] dp1 = new long[MAXN][MAXN];
 
-	static {
-		for (int i = 0; i < MAXN; i++) {
-			for (int j = 0; j < MAXN; j++) {
-				dp1[i][j] = -1;
-			}
-		}
-	}
+ static {
+  for (int i = 0; i < MAXN; i++) {
+   for (int j = 0; j < MAXN; j++) {
+    dp1[i][j] = -1;
+   }
+  }
+ }
 
-	// 二叉树节点数为n
-	// 高度不能超过m
-	// 结构数返回
-	// 记忆化搜索
-	public static int compute1(int n, int m) {
-		if (n == 0) {
-			return 1;
-		}
-		// n > 0
-		if (m == 0) {
-			return 0;
-		}
-		if (dp1[n][m] != -1) {
-			return (int) dp1[n][m];
-		}
-		long ans = 0;
-		// n个点，头占掉1个
-		for (int k = 0; k < n; k++) {
-			// 一共n个节点，头节点已经占用了1个名额
-			// 如果左树占用k个，那么右树就占用i-k-1个
-			ans = (ans + ((long) compute1(k, m - 1) * compute1(n - k - 1, m - 1)) % MOD) % MOD;
-		}
-		dp1[n][m] = ans;
-		return (int) ans;
-	}
+ // 二叉树节点数为n
+ // 高度不能超过m
+ // 结构数返回
+ // 记忆化搜索
+ public static int compute1(int n, int m) {
+  if (n == 0) {
+   return 1;
+  }
+  // n > 0
+  if (m == 0) {
+   return 0;
+  }
+  if (dp1[n][m] != -1) {
+   return (int) dp1[n][m];
+  }
+  long ans = 0;
+  // n个点，头占掉1个
+  for (int k = 0; k < n; k++) {
+   // 一共n个节点，头节点已经占用了1个名额
+   // 如果左树占用k个，那么右树就占用i-k-1个
+   ans = (ans + ((long) compute1(k, m - 1) * compute1(n - k - 1, m - 1)) % MOD) % MOD;
+  }
+  dp1[n][m] = ans;
+  return (int) ans;
+ }
 
-	// 严格位置依赖的动态规划
-	public static long[][] dp2 = new long[MAXN][MAXN];
+ // 严格位置依赖的动态规划
+ public static long[][] dp2 = new long[MAXN][MAXN];
 
-	public static int compute2(int n, int m) {
-		for (int j = 0; j <= m; j++) {
-			dp2[0][j] = 1;
-		}
-		for (int i = 1; i <= n; i++) {
-			for (int j = 1; j <= m; j++) {
-				dp2[i][j] = 0;
-				for (int k = 0; k < i; k++) {
-					// 一共i个节点，头节点已经占用了1个名额
-					// 如果左树占用k个，那么右树就占用i-k-1个
-					dp2[i][j] = (dp2[i][j] + dp2[k][j - 1] * dp2[i - k - 1][j - 1] % MOD) % MOD;
-				}
-			}
-		}
-		return (int) dp2[n][m];
-	}
+ public static int compute2(int n, int m) {
+  for (int j = 0; j <= m; j++) {
+   dp2[0][j] = 1;
+  }
+  for (int i = 1; i <= n; i++) {
+   for (int j = 1; j <= m; j++) {
+    dp2[i][j] = 0;
+    for (int k = 0; k < i; k++) {
+     // 一共i个节点，头节点已经占用了1个名额
+     // 如果左树占用k个，那么右树就占用i-k-1个
+     dp2[i][j] = (dp2[i][j] + dp2[k][j - 1] * dp2[i - k - 1][j - 1] % MOD) % MOD;
+    }
+   }
+  }
+  return (int) dp2[n][m];
+ }
 
-	// 空间压缩
-	public static long[] dp3 = new long[MAXN];
+ // 空间压缩
+ public static long[] dp3 = new long[MAXN];
 
-	public static int compute3(int n, int m) {
-		dp3[0] = 1;
-		for (int i = 1; i <= n; i++) {
-			dp3[i] = 0;
-		}
-		for (int j = 1; j <= m; j++) {
-			// 根据依赖，一定要先枚举列
-			for (int i = n; i >= 1; i--) {
-				// 再枚举行，而且i不需要到达0，i>=1即可
-				dp3[i] = 0;
-				for (int k = 0; k < i; k++) {
-					// 枚举
-					dp3[i] = (dp3[i] + dp3[k] * dp3[i - k - 1] % MOD) % MOD;
-				}
-			}
-		}
-		return (int) dp3[n];
-	}
+ public static int compute3(int n, int m) {
+  dp3[0] = 1;
+  for (int i = 1; i <= n; i++) {
+   dp3[i] = 0;
+  }
+  for (int j = 1; j <= m; j++) {
+   // 根据依赖，一定要先枚举列
+   for (int i = n; i >= 1; i--) {
+    // 再枚举行，而且i不需要到达0，i>=1即可
+    dp3[i] = 0;
+    for (int k = 0; k < i; k++) {
+     // 枚举
+     dp3[i] = (dp3[i] + dp3[k] * dp3[i - k - 1] % MOD) % MOD;
+    }
+   }
+  }
+  return (int) dp3[n];
+ }
 
 }
 ```
@@ -2750,67 +2778,67 @@ public class Code05_NodenHeightNotLargerThanm {
 ```java
 public class Code06_LongestIncreasingPath {
 
-	public static int longestIncreasingPath1(int[][] grid) {
-		int ans = 0;
-		for (int i = 0; i < grid.length; i++) {
-			for (int j = 0; j < grid[0].length; j++) {
-				ans = Math.max(ans, f1(grid, i, j));
-			}
-		}
-		return ans;
-	}
+ public static int longestIncreasingPath1(int[][] grid) {
+  int ans = 0;
+  for (int i = 0; i < grid.length; i++) {
+   for (int j = 0; j < grid[0].length; j++) {
+    ans = Math.max(ans, f1(grid, i, j));
+   }
+  }
+  return ans;
+ }
 
-	// 从(i,j)出发，能走出来多长的递增路径，返回最长长度
-	public static int f1(int[][] grid, int i, int j) {
-		int next = 0;
-		if (i > 0 && grid[i][j] < grid[i - 1][j]) {
-			next = Math.max(next, f1(grid, i - 1, j));
-		}
-		if (i + 1 < grid.length && grid[i][j] < grid[i + 1][j]) {
-			next = Math.max(next, f1(grid, i + 1, j));
-		}
-		if (j > 0 && grid[i][j] < grid[i][j - 1]) {
-			next = Math.max(next, f1(grid, i, j - 1));
-		}
-		if (j + 1 < grid[0].length && grid[i][j] < grid[i][j + 1]) {
-			next = Math.max(next, f1(grid, i, j + 1));
-		}
-		return next + 1;
-	}
+ // 从(i,j)出发，能走出来多长的递增路径，返回最长长度
+ public static int f1(int[][] grid, int i, int j) {
+  int next = 0;
+  if (i > 0 && grid[i][j] < grid[i - 1][j]) {
+   next = Math.max(next, f1(grid, i - 1, j));
+  }
+  if (i + 1 < grid.length && grid[i][j] < grid[i + 1][j]) {
+   next = Math.max(next, f1(grid, i + 1, j));
+  }
+  if (j > 0 && grid[i][j] < grid[i][j - 1]) {
+   next = Math.max(next, f1(grid, i, j - 1));
+  }
+  if (j + 1 < grid[0].length && grid[i][j] < grid[i][j + 1]) {
+   next = Math.max(next, f1(grid, i, j + 1));
+  }
+  return next + 1;
+ }
 
-	public static int longestIncreasingPath2(int[][] grid) {
-		int n = grid.length;
-		int m = grid[0].length;
-		int[][] dp = new int[n][m];
-		int ans = 0;
-		for (int i = 0; i < n; i++) {
-			for (int j = 0; j < m; j++) {
-				ans = Math.max(ans, f2(grid, i, j, dp));
-			}
-		}
-		return ans;
-	}
+ public static int longestIncreasingPath2(int[][] grid) {
+  int n = grid.length;
+  int m = grid[0].length;
+  int[][] dp = new int[n][m];
+  int ans = 0;
+  for (int i = 0; i < n; i++) {
+   for (int j = 0; j < m; j++) {
+    ans = Math.max(ans, f2(grid, i, j, dp));
+   }
+  }
+  return ans;
+ }
 
-	public static int f2(int[][] grid, int i, int j, int[][] dp) {
-		if (dp[i][j] != 0) {
-			return dp[i][j];
-		}
-		int next = 0;
-		if (i > 0 && grid[i][j] < grid[i - 1][j]) {
-			next = Math.max(next, f2(grid, i - 1, j, dp));
-		}
-		if (i + 1 < grid.length && grid[i][j] < grid[i + 1][j]) {
-			next = Math.max(next, f2(grid, i + 1, j, dp));
-		}
-		if (j > 0 && grid[i][j] < grid[i][j - 1]) {
-			next = Math.max(next, f2(grid, i, j - 1, dp));
-		}
-		if (j + 1 < grid[0].length && grid[i][j] < grid[i][j + 1]) {
-			next = Math.max(next, f2(grid, i, j + 1, dp));
-		}
-		dp[i][j] = next + 1;
-		return next + 1;
-	}
+ public static int f2(int[][] grid, int i, int j, int[][] dp) {
+  if (dp[i][j] != 0) {
+   return dp[i][j];
+  }
+  int next = 0;
+  if (i > 0 && grid[i][j] < grid[i - 1][j]) {
+   next = Math.max(next, f2(grid, i - 1, j, dp));
+  }
+  if (i + 1 < grid.length && grid[i][j] < grid[i + 1][j]) {
+   next = Math.max(next, f2(grid, i + 1, j, dp));
+  }
+  if (j > 0 && grid[i][j] < grid[i][j - 1]) {
+   next = Math.max(next, f2(grid, i, j - 1, dp));
+  }
+  if (j + 1 < grid[0].length && grid[i][j] < grid[i][j + 1]) {
+   next = Math.max(next, f2(grid, i, j + 1, dp));
+  }
+  dp[i][j] = next + 1;
+  return next + 1;
+ }
 
 }
 ```
@@ -2828,66 +2856,66 @@ package class068;
 // 测试链接 : https://leetcode.cn/problems/distinct-subsequences/
 public class Code01_DistinctSubsequences {
 
-	// 已经展示太多次从递归到动态规划了
-	// 直接写动态规划吧
-	public static int numDistinct1(String str, String target) {
-		char[] s = str.toCharArray();
-		char[] t = target.toCharArray();
-		int n = s.length;
-		int m = t.length;
-		// dp[i][j] :
-		// s[前缀长度为i]的所有子序列中，有多少个子序列等于t[前缀长度为j]
-		int[][] dp = new int[n + 1][m + 1];
-		for (int i = 0; i <= n; i++) {
-			dp[i][0] = 1;
-		}
-		for (int i = 1; i <= n; i++) {
-			for (int j = 1; j <= m; j++) {
-				dp[i][j] = dp[i - 1][j];
-				if (s[i - 1] == t[j - 1]) {
-					dp[i][j] += dp[i - 1][j - 1];
-				}
-			}
-		}
-		return dp[n][m];
-	}
+ // 已经展示太多次从递归到动态规划了
+ // 直接写动态规划吧
+ public static int numDistinct1(String str, String target) {
+  char[] s = str.toCharArray();
+  char[] t = target.toCharArray();
+  int n = s.length;
+  int m = t.length;
+  // dp[i][j] :
+  // s[前缀长度为i]的所有子序列中，有多少个子序列等于t[前缀长度为j]
+  int[][] dp = new int[n + 1][m + 1];
+  for (int i = 0; i <= n; i++) {
+   dp[i][0] = 1;
+  }
+  for (int i = 1; i <= n; i++) {
+   for (int j = 1; j <= m; j++) {
+    dp[i][j] = dp[i - 1][j];
+    if (s[i - 1] == t[j - 1]) {
+     dp[i][j] += dp[i - 1][j - 1];
+    }
+   }
+  }
+  return dp[n][m];
+ }
 
-	// 空间压缩
-	public static int numDistinct2(String str, String target) {
-		char[] s = str.toCharArray();
-		char[] t = target.toCharArray();
-		int n = s.length;
-		int m = t.length;
-		int[] dp = new int[m + 1];
-		dp[0] = 1;
-		for (int i = 1; i <= n; i++) {
-			for (int j = m; j >= 1; j--) {
-				if (s[i - 1] == t[j - 1]) {
-					dp[j] += dp[j - 1];
-				}
-			}
-		}
-		return dp[m];
-	}
+ // 空间压缩
+ public static int numDistinct2(String str, String target) {
+  char[] s = str.toCharArray();
+  char[] t = target.toCharArray();
+  int n = s.length;
+  int m = t.length;
+  int[] dp = new int[m + 1];
+  dp[0] = 1;
+  for (int i = 1; i <= n; i++) {
+   for (int j = m; j >= 1; j--) {
+    if (s[i - 1] == t[j - 1]) {
+     dp[j] += dp[j - 1];
+    }
+   }
+  }
+  return dp[m];
+ }
 
-	// 本题说了要取模，所以增加取模的逻辑
-	public static int numDistinct3(String str, String target) {
-		int mod = 1000000007;
-		char[] s = str.toCharArray();
-		char[] t = target.toCharArray();
-		int n = s.length;
-		int m = t.length;
-		int[] dp = new int[m + 1];
-		dp[0] = 1;
-		for (int i = 1; i <= n; i++) {
-			for (int j = m; j >= 1; j--) {
-				if (s[i - 1] == t[j - 1]) {
-					dp[j] = (dp[j] + dp[j - 1]) % mod;
-				}
-			}
-		}
-		return dp[m];
-	}
+ // 本题说了要取模，所以增加取模的逻辑
+ public static int numDistinct3(String str, String target) {
+  int mod = 1000000007;
+  char[] s = str.toCharArray();
+  char[] t = target.toCharArray();
+  int n = s.length;
+  int m = t.length;
+  int[] dp = new int[m + 1];
+  dp[0] = 1;
+  for (int i = 1; i <= n; i++) {
+   for (int j = m; j >= 1; j--) {
+    if (s[i - 1] == t[j - 1]) {
+     dp[j] = (dp[j] + dp[j - 1]) % mod;
+    }
+   }
+  }
+  return dp[m];
+ }
 
 }
 ```
@@ -2909,105 +2937,105 @@ package class068;
 // 测试链接 : https://leetcode.cn/problems/edit-distance/
 public class Code02_EditDistance {
 
-	// 已经展示太多次从递归到动态规划了
-	// 直接写动态规划吧
-	public int minDistance(String word1, String word2) {
-		return editDistance2(word1, word2, 1, 1, 1);
-	}
+ // 已经展示太多次从递归到动态规划了
+ // 直接写动态规划吧
+ public int minDistance(String word1, String word2) {
+  return editDistance2(word1, word2, 1, 1, 1);
+ }
 
-	// 原初尝试版
-	// a : str1中插入1个字符的代价
-	// b : str1中删除1个字符的代价
-	// c : str1中改变1个字符的代价
-	// 返回从str1转化成str2的最低代价
-	public static int editDistance1(String str1, String str2, int a, int b, int c) {
-		char[] s1 = str1.toCharArray();
-		char[] s2 = str2.toCharArray();
-		int n = s1.length;
-		int m = s2.length;
-		// dp[i][j] :
-		// s1[前缀长度为i]想变成s2[前缀长度为j]，至少付出多少代价
-		int[][] dp = new int[n + 1][m + 1];
-		for (int i = 1; i <= n; i++) {
-			dp[i][0] = i * b;
-		}
-		for (int j = 1; j <= m; j++) {
-			dp[0][j] = j * a;
-		}
-		for (int i = 1; i <= n; i++) {
-			for (int j = 1; j <= m; j++) {
-				int p1 = Integer.MAX_VALUE;
-				if (s1[i - 1] == s2[j - 1]) {
-					p1 = dp[i - 1][j - 1];
-				}
-				int p2 = Integer.MAX_VALUE;
-				if (s1[i - 1] != s2[j - 1]) {
-					p2 = dp[i - 1][j - 1] + c;
-				}
-				int p3 = dp[i][j - 1] + a;
-				int p4 = dp[i - 1][j] + b;
-				dp[i][j] = Math.min(Math.min(p1, p2), Math.min(p3, p4));
-			}
-		}
-		return dp[n][m];
-	}
+ // 原初尝试版
+ // a : str1中插入1个字符的代价
+ // b : str1中删除1个字符的代价
+ // c : str1中改变1个字符的代价
+ // 返回从str1转化成str2的最低代价
+ public static int editDistance1(String str1, String str2, int a, int b, int c) {
+  char[] s1 = str1.toCharArray();
+  char[] s2 = str2.toCharArray();
+  int n = s1.length;
+  int m = s2.length;
+  // dp[i][j] :
+  // s1[前缀长度为i]想变成s2[前缀长度为j]，至少付出多少代价
+  int[][] dp = new int[n + 1][m + 1];
+  for (int i = 1; i <= n; i++) {
+   dp[i][0] = i * b;
+  }
+  for (int j = 1; j <= m; j++) {
+   dp[0][j] = j * a;
+  }
+  for (int i = 1; i <= n; i++) {
+   for (int j = 1; j <= m; j++) {
+    int p1 = Integer.MAX_VALUE;
+    if (s1[i - 1] == s2[j - 1]) {
+     p1 = dp[i - 1][j - 1];
+    }
+    int p2 = Integer.MAX_VALUE;
+    if (s1[i - 1] != s2[j - 1]) {
+     p2 = dp[i - 1][j - 1] + c;
+    }
+    int p3 = dp[i][j - 1] + a;
+    int p4 = dp[i - 1][j] + b;
+    dp[i][j] = Math.min(Math.min(p1, p2), Math.min(p3, p4));
+   }
+  }
+  return dp[n][m];
+ }
 
-	// 枚举小优化版
-	// a : str1中插入1个字符的代价
-	// b : str1中删除1个字符的代价
-	// c : str1中改变1个字符的代价
-	// 返回从str1转化成str2的最低代价
-	public static int editDistance2(String str1, String str2, int a, int b, int c) {
-		char[] s1 = str1.toCharArray();
-		char[] s2 = str2.toCharArray();
-		int n = s1.length;
-		int m = s2.length;
-		// dp[i][j] :
-		// s1[前缀长度为i]想变成s2[前缀长度为j]，至少付出多少代价
-		int[][] dp = new int[n + 1][m + 1];
-		for (int i = 1; i <= n; i++) {
-			dp[i][0] = i * b;
-		}
-		for (int j = 1; j <= m; j++) {
-			dp[0][j] = j * a;
-		}
-		for (int i = 1; i <= n; i++) {
-			for (int j = 1; j <= m; j++) {
-				if (s1[i - 1] == s2[j - 1]) {
-					dp[i][j] = dp[i - 1][j - 1];
-				} else {
-					dp[i][j] = Math.min(Math.min(dp[i - 1][j] + b, dp[i][j - 1] + a), dp[i - 1][j - 1] + c);
-				}
-			}
-		}
-		return dp[n][m];
-	}
+ // 枚举小优化版
+ // a : str1中插入1个字符的代价
+ // b : str1中删除1个字符的代价
+ // c : str1中改变1个字符的代价
+ // 返回从str1转化成str2的最低代价
+ public static int editDistance2(String str1, String str2, int a, int b, int c) {
+  char[] s1 = str1.toCharArray();
+  char[] s2 = str2.toCharArray();
+  int n = s1.length;
+  int m = s2.length;
+  // dp[i][j] :
+  // s1[前缀长度为i]想变成s2[前缀长度为j]，至少付出多少代价
+  int[][] dp = new int[n + 1][m + 1];
+  for (int i = 1; i <= n; i++) {
+   dp[i][0] = i * b;
+  }
+  for (int j = 1; j <= m; j++) {
+   dp[0][j] = j * a;
+  }
+  for (int i = 1; i <= n; i++) {
+   for (int j = 1; j <= m; j++) {
+    if (s1[i - 1] == s2[j - 1]) {
+     dp[i][j] = dp[i - 1][j - 1];
+    } else {
+     dp[i][j] = Math.min(Math.min(dp[i - 1][j] + b, dp[i][j - 1] + a), dp[i - 1][j - 1] + c);
+    }
+   }
+  }
+  return dp[n][m];
+ }
 
-	// 空间压缩
-	public static int editDistance3(String str1, String str2, int a, int b, int c) {
-		char[] s1 = str1.toCharArray();
-		char[] s2 = str2.toCharArray();
-		int n = s1.length;
-		int m = s2.length;
-		int[] dp = new int[m + 1];
-		for (int j = 1; j <= m; j++) {
-			dp[j] = j * a;
-		}
-		for (int i = 1, leftUp, backUp; i <= n; i++) {
-			leftUp = (i - 1) * b;
-			dp[0] = i * b;
-			for (int j = 1; j <= m; j++) {
-				backUp = dp[j];
-				if (s1[i - 1] == s2[j - 1]) {
-					dp[j] = leftUp;
-				} else {
-					dp[j] = Math.min(Math.min(dp[j] + b, dp[j - 1] + a), leftUp + c);
-				}
-				leftUp = backUp;
-			}
-		}
-		return dp[m];
-	}
+ // 空间压缩
+ public static int editDistance3(String str1, String str2, int a, int b, int c) {
+  char[] s1 = str1.toCharArray();
+  char[] s2 = str2.toCharArray();
+  int n = s1.length;
+  int m = s2.length;
+  int[] dp = new int[m + 1];
+  for (int j = 1; j <= m; j++) {
+   dp[j] = j * a;
+  }
+  for (int i = 1, leftUp, backUp; i <= n; i++) {
+   leftUp = (i - 1) * b;
+   dp[0] = i * b;
+   for (int j = 1; j <= m; j++) {
+    backUp = dp[j];
+    if (s1[i - 1] == s2[j - 1]) {
+     dp[j] = leftUp;
+    } else {
+     dp[j] = Math.min(Math.min(dp[j] + b, dp[j - 1] + a), leftUp + c);
+    }
+    leftUp = backUp;
+   }
+  }
+  return dp[m];
+ }
 
 }
 ```
@@ -3025,67 +3053,67 @@ package class068;
 // 测试链接 : https://leetcode.cn/problems/interleaving-string/
 public class Code03_InterleavingString {
 
-	// 已经展示太多次从递归到动态规划了
-	// 直接写动态规划吧
-	public static boolean isInterleave1(String str1, String str2, String str3) {
-		if (str1.length() + str2.length() != str3.length()) {
-			return false;
-		}
-		char[] s1 = str1.toCharArray();
-		char[] s2 = str2.toCharArray();
-		char[] s3 = str3.toCharArray();
-		int n = s1.length;
-		int m = s2.length;
-		// dp[i][j]:
-		// s1[前缀长度为i]和s2[前缀长度为j]，能否交错组成出s3[前缀长度为i+j]
-		boolean[][] dp = new boolean[n + 1][m + 1];
-		dp[0][0] = true;
-		for (int i = 1; i <= n; i++) {
-			if (s1[i - 1] != s3[i - 1]) {
-				break;
-			}
-			dp[i][0] = true;
-		}
-		for (int j = 1; j <= m; j++) {
-			if (s2[j - 1] != s3[j - 1]) {
-				break;
-			}
-			dp[0][j] = true;
-		}
-		for (int i = 1; i <= n; i++) {
-			for (int j = 1; j <= m; j++) {
-				dp[i][j] = (s1[i - 1] == s3[i + j - 1] && dp[i - 1][j]) || (s2[j - 1] == s3[i + j - 1] && dp[i][j - 1]);
-			}
-		}
-		return dp[n][m];
-	}
+ // 已经展示太多次从递归到动态规划了
+ // 直接写动态规划吧
+ public static boolean isInterleave1(String str1, String str2, String str3) {
+  if (str1.length() + str2.length() != str3.length()) {
+   return false;
+  }
+  char[] s1 = str1.toCharArray();
+  char[] s2 = str2.toCharArray();
+  char[] s3 = str3.toCharArray();
+  int n = s1.length;
+  int m = s2.length;
+  // dp[i][j]:
+  // s1[前缀长度为i]和s2[前缀长度为j]，能否交错组成出s3[前缀长度为i+j]
+  boolean[][] dp = new boolean[n + 1][m + 1];
+  dp[0][0] = true;
+  for (int i = 1; i <= n; i++) {
+   if (s1[i - 1] != s3[i - 1]) {
+    break;
+   }
+   dp[i][0] = true;
+  }
+  for (int j = 1; j <= m; j++) {
+   if (s2[j - 1] != s3[j - 1]) {
+    break;
+   }
+   dp[0][j] = true;
+  }
+  for (int i = 1; i <= n; i++) {
+   for (int j = 1; j <= m; j++) {
+    dp[i][j] = (s1[i - 1] == s3[i + j - 1] && dp[i - 1][j]) || (s2[j - 1] == s3[i + j - 1] && dp[i][j - 1]);
+   }
+  }
+  return dp[n][m];
+ }
 
-	// 空间压缩
-	public static boolean isInterleave2(String str1, String str2, String str3) {
-		if (str1.length() + str2.length() != str3.length()) {
-			return false;
-		}
-		char[] s1 = str1.toCharArray();
-		char[] s2 = str2.toCharArray();
-		char[] s3 = str3.toCharArray();
-		int n = s1.length;
-		int m = s2.length;
-		boolean[] dp = new boolean[m + 1];
-		dp[0] = true;
-		for (int j = 1; j <= m; j++) {
-			if (s2[j - 1] != s3[j - 1]) {
-				break;
-			}
-			dp[j] = true;
-		}
-		for (int i = 1; i <= n; i++) {
-			dp[0] = s1[i - 1] == s3[i - 1] && dp[0];
-			for (int j = 1; j <= m; j++) {
-				dp[j] = (s1[i - 1] == s3[i + j - 1] && dp[j]) || (s2[j - 1] == s3[i + j - 1] && dp[j - 1]);
-			}
-		}
-		return dp[m];
-	}
+ // 空间压缩
+ public static boolean isInterleave2(String str1, String str2, String str3) {
+  if (str1.length() + str2.length() != str3.length()) {
+   return false;
+  }
+  char[] s1 = str1.toCharArray();
+  char[] s2 = str2.toCharArray();
+  char[] s3 = str3.toCharArray();
+  int n = s1.length;
+  int m = s2.length;
+  boolean[] dp = new boolean[m + 1];
+  dp[0] = true;
+  for (int j = 1; j <= m; j++) {
+   if (s2[j - 1] != s3[j - 1]) {
+    break;
+   }
+   dp[j] = true;
+  }
+  for (int i = 1; i <= n; i++) {
+   dp[0] = s1[i - 1] == s3[i - 1] && dp[0];
+   for (int j = 1; j <= m; j++) {
+    dp[j] = (s1[i - 1] == s3[i + j - 1] && dp[j]) || (s2[j - 1] == s3[i + j - 1] && dp[j - 1]);
+   }
+  }
+  return dp[m];
+ }
 
 }
 ```
@@ -3107,95 +3135,95 @@ import java.util.Arrays;
 // 对数器验证
 public class Code04_FillCellsUseAllColorsWays {
 
-	// 暴力方法
-	// 为了验证
-	public static int ways1(int n, int m) {
-		return f(new int[n], new boolean[m + 1], 0, n, m);
-	}
+ // 暴力方法
+ // 为了验证
+ public static int ways1(int n, int m) {
+  return f(new int[n], new boolean[m + 1], 0, n, m);
+ }
 
-	// 把所有填色的方法暴力枚举
-	// 然后一个一个验证是否有效
-	// 这是一个带路径的递归
-	// 无法改成动态规划
-	public static int f(int[] path, boolean[] set, int i, int n, int m) {
-		if (i == n) {
-			Arrays.fill(set, false);
-			int colors = 0;
-			for (int c : path) {
-				if (!set[c]) {
-					set[c] = true;
-					colors++;
-				}
-			}
-			return colors == m ? 1 : 0;
-		} else {
-			int ans = 0;
-			for (int j = 1; j <= m; j++) {
-				path[i] = j;
-				ans += f(path, set, i + 1, n, m);
-			}
-			return ans;
-		}
-	}
+ // 把所有填色的方法暴力枚举
+ // 然后一个一个验证是否有效
+ // 这是一个带路径的递归
+ // 无法改成动态规划
+ public static int f(int[] path, boolean[] set, int i, int n, int m) {
+  if (i == n) {
+   Arrays.fill(set, false);
+   int colors = 0;
+   for (int c : path) {
+    if (!set[c]) {
+     set[c] = true;
+     colors++;
+    }
+   }
+   return colors == m ? 1 : 0;
+  } else {
+   int ans = 0;
+   for (int j = 1; j <= m; j++) {
+    path[i] = j;
+    ans += f(path, set, i + 1, n, m);
+   }
+   return ans;
+  }
+ }
 
-	// 正式方法
-	// 时间复杂度O(n * m)
-	// 已经展示太多次从递归到动态规划了
-	// 直接写动态规划吧
-	// 也不做空间压缩了，因为千篇一律
-	// 有兴趣的同学自己试试
-	public static int MAXN = 5001;
+ // 正式方法
+ // 时间复杂度O(n * m)
+ // 已经展示太多次从递归到动态规划了
+ // 直接写动态规划吧
+ // 也不做空间压缩了，因为千篇一律
+ // 有兴趣的同学自己试试
+ public static int MAXN = 5001;
 
-	public static int[][] dp = new int[MAXN][MAXN];
+ public static int[][] dp = new int[MAXN][MAXN];
 
-	public static int mod = 1000000007;
+ public static int mod = 1000000007;
 
-	public static int ways2(int n, int m) {
-		// dp[i][j]:
-		// 一共有m种颜色
-		// 前i个格子涂满j种颜色的方法数
-		for (int i = 1; i <= n; i++) {
-			dp[i][1] = m;
-		}
-		for (int i = 2; i <= n; i++) {
-			for (int j = 2; j <= m; j++) {
-				dp[i][j] = (int) (((long) dp[i - 1][j] * j) % mod);
-				dp[i][j] = (int) ((((long) dp[i - 1][j - 1] * (m - j + 1)) + dp[i][j]) % mod);
-			}
-		}
-		return dp[n][m];
-	}
+ public static int ways2(int n, int m) {
+  // dp[i][j]:
+  // 一共有m种颜色
+  // 前i个格子涂满j种颜色的方法数
+  for (int i = 1; i <= n; i++) {
+   dp[i][1] = m;
+  }
+  for (int i = 2; i <= n; i++) {
+   for (int j = 2; j <= m; j++) {
+    dp[i][j] = (int) (((long) dp[i - 1][j] * j) % mod);
+    dp[i][j] = (int) ((((long) dp[i - 1][j - 1] * (m - j + 1)) + dp[i][j]) % mod);
+   }
+  }
+  return dp[n][m];
+ }
 
-	public static void main(String[] args) {
-		// 测试的数据量比较小
-		// 那是因为数据量大了，暴力方法过不了
-		// 但是这个数据量足够说明正式方法是正确的
-		int N = 9;
-		int M = 9;
-		System.out.println("功能测试开始");
-		for (int n = 1; n <= N; n++) {
-			for (int m = 1; m <= M; m++) {
-				int ans1 = ways1(n, m);
-				int ans2 = ways2(n, m);
-				if (ans1 != ans2) {
-					System.out.println("出错了!");
-				}
-			}
-		}
-		System.out.println("功能测试结束");
+ public static void main(String[] args) {
+  // 测试的数据量比较小
+  // 那是因为数据量大了，暴力方法过不了
+  // 但是这个数据量足够说明正式方法是正确的
+  int N = 9;
+  int M = 9;
+  System.out.println("功能测试开始");
+  for (int n = 1; n <= N; n++) {
+   for (int m = 1; m <= M; m++) {
+    int ans1 = ways1(n, m);
+    int ans2 = ways2(n, m);
+    if (ans1 != ans2) {
+     System.out.println("出错了!");
+    }
+   }
+  }
+  System.out.println("功能测试结束");
 
-		System.out.println("性能测试开始");
-		int n = 5000;
-		int m = 4877;
-		System.out.println("n : " + n);
-		System.out.println("m : " + m);
-		long start = System.currentTimeMillis();
-		int ans = ways2(n, m);
-		long end = System.currentTimeMillis();
-		System.out.println("取模之后的结果 : " + ans);
-		System.out.println("运行时间 : " + (end - start) + " 毫秒");
-		System.out.println("性能测试结束");
-	}
+  System.out.println("性能测试开始");
+  int n = 5000;
+  int m = 4877;
+  System.out.println("n : " + n);
+  System.out.println("m : " + m);
+  long start = System.currentTimeMillis();
+  int ans = ways2(n, m);
+  long end = System.currentTimeMillis();
+  System.out.println("取模之后的结果 : " + ans);
+  System.out.println("运行时间 : " + (end - start) + " 毫秒");
+  System.out.println("性能测试结束");
+ }
 
 }
 ```
@@ -3214,99 +3242,99 @@ import java.util.List;
 // 对数器验证
 public class Code05_MinimumDeleteBecomeSubstring {
 
-	// 暴力方法
-	// 为了验证
-	public static int minDelete1(String s1, String s2) {
-		List<String> list = new ArrayList<>();
-		f(s1.toCharArray(), 0, "", list);
-		// 排序 : 长度大的子序列先考虑
-		// 因为如果长度大的子序列是s2的子串
-		// 那么需要删掉的字符数量 = s1的长度 - s1子序列长度
-		// 子序列长度越大，需要删掉的字符数量就越少
-		// 所以长度大的子序列先考虑
-		list.sort((a, b) -> b.length() - a.length());
-		for (String str : list) {
-			if (s2.indexOf(str) != -1) {
-				// 检查s2中，是否包含当前的s1子序列str
-				return s1.length() - str.length();
-			}
-		}
-		return s1.length();
-	}
+ // 暴力方法
+ // 为了验证
+ public static int minDelete1(String s1, String s2) {
+  List<String> list = new ArrayList<>();
+  f(s1.toCharArray(), 0, "", list);
+  // 排序 : 长度大的子序列先考虑
+  // 因为如果长度大的子序列是s2的子串
+  // 那么需要删掉的字符数量 = s1的长度 - s1子序列长度
+  // 子序列长度越大，需要删掉的字符数量就越少
+  // 所以长度大的子序列先考虑
+  list.sort((a, b) -> b.length() - a.length());
+  for (String str : list) {
+   if (s2.indexOf(str) != -1) {
+    // 检查s2中，是否包含当前的s1子序列str
+    return s1.length() - str.length();
+   }
+  }
+  return s1.length();
+ }
 
-	// 生成s1字符串的所有子序列串
-	public static void f(char[] s1, int i, String path, List<String> list) {
-		if (i == s1.length) {
-			list.add(path);
-		} else {
-			f(s1, i + 1, path, list);
-			f(s1, i + 1, path + s1[i], list);
-		}
-	}
+ // 生成s1字符串的所有子序列串
+ public static void f(char[] s1, int i, String path, List<String> list) {
+  if (i == s1.length) {
+   list.add(path);
+  } else {
+   f(s1, i + 1, path, list);
+   f(s1, i + 1, path + s1[i], list);
+  }
+ }
 
-	// 正式方法，动态规划
-	// 已经展示太多次从递归到动态规划了
-	// 直接写动态规划吧
-	// 也不做空间压缩了，因为千篇一律
-	// 有兴趣的同学自己试试
-	public static int minDelete2(String str1, String str2) {
-		char[] s1 = str1.toCharArray();
-		char[] s2 = str2.toCharArray();
-		int n = s1.length;
-		int m = s2.length;
-		// dp[len1][len2] :
-		// s1[前缀长度为i]至少删除多少字符，可以变成s2[前缀长度为j]的任意后缀串
-		int[][] dp = new int[n + 1][m + 1];
-		for (int i = 1; i <= n; i++) {
-			dp[i][0] = i;
-			for (int j = 1; j <= m; j++) {
-				if (s1[i - 1] == s2[j - 1]) {
-					dp[i][j] = dp[i - 1][j - 1];
-				} else {
-					dp[i][j] = dp[i - 1][j] + 1;
-				}
-			}
-		}
-		int ans = Integer.MAX_VALUE;
-		for (int j = 0; j <= m; j++) {
-			ans = Math.min(ans, dp[n][j]);
-		}
-		return ans;
-	}
+ // 正式方法，动态规划
+ // 已经展示太多次从递归到动态规划了
+ // 直接写动态规划吧
+ // 也不做空间压缩了，因为千篇一律
+ // 有兴趣的同学自己试试
+ public static int minDelete2(String str1, String str2) {
+  char[] s1 = str1.toCharArray();
+  char[] s2 = str2.toCharArray();
+  int n = s1.length;
+  int m = s2.length;
+  // dp[len1][len2] :
+  // s1[前缀长度为i]至少删除多少字符，可以变成s2[前缀长度为j]的任意后缀串
+  int[][] dp = new int[n + 1][m + 1];
+  for (int i = 1; i <= n; i++) {
+   dp[i][0] = i;
+   for (int j = 1; j <= m; j++) {
+    if (s1[i - 1] == s2[j - 1]) {
+     dp[i][j] = dp[i - 1][j - 1];
+    } else {
+     dp[i][j] = dp[i - 1][j] + 1;
+    }
+   }
+  }
+  int ans = Integer.MAX_VALUE;
+  for (int j = 0; j <= m; j++) {
+   ans = Math.min(ans, dp[n][j]);
+  }
+  return ans;
+ }
 
-	// 为了验证
-	// 生成长度为n，有v种字符的随机字符串
-	public static String randomString(int n, int v) {
-		char[] ans = new char[n];
-		for (int i = 0; i < n; i++) {
-			ans[i] = (char) ('a' + (int) (Math.random() * v));
-		}
-		return String.valueOf(ans);
-	}
+ // 为了验证
+ // 生成长度为n，有v种字符的随机字符串
+ public static String randomString(int n, int v) {
+  char[] ans = new char[n];
+  for (int i = 0; i < n; i++) {
+   ans[i] = (char) ('a' + (int) (Math.random() * v));
+  }
+  return String.valueOf(ans);
+ }
 
-	// 为了验证
-	// 对数器
-	public static void main(String[] args) {
-		// 测试的数据量比较小
-		// 那是因为数据量大了，暴力方法过不了
-		// 但是这个数据量足够说明正式方法是正确的
-		int n = 12;
-		int v = 3;
-		int testTime = 20000;
-		System.out.println("测试开始");
-		for (int i = 0; i < testTime; i++) {
-			int len1 = (int) (Math.random() * n) + 1;
-			int len2 = (int) (Math.random() * n) + 1;
-			String s1 = randomString(len1, v);
-			String s2 = randomString(len2, v);
-			int ans1 = minDelete1(s1, s2);
-			int ans2 = minDelete2(s1, s2);
-			if (ans1 != ans2) {
-				System.out.println("出错了!");
-			}
-		}
-		System.out.println("测试结束");
-	}
+ // 为了验证
+ // 对数器
+ public static void main(String[] args) {
+  // 测试的数据量比较小
+  // 那是因为数据量大了，暴力方法过不了
+  // 但是这个数据量足够说明正式方法是正确的
+  int n = 12;
+  int v = 3;
+  int testTime = 20000;
+  System.out.println("测试开始");
+  for (int i = 0; i < testTime; i++) {
+   int len1 = (int) (Math.random() * n) + 1;
+   int len2 = (int) (Math.random() * n) + 1;
+   String s1 = randomString(len1, v);
+   String s2 = randomString(len2, v);
+   int ans1 = minDelete1(s1, s2);
+   int ans2 = minDelete2(s1, s2);
+   if (ans1 != ans2) {
+    System.out.println("出错了!");
+   }
+  }
+  System.out.println("测试结束");
+ }
 
 }
 ```
@@ -3427,92 +3455,92 @@ package class069;
 // 测试链接 : https://leetcode.cn/problems/profitable-schemes/
 public class Code02_ProfitableSchemes {
 
-	// n : 员工的额度，不能超
-	// p : 利润的额度，不能少
-	// group[i] : i号项目需要几个人
-	// profit[i] : i号项目产生的利润
-	// 返回能做到员工不能超过n，利润不能少于p的计划有多少个
-	public static int profitableSchemes1(int n, int minProfit, int[] group, int[] profit) {
-		return f1(group, profit, 0, n, minProfit);
-	}
+ // n : 员工的额度，不能超
+ // p : 利润的额度，不能少
+ // group[i] : i号项目需要几个人
+ // profit[i] : i号项目产生的利润
+ // 返回能做到员工不能超过n，利润不能少于p的计划有多少个
+ public static int profitableSchemes1(int n, int minProfit, int[] group, int[] profit) {
+  return f1(group, profit, 0, n, minProfit);
+ }
 
-	// i : 来到i号工作
-	// r : 员工额度还有r人，如果r<=0说明已经没法再选择工作了
-	// s : 利润还有s才能达标，如果s<=0说明之前的选择已经让利润达标了
-	// 返回 : i.... r、s，有多少种方案
-	public static int f1(int[] g, int[] p, int i, int r, int s) {
-		if (r <= 0) {
-			// 人已经耗尽了，之前可能选了一些工作
-			return s <= 0 ? 1 : 0;
-		}
-		// r > 0
-		if (i == g.length) {
-			// 工作耗尽了，之前可能选了一些工作
-			return s <= 0 ? 1 : 0;
-		}
-		// 不要当前工作
-		int p1 = f1(g, p, i + 1, r, s);
-		// 要做当前工作
-		int p2 = 0;
-		if (g[i] <= r) {
-			p2 = f1(g, p, i + 1, r - g[i], s - p[i]);
-		}
-		return p1 + p2;
-	}
+ // i : 来到i号工作
+ // r : 员工额度还有r人，如果r<=0说明已经没法再选择工作了
+ // s : 利润还有s才能达标，如果s<=0说明之前的选择已经让利润达标了
+ // 返回 : i.... r、s，有多少种方案
+ public static int f1(int[] g, int[] p, int i, int r, int s) {
+  if (r <= 0) {
+   // 人已经耗尽了，之前可能选了一些工作
+   return s <= 0 ? 1 : 0;
+  }
+  // r > 0
+  if (i == g.length) {
+   // 工作耗尽了，之前可能选了一些工作
+   return s <= 0 ? 1 : 0;
+  }
+  // 不要当前工作
+  int p1 = f1(g, p, i + 1, r, s);
+  // 要做当前工作
+  int p2 = 0;
+  if (g[i] <= r) {
+   p2 = f1(g, p, i + 1, r - g[i], s - p[i]);
+  }
+  return p1 + p2;
+ }
 
-	public static int mod = 1000000007;
+ public static int mod = 1000000007;
 
-	public static int profitableSchemes2(int n, int minProfit, int[] group, int[] profit) {
-		int m = group.length;
-		int[][][] dp = new int[m][n + 1][minProfit + 1];
-		for (int a = 0; a < m; a++) {
-			for (int b = 0; b <= n; b++) {
-				for (int c = 0; c <= minProfit; c++) {
-					dp[a][b][c] = -1;
-				}
-			}
-		}
-		return f2(group, profit, 0, n, minProfit, dp);
-	}
+ public static int profitableSchemes2(int n, int minProfit, int[] group, int[] profit) {
+  int m = group.length;
+  int[][][] dp = new int[m][n + 1][minProfit + 1];
+  for (int a = 0; a < m; a++) {
+   for (int b = 0; b <= n; b++) {
+    for (int c = 0; c <= minProfit; c++) {
+     dp[a][b][c] = -1;
+    }
+   }
+  }
+  return f2(group, profit, 0, n, minProfit, dp);
+ }
 
-	public static int f2(int[] g, int[] p, int i, int r, int s, int[][][] dp) {
-		if (r <= 0) {
-			return s == 0 ? 1 : 0;
-		}
-		if (i == g.length) {
-			return s == 0 ? 1 : 0;
-		}
-		if (dp[i][r][s] != -1) {
-			return dp[i][r][s];
-		}
-		int p1 = f2(g, p, i + 1, r, s, dp);
-		int p2 = 0;
-		if (g[i] <= r) {
-			p2 = f2(g, p, i + 1, r - g[i], Math.max(0, s - p[i]), dp);
-		}
-		int ans = (p1 + p2) % mod;
-		dp[i][r][s] = ans;
-		return ans;
-	}
+ public static int f2(int[] g, int[] p, int i, int r, int s, int[][][] dp) {
+  if (r <= 0) {
+   return s == 0 ? 1 : 0;
+  }
+  if (i == g.length) {
+   return s == 0 ? 1 : 0;
+  }
+  if (dp[i][r][s] != -1) {
+   return dp[i][r][s];
+  }
+  int p1 = f2(g, p, i + 1, r, s, dp);
+  int p2 = 0;
+  if (g[i] <= r) {
+   p2 = f2(g, p, i + 1, r - g[i], Math.max(0, s - p[i]), dp);
+  }
+  int ans = (p1 + p2) % mod;
+  dp[i][r][s] = ans;
+  return ans;
+ }
 
-	public static int profitableSchemes3(int n, int minProfit, int[] group, int[] profit) {
-		// i = 没有工作的时候，i == g.length
-		int[][] dp = new int[n + 1][minProfit + 1];
-		for (int r = 0; r <= n; r++) {
-			dp[r][0] = 1;
-		}
-		int m = group.length;
-		for (int i = m - 1; i >= 0; i--) {
-			for (int r = n; r >= 0; r--) {
-				for (int s = minProfit; s >= 0; s--) {
-					int p1 = dp[r][s];
-					int p2 = group[i] <= r ? dp[r - group[i]][Math.max(0, s - profit[i])] : 0;
-					dp[r][s] = (p1 + p2) % mod;
-				}
-			}
-		}
-		return dp[n][minProfit];
-	}
+ public static int profitableSchemes3(int n, int minProfit, int[] group, int[] profit) {
+  // i = 没有工作的时候，i == g.length
+  int[][] dp = new int[n + 1][minProfit + 1];
+  for (int r = 0; r <= n; r++) {
+   dp[r][0] = 1;
+  }
+  int m = group.length;
+  for (int i = m - 1; i >= 0; i--) {
+   for (int r = n; r >= 0; r--) {
+    for (int s = minProfit; s >= 0; s--) {
+     int p1 = dp[r][s];
+     int p2 = group[i] <= r ? dp[r - group[i]][Math.max(0, s - profit[i])] : 0;
+     dp[r][s] = (p1 + p2) % mod;
+    }
+   }
+  }
+  return dp[n][minProfit];
+ }
 
 }
 ```
@@ -3530,30 +3558,30 @@ package class070;
 // 测试链接 : https://leetcode.cn/problems/maximum-subarray/
 public class Code01_MaximumSubarray {
 
-	// 动态规划
-	public static int maxSubArray1(int[] nums) {
-		int n = nums.length;
-		// dp[i] : 子数组必须以i位置的数做结尾，往左能延伸出来的最大累加和
-		int[] dp = new int[n];
-		dp[0] = nums[0];
-		int ans = nums[0];
-		for (int i = 1; i < n; i++) {
-			dp[i] = Math.max(nums[i], dp[i - 1] + nums[i]);
-			ans = Math.max(ans, dp[i]);
-		}
-		return ans;
-	}
+ // 动态规划
+ public static int maxSubArray1(int[] nums) {
+  int n = nums.length;
+  // dp[i] : 子数组必须以i位置的数做结尾，往左能延伸出来的最大累加和
+  int[] dp = new int[n];
+  dp[0] = nums[0];
+  int ans = nums[0];
+  for (int i = 1; i < n; i++) {
+   dp[i] = Math.max(nums[i], dp[i - 1] + nums[i]);
+   ans = Math.max(ans, dp[i]);
+  }
+  return ans;
+ }
 
-	// 空间压缩
-	public static int maxSubArray2(int[] nums) {
-		int n = nums.length;
-		int ans = nums[0];
-		for (int i = 1, pre = nums[0]; i < n; i++) {
-			pre = Math.max(nums[i], pre + nums[i]);
-			ans = Math.max(ans, pre);
-		}
-		return ans;
-	}
+ // 空间压缩
+ public static int maxSubArray2(int[] nums) {
+  int n = nums.length;
+  int ans = nums[0];
+  for (int i = 1, pre = nums[0]; i < n; i++) {
+   pre = Math.max(nums[i], pre + nums[i]);
+   ans = Math.max(ans, pre);
+  }
+  return ans;
+ }
 
 }
 ```
@@ -3562,43 +3590,43 @@ public class Code01_MaximumSubarray {
 
 ```java
 
-	// 如下代码为附加问题的实现
-	// 子数组中找到拥有最大累加和的子数组
-	// 并返回如下三个信息:
-	// 1) 最大累加和子数组的开头left
-	// 2) 最大累加和子数组的结尾right
-	// 3) 最大累加和子数组的累加和sum
-	// 如果不止一个子数组拥有最大累加和，那么找到哪一个都可以
-	public static int left;
+ // 如下代码为附加问题的实现
+ // 子数组中找到拥有最大累加和的子数组
+ // 并返回如下三个信息:
+ // 1) 最大累加和子数组的开头left
+ // 2) 最大累加和子数组的结尾right
+ // 3) 最大累加和子数组的累加和sum
+ // 如果不止一个子数组拥有最大累加和，那么找到哪一个都可以
+ public static int left;
 
-	public static int right;
+ public static int right;
 
-	public static int sum;
+ public static int sum;
 
-	// 找到拥有最大累加和的子数组
-	// 更新好全局变量left、right、sum
-	// 上游调用函数可以直接使用这三个变量
-	// 相当于返回了三个值
-	public static void extra(int[] nums) {
-		sum = Integer.MIN_VALUE;
-		for (int l = 0, r = 0, pre = Integer.MIN_VALUE; r < nums.length; r++) {
-			if (pre >= 0) {
-				// 吸收前面的累加和有利可图
-				// 那就不换开头
-				pre += nums[r];
-			} else {
-				// 吸收前面的累加和已经无利可图
-				// 那就换开头
-				pre = nums[r];
-				l = r;
-			}
-			if (pre > sum) {
-				sum = pre;
-				left = l;
-				right = r;
-			}
-		}
-	}
+ // 找到拥有最大累加和的子数组
+ // 更新好全局变量left、right、sum
+ // 上游调用函数可以直接使用这三个变量
+ // 相当于返回了三个值
+ public static void extra(int[] nums) {
+  sum = Integer.MIN_VALUE;
+  for (int l = 0, r = 0, pre = Integer.MIN_VALUE; r < nums.length; r++) {
+   if (pre >= 0) {
+    // 吸收前面的累加和有利可图
+    // 那就不换开头
+    pre += nums[r];
+   } else {
+    // 吸收前面的累加和已经无利可图
+    // 那就换开头
+    pre = nums[r];
+    l = r;
+   }
+   if (pre > sum) {
+    sum = pre;
+    left = l;
+    right = r;
+   }
+  }
+ }
 ```
 
 ## 打家劫舍
@@ -3614,43 +3642,43 @@ package class070;
 // 测试链接 : https://leetcode.cn/problems/house-robber/
 public class Code02_HouseRobber {
 
-	// 动态规划
-	public static int rob1(int[] nums) {
-		int n = nums.length;
-		if (n == 1) {
-			return nums[0];
-		}
-		if (n == 2) {
-			return Math.max(nums[0], nums[1]);
-		}
-		// dp[i] : nums[0...i]范围上可以随意选择数字，但是不能选相邻数，能得到的最大累加和
-		int[] dp = new int[n];
-		dp[0] = nums[0];
-		dp[1] = Math.max(nums[0], nums[1]);
-		for (int i = 2; i < n; i++) {
-			dp[i] = Math.max(dp[i - 1], Math.max(nums[i], dp[i - 2] + nums[i]));
-		}
-		return dp[n - 1];
-	}
+ // 动态规划
+ public static int rob1(int[] nums) {
+  int n = nums.length;
+  if (n == 1) {
+   return nums[0];
+  }
+  if (n == 2) {
+   return Math.max(nums[0], nums[1]);
+  }
+  // dp[i] : nums[0...i]范围上可以随意选择数字，但是不能选相邻数，能得到的最大累加和
+  int[] dp = new int[n];
+  dp[0] = nums[0];
+  dp[1] = Math.max(nums[0], nums[1]);
+  for (int i = 2; i < n; i++) {
+   dp[i] = Math.max(dp[i - 1], Math.max(nums[i], dp[i - 2] + nums[i]));
+  }
+  return dp[n - 1];
+ }
 
-	// 空间压缩
-	public static int rob2(int[] nums) {
-		int n = nums.length;
-		if (n == 1) {
-			return nums[0];
-		}
-		if (n == 2) {
-			return Math.max(nums[0], nums[1]);
-		}
-		int prepre = nums[0];
-		int pre = Math.max(nums[0], nums[1]);
-		for (int i = 2, cur; i < n; i++) {
-			cur = Math.max(pre, Math.max(nums[i], prepre + nums[i]));
-			prepre = pre;
-			pre = cur;
-		}
-		return pre;
-	}
+ // 空间压缩
+ public static int rob2(int[] nums) {
+  int n = nums.length;
+  if (n == 1) {
+   return nums[0];
+  }
+  if (n == 2) {
+   return Math.max(nums[0], nums[1]);
+  }
+  int prepre = nums[0];
+  int pre = Math.max(nums[0], nums[1]);
+  for (int i = 2, cur; i < n; i++) {
+   cur = Math.max(pre, Math.max(nums[i], prepre + nums[i]));
+   prepre = pre;
+   pre = cur;
+  }
+  return pre;
+ }
 
 }
 ```

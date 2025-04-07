@@ -93,6 +93,10 @@ export default defineConfig({
             text: 'Git',
             link: '/engineering/git'
           },
+          {
+            text: 'Webpack',
+            link: '/engineering/webpack'
+          }
         ]
       },
       {
@@ -203,6 +207,10 @@ export default defineConfig({
             text: 'Git',
             link: '/engineering/git'
           },
+          {
+            text: 'Webpack',
+            link: '/engineering/webpack'
+          }
         ]
       },
       {

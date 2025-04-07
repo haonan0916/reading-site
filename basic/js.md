@@ -116,7 +116,7 @@ foo(); // 1
 
 > [!TIP]
 >
-> 输出结果：` 2 1 1`
+> 输出结果：`2 1 1`
 >
 > **解析：**
 >
@@ -211,7 +211,7 @@ Promise.race([promise1, timeOutPromise(5000)]).then((res) => {});
 
 **总结：**
 
-`Promise` 对象是异步编程的一种解决方案，最早由社区提出。`Promise` 是一个**构造函数**，接收一个函数作为参数，返回一个 `Promise` 实例。一个 `Promise `实例有三种状态，分别是 `pending、fulfilled` 和 `rejected`，分别代表了进行中、已成功和已失败。实例的状态只能由 `pending` 转变 `resolved` 或者 `rejected` 状态，并且状态一经改变，就凝固了，无法再被改变了。
+`Promise` 对象是异步编程的一种解决方案，最早由社区提出。`Promise` 是一个**构造函数**，接收一个函数作为参数，返回一个 `Promise` 实例。一个 `Promise`实例有三种状态，分别是 `pending、fulfilled` 和 `rejected`，分别代表了进行中、已成功和已失败。实例的状态只能由 `pending` 转变 `resolved` 或者 `rejected` 状态，并且状态一经改变，就凝固了，无法再被改变了。
 
 **状态的改变是通过 `resolve()` 和 `reject()` 函数来实现的**，可以在异步操作结束后调用这两个函数改变 `Promise` 实例的状态，它的原型上定义了一个 `then` 方法，使用这个 `then` 方法可以为两个状态的改变注册回调函数。**这个回调函数属于微任务，会在本轮事件循环的末尾执行。**
 
@@ -262,11 +262,11 @@ Promise.resolve(11).then(function (value) {
 Promise.reject(new Error(“我错了，请原谅俺！！”));
 ```
 
-就是下面的代码 `new Promise ` 的简单形式：
+就是下面的代码 `new Promise` 的简单形式：
 
 ```js
 new Promise(function(resolve, reject) => {
-	reject(new Error("我错了，请原谅俺！！"));
+ reject(new Error("我错了，请原谅俺！！"));
 });
 ```
 
@@ -406,23 +406,23 @@ Promise.all([promise1, promise2, promise3]).then((res) => {
 
 ```js
 let promise1 = new Promise((resolve,reject)=>{
-	setTimeout(()=>{
+ setTimeout(()=>{
        reject(1);
-	},2000)
+ },2000)
 });
 let promise2 = new Promise((resolve,reject)=>{
-	setTimeout(()=>{
+ setTimeout(()=>{
        resolve(2);
-	},1000)
+ },1000)
 });
 let promise3 = new Promise((resolve,reject)=>{
-	setTimeout(()=>{
+ setTimeout(()=>{
        resolve(3);
-	},3000)
+ },3000)
 });
 Promise.race([promise1,promise2,promise3]).then(res=>{
-	console.log(res);
-	//结果：2
+ console.log(res);
+ //结果：2
 },rej=>{
     console.log(rej)};
 )
@@ -653,7 +653,7 @@ testAwt();
 console.log("cuger"); // 立即输出 cuger
 ```
 
-这就是 `await` 必须用在 `async` 函数中的原因。`async` 函数调用不会造成阻塞，它内部所有的阻塞都被封装在一个 `Promise` 对象中异步执行。`await` 暂停当前 `async` 的执行，所以 `'cuger `最先输出，`hello world`和 `‘cuger’` 是 3 秒钟后同时出现的。
+这就是 `await` 必须用在 `async` 函数中的原因。`async` 函数调用不会造成阻塞，它内部所有的阻塞都被封装在一个 `Promise` 对象中异步执行。`await` 暂停当前 `async` 的执行，所以 `'cuger`最先输出，`hello world`和 `‘cuger’` 是 3 秒钟后同时出现的。
 
 ## 6. async/await 的优势
 
@@ -870,7 +870,7 @@ function throttle(fn, delay) {
 >
 > `new Worker()` 里面的 `js` 文件必须是线上的一个文件地址，不能是本地的 `js` 文件。
 >
-> 如果是 `vite / webpack` 项目，我们可以先把该 `js` 文件放到 `public ` 文件夹下来进行使用。
+> 如果是 `vite / webpack` 项目，我们可以先把该 `js` 文件放到 `public` 文件夹下来进行使用。
 >
 > - `webworker` 不能使用本地文件，必须是网络上的同源文件。
 > - `webwoker` 不能使用 `window` 上的 `dom` 操作，也不能获取 `dom` 对象，`dom` 相关的东西只有主线程有。只能做一些计算相关的操作。
@@ -1043,7 +1043,7 @@ function exportExcel() {
 **2）引用计数**
 
 - 另外一种垃圾回收机制就是引用计数，**这个用的相对较少**。引用计数就是跟踪记录每个值被引用的次数。当声明了一个变量并将一个引用类型赋值给该变量时，则这个值的引用次数就是 `1`。相反，如果包含对这个值引用的变量又取得了另外一个值，则这个值的引用次数就减 `1`。当这个引用次数变为 `0` 时，说明这个变量已经没有价值，因此，在垃圾回收期下次再运行时，这个变量所占有的内存空间就会被释放出来。
-- 这种方法会引起**循环引用**的问题：例如：` obj1`和 `obj2`通过属性进行相互引用，两个对象的引用次数都是 `2`。当使用循环计数时，由于函数执行完后，两个对象都离开作用域，函数执行结束，`obj1`和 `obj2`还将会继续存在，因此它们的引用次数永远不会是 `0`，就会引起循环引用。
+- 这种方法会引起**循环引用**的问题：例如：`obj1`和 `obj2`通过属性进行相互引用，两个对象的引用次数都是 `2`。当使用循环计数时，由于函数执行完后，两个对象都离开作用域，函数执行结束，`obj1`和 `obj2`还将会继续存在，因此它们的引用次数永远不会是 `0`，就会引起循环引用。
 
 ```js
 function fun() {
@@ -1254,7 +1254,7 @@ obj2.a = null;
 - 每个任务都有一个任务类型，同一个类型的任务必须在一个队列，不同类型的任务可以分属于不同的队列。
   在一次事件循环中，浏览器可以根据实际情况从不同的队列中取出任务执行。
 - 浏览器必须准备好一个微队列，微队列中的任务优先所有其他任务执行
-  https://html.spec.whatwg.org/multipage/webappapis.html#perform-a-microtask-checkpoint
+  <https://html.spec.whatwg.org/multipage/webappapis.html#perform-a-microtask-checkpoint>
 
 > 随着浏览器的复杂度急剧提升，`W3C` 不再使用**宏队列**的说法
 
@@ -1581,7 +1581,7 @@ function deepCopy(object) {
 
 ## 1. abort()
 
-`XMLHttpRequest.abort() ` 方法用于终止 `XMLHttpRequest` 对象的请求，该方法没有参数，也没有返回值。当调用该方法时，如果对应 `XMLHttpRequest` 对象的请求已经被发送并且正在处理中，则会中止该请求；如果请求已经完成（即已经接收到完整的响应），则不会执行任何操作。而且调用该方法后，还会触发 `XMLHttpRequest `对象的 `abort` 事件，我们可以在该事件的处理函数中执行后续相关逻辑代码，例如清除请求相关数据等等。
+`XMLHttpRequest.abort()` 方法用于终止 `XMLHttpRequest` 对象的请求，该方法没有参数，也没有返回值。当调用该方法时，如果对应 `XMLHttpRequest` 对象的请求已经被发送并且正在处理中，则会中止该请求；如果请求已经完成（即已经接收到完整的响应），则不会执行任何操作。而且调用该方法后，还会触发 `XMLHttpRequest`对象的 `abort` 事件，我们可以在该事件的处理函数中执行后续相关逻辑代码，例如清除请求相关数据等等。
 
 当一个请求被终止后，该请求的 `readyState` 将会变为 `0`，并且 `status` 属性也会变为 `0`。
 
@@ -2552,7 +2552,7 @@ export default {
 ### 具体过程
 
 - 客户端发送一个 `HTTP GET` 请求到服务器，请求的路径是 `WebSocket` 的路径（类似 `ws://example.com/socket`）。请求中包含一些特殊的头字段，如 `Upgrade: websocket 和 Connection: Upgrade`，以表明客户端希望升级连接为 `WebSocket`。
-- 服务器收到这个请求后，会返回一个 `HTTP 101` 状态码（协议切换协议）。同样在响应头中包含 `Upgrade: websocket `和 `Connection: Upgrade`，以及一些其他的 `WebSocket` 特定的头字段，例如 `Sec-WebSocket-Accept`，用于验证握手的合法性。
+- 服务器收到这个请求后，会返回一个 `HTTP 101` 状态码（协议切换协议）。同样在响应头中包含 `Upgrade: websocket`和 `Connection: Upgrade`，以及一些其他的 `WebSocket` 特定的头字段，例如 `Sec-WebSocket-Accept`，用于验证握手的合法性。
 - 客户端和服务器之间的连接从普通的 `HTTP` 连接升级为 `WebSocket` 连接。之后，客户端和服务器之间的通信就变成了 `WebSocket` 帧的传输，而不再是普通的 `HTTP` 请求和响应。
 
 ### 示例
@@ -2962,3 +2962,83 @@ Reflect 的核心价值：
 - 在编写 Proxy 处理器时优先使用 Reflect 方法
 - 替代易出错的 `Object` 方法（如 `defineProperty`）
 - 需要精确控制操作结果时使用（如判断属性是否删除成功）
+
+# 7. JS Array.sort 原理
+
+## 一、默认排序机制
+
+当不提供比较函数时
+
+```js
+[3, 10, 1].sort(); // 输出[1, 10, 3]（不符合数值预期）
+```
+
+- **元素转换**：将所有元素隐式转换为字符串
+- **字典序比较**：按照 Unicode 码顺序比较字符串
+- **编码示例**：
+
+```js
+[3, 10, 1].map(x => String(x)); // ["3", "10", "1"]
+"3".codePointAt(0); // 51
+"10".codePointAt(0); // 49
+"1".codePointAt(0); // 49
+```
+
+## 二、比较函数原理
+
+当提供比较函数时：
+
+```js
+[3, 10, 1].sort((a, b) => a - b); // [1, 3, 10]
+```
+
+- **函数签名**：`compareFunction(a, b)`
+- **返回值规则**：
+  - `< 0`：`a` 排在 `b` 前面
+  - `= 0`：`a` 和 `b` 保持相对位置不变
+  - `> 0`：`b` 排在 `a` 前面
+
+底层实现流程：
+
+1. 将数组元素两两比较
+2. 根据比较函数返回值决定元素位置
+3. 采用分治策略（不同引擎实现不同）
+
+## 三、引擎实现差异
+
+1. V8 引擎（Chrome/Node.js）
+
+- 小数组（长度 <= 10）：插入排序
+- 大数组：快速排序 + 插入排序
+
+2. SpiderMonkey 引擎（Firefox）
+
+- 归并排序
+
+3. JavaScriptCore 引擎（Safari）
+
+- 快速排序
+
+# 埋点
+
+前端埋点是**收集用户行为数据的关键技术手段**，主要用于产品优化、用户行为分析和业务决策支持。
+
+## 埋点类型与场景
+
+| 类型 | 触发方式 | 适用场景 | 示例 |
+|------|----------|----------|------|
+| **点击埋点** | 用户交互事件 | 按钮点击、导航跳转 | 购买按钮点击统计 |
+| **曝光埋点** | 元素进入视口 | 广告展示、内容曝光 | 首屏广告曝光率统计 |
+| **停留埋点** | 时间阈值触发 | 页面停留时长、模块停留 | 详情页停留超过30秒 |
+| **错误埋点** | 异常捕获 | JS错误、API失败 | 接口500错误监控 |
+| **性能埋点** | 性能API | 页面加载速度、资源耗时 | FCP(首次内容渲染时间) |
+
+# XHR 和 Fetch 区别
+
+| 功能点 | XHR | Fetch
+|------|----------|----------
+| **基本的请求能力** | ✅ | ✅ |
+| **基本的获取响应能力** | ✅ | ✅ |
+| **监控请求进度** | ✅ | ✅ |
+| **监控响应进度** | ✅ | ✅ |
+
