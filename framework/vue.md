@@ -44,7 +44,7 @@
 
    - 新的生命周期钩子
    - `data` 选项应始终被声明为一个函数
-   - 移除 `keyCode`支持作为 ` v-on` 的修饰符
+   - 移除 `keyCode`支持作为 `v-on` 的修饰符
 
      ......
 
@@ -88,7 +88,7 @@ npm run serve
 - `webpack`构建 与 `vite`构建对比图如下：
   `<img src="/public/vue_images/1683167182037-71c78210-8217-4e7d-9a83-e463035efbbe.png" alt="webpack构建" title="webpack构建" style="zoom:20%;box-shadow:0 0 10px black" />` `<img src="/public/vue_images/1683167204081-582dc237-72bc-499e-9589-2cdfd452e62f.png" alt="vite构建" title="vite构建" style="zoom: 20%;box-shadow:0 0 10px black" />`
 
-* 具体操作如下（点击查看[官方文档](https://cn.vuejs.org/guide/quick-start.html#creating-a-vue-application)）
+- 具体操作如下（点击查看[官方文档](https://cn.vuejs.org/guide/quick-start.html#creating-a-vue-application)）
 
 ```powershell
 ## 1.创建命令
@@ -150,7 +150,7 @@ export default {
 
 - `Vite` 项目中，`index.html` 是项目的入口文件，在项目最外层。
 - 加载 `index.html`后，`Vite` 解析 `<script type="module" src="xxx">` 指向的 `JavaScript`。
-- `Vue3`**中是通过 **`createApp` 函数创建一个应用实例。
+- `Vue3`**中是通过**`createApp` 函数创建一个应用实例。
 
 ## 2.3. 【一个简单的效果】
 
@@ -1311,7 +1311,7 @@ defineExpose({ name, age });
   export default router;
   ```
 
-* `main.ts`代码如下：
+- `main.ts`代码如下：
 
   ```js
   import router from "./router/index";
@@ -1401,7 +1401,7 @@ defineExpose({ name, age });
    - `pushState()` 设置的新 `URL` 可以与当前 `URL` 一模一样，这样也会把记录添加到栈中；而 `hash` 设置的新值必须与原来不一样才会触发动作将记录添加到栈中；
    - `pushState()` 通过 `stateObject` 参数可以添加任意类型的数据到记录中；而 `hash` 只可添加短字符串；
    - `pushState()` 可额外设置 `title` 属性供后续使用。
-   - `hash` 模式下，仅 `hash` 符号之前的 `url` 会被包含在请求中，后端如果没有做到对路由的全覆盖，也不会返回 `404` 错误；`history` 模式下，前端的 `url` 必须和实际向后端发起请求的 `url` 一致，如果没有对应的路由处理，将返回 `404 `错误。
+   - `hash` 模式下，仅 `hash` 符号之前的 `url` 会被包含在请求中，后端如果没有做到对路由的全覆盖，也不会返回 `404` 错误；`history` 模式下，前端的 `url` 必须和实际向后端发起请求的 `url` 一致，如果没有对应的路由处理，将返回 `404`错误。
 
    ## 4.5. 【to 的两种写法】
 
@@ -1523,7 +1523,7 @@ defineExpose({ name, age });
       ```vue
       <!-- 跳转并携带query参数（to的字符串写法） -->
       <router-link to="/news/detail?a=1&b=2&content=欢迎你">
-      	跳转
+       跳转
       </router-link>
 
       <!-- 跳转并携带query参数（to的对象写法） -->
@@ -1597,9 +1597,9 @@ defineExpose({ name, age });
 
    ```js
    {
-   	name:'xiang',
-   	path:'detail/:id/:title/:content',
-   	component:Detail,
+    name:'xiang',
+    path:'detail/:id/:title/:content',
+    component:Detail,
 
      // props的对象写法，作用：把对象中的每一组key-value作为props传给Detail组件
      // props:{a:1,b:2,c:3},
@@ -1805,7 +1805,7 @@ defineExpose({ name, age });
 
    ## Vue-router 跳转和 location.href 有什么区别
 
-   - 使用 `location.href= /url `来跳转，简单方便，但是刷新了页面；
+   - 使用 `location.href= /url`来跳转，简单方便，但是刷新了页面；
    - 使用 `history.pushState( /url )` ，无刷新页面，静态跳转；
    - 引进 router ，然后使用 `router.push( /url )` 来跳转，使用了 `diff` 算法，实现了按需加载，减少了 dom 的消耗。其实使用 router 跳转和使用 `history.pushState()` 没什么差别的，因为 vue-router 就是用了 `history.pushState()` ，尤其是在 history 模式下。
 
@@ -2087,10 +2087,10 @@ defineExpose({ name, age });
 
    - 移出事件总线，使用 `mitt`代替。
 
-   * `vuex`换成了 `pinia`。
-   * 把 `.sync`优化到了 `v-model`里面了。
-   * 把 `$listeners`所有的东西，合并到 `$attrs`中了。
-   * `$children`被砍掉了。
+   - `vuex`换成了 `pinia`。
+   - 把 `.sync`优化到了 `v-model`里面了。
+   - 把 `$listeners`所有的东西，合并到 `$attrs`中了。
+   - `$children`被砍掉了。
 
    **常见搭配形式：**
 
@@ -2937,19 +2937,19 @@ defineExpose({ name, age });
           beforeMount() {
               console.log('======> beforeMount');
           }
-      	mounted(el: HTMLElement, binding: DirectiveBinding) {
+       mounted(el: HTMLElement, binding: DirectiveBinding) {
               console.log('======> mounted');
           }
-      	beforeUpdate() {
+       beforeUpdate() {
               console.log('======> beforeUpdate');
           }
-      	updated() {
+       updated() {
               console.log('======> updated');
           }
-      	beforeUnmount() {
+       beforeUnmount() {
               console.log('======> beforeUnmount');
           }
-      	unmounted() {
+       unmounted() {
               console.log('======> unmounted');
           }
       }
@@ -3046,37 +3046,691 @@ defineExpose({ name, age });
    - `vue2` 是通过对旧节点列表建立一个 `{ key, oldVnode }` 的映射表，然后遍历新节点列表的剩余节点，根据`newVnode.key` 在旧映射表中寻找可复用的节点，然后打补丁并且移动到正确的位置。
    - `vue3` 则是建立一个存储新节点数组中的剩余节点在旧节点数组上的索引的映射关系数组，建立完成这个数组后也即找到了可复用的节点，然后通过这个数组计算得到最长递增子序列，这个序列中的节点保持不动，然后将新节点数组中的剩余节点移动到正确的位置。
 
-   # vue 项目中如何使用 cdn axios
+   # Transition 与 TransitionGroup
+
+   ## TransitionGroup
+
+以下是关于 Vue.js 中 `TransitionGroup` 组件的详细解析：
+
+---
+
+### **一、核心作用**
+
+`TransitionGroup` 是 Vue 的内置组件，专门用于 **管理列表元素（多个同级元素）的过渡效果**，主要处理以下场景：
+
+- **列表项的新增/删除动画**
+- **元素位置变化的平滑过渡**
+- **动态排序时的视觉反馈**
+- **复杂列表的复合过渡效果**
+
+---
+
+### **二、与 Transition 组件的区别**
+
+| 特性               | Transition                  | TransitionGroup             |
+|--------------------|-----------------------------|-----------------------------|
+| **作用对象**       | 单个元素/组件               | 多个元素组成的列表          |
+| **DOM 结构**       | 不渲染额外元素              | 默认渲染为 `<span>` 包裹容器 |
+| **位置变化处理**   | 不支持                      | 自动检测元素移动并应用动画  |
+| **Key 要求**       | 不需要                      | 必须为每个元素提供唯一 key  |
+
+---
+
+### **三、基础用法**
+
+#### 1. 基本结构
+
+```html
+<TransitionGroup name="list" tag="ul">
+  <li 
+    v-for="item in items" 
+    :key="item.id"
+  >
+    {{ item.text }}
+  </li>
+</TransitionGroup>
+```
+
+#### 2. 必要 CSS 类
+
+```css
+/* 进入/离开过渡 */
+.list-enter-from,
+.list-leave-to {
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+.list-enter-active,
+.list-leave-active {
+  transition: all 0.5s ease;
+}
+
+/* 移动过渡 */
+.list-move {
+  transition: transform 0.5s ease;
+}
+```
+
+---
+
+### **四、核心特性**
+
+#### 1. **自动位置检测**
+
+- 使用 **FLIP 动画技术**（First Last Invert Play）实现高效的位置变化动画
+- 当列表元素顺序变化时，自动计算位置差异并应用平滑过渡
+
+#### 2. **生命周期钩子**
+
+支持与 `Transition` 相同的 JavaScript 钩子：
+
+```html
+<TransitionGroup
+  @before-enter="onBeforeEnter"
+  @enter="onEnter"
+  @after-enter="onAfterEnter"
+  @enter-cancelled="onEnterCancelled"
+  @before-leave="onBeforeLeave"
+  @leave="onLeave"
+  @after-leave="onAfterLeave"
+  @leave-cancelled="onLeaveCancelled"
+>
+```
+
+#### 3. **配置属性**
+
+| 属性         | 类型      | 说明                          |
+|--------------|-----------|-------------------------------|
+| `tag`        | String    | 容器元素的标签（默认：`span`）|
+| `name`       | String    | 过渡类名前缀（默认：`v`）     |
+| `css`        | Boolean   | 是否使用 CSS 过渡（默认：true）|
+| `appear`     | Boolean   | 是否启用初始渲染过渡          |
+| `move-class` | String    | 自定义移动过渡类名            |
+
+---
+
+### **五、实现原理**
+
+#### 1. **虚拟 DOM 对比**
+
+- 通过对比新旧 `vnode` 列表，识别元素的添加、删除和移动
+- 使用 `key` 属性跟踪元素身份
+
+#### 2. **FLIP 动画流程**
+
+```mermaid
+sequenceDiagram
+    participant 旧位置
+    participant 新位置
+    participant 计算差异
+    participant 应用变换
+    
+    旧位置->>新位置: 记录元素初始位置
+    新位置->>计算差异: 计算位置差异
+    计算差异->>应用变换: 应用反向变换
+    应用变换->>新位置: 执行动画过渡到实际位置
+```
+
+#### 3. **CSS 控制阶段**
+
+- **进入阶段**：`v-enter-from` → `v-enter-to`
+- **离开阶段**：`v-leave-from` → `v-leave-to`
+- **移动阶段**：`v-move`
+
+---
+
+### **六、高级用法**
+
+#### 1. 交错动画
+
+```javascript
+// 使用 data-index 实现延迟
+function onBeforeEnter(el) {
+  el.style.animationDelay = `${el.dataset.index * 0.1}s`;
+}
+```
+
+#### 2. 与第三方动画库集成
+
+```html
+<TransitionGroup
+  tag="div"
+  @enter="onEnter"
+  :css="false"
+>
+  <!-- 元素内容 -->
+</TransitionGroup>
+
+<script>
+function onEnter(el, done) {
+  anime({
+    targets: el,
+    opacity: [0, 1],
+    translateY: [30, 0],
+    duration: 500,
+    complete: done
+  });
+}
+</script>
+```
+
+#### 3. 动态过渡类型
+
+```html
+<TransitionGroup :name="isMobile ? 'slide' : 'fade'">
+  <!-- 元素内容 -->
+</TransitionGroup>
+```
+
+---
+
+### **七、性能优化**
+
+#### 1. **强制硬件加速**
+
+```css
+.v-move {
+  will-change: transform;
+}
+```
+
+#### 2. **禁用非必要动画**
+
+```html
+<TransitionGroup :css="shouldAnimate">
+```
+
+#### 3. **虚拟列表优化**
+
+配合 `vue-virtual-scroller` 等库使用：
+
+```html
+<RecycleScroller>
+  <TransitionGroup>
+    <!-- 虚拟化列表项 -->
+  </TransitionGroup>
+</RecycleScroller>
+```
+
+---
+
+### **八、常见问题**
+
+#### 1. **元素跳动问题**
+
+- **原因**：未正确设置 `position: absolute` 在离开过渡时
+- **解决**：
+
+  ```css
+  .list-leave-active {
+    position: absolute;
+  }
+  ```
+
+#### 2. **过渡不生效**
+
+- **检查项**：
+  1. 是否正确应用了 CSS 过渡属性
+  2. 是否提供了唯一的 `key`
+  3. 是否正确定义了过渡类名
+
+#### 3. **移动动画卡顿**
+
+- **优化方案**：
+
+  ```css
+  .list-move {
+    transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+  ```
+
+---
+
+### **九、完整示例**
+
+```html
+<template>
+  <div>
+    <button @click="addItem">添加</button>
+    <button @click="shuffle">随机排序</button>
+    
+    <TransitionGroup 
+      name="list" 
+      tag="ul"
+      class="list-container"
+    >
+      <li
+        v-for="(item, index) in items"
+        :key="item.id"
+        :data-index="index"
+        class="list-item"
+      >
+        {{ item.text }}
+        <button @click="removeItem(item.id)">×</button>
+      </li>
+    </TransitionGroup>
+  </div>
+</template>
+
+<script setup>
+import { ref } from 'vue';
+
+const items = ref([/* 初始数据 */]);
+
+function addItem() {
+  items.value.push({ id: Date.now(), text: '新项目' });
+}
+
+function removeItem(id) {
+  items.value = items.value.filter(item => item.id !== id);
+}
+
+function shuffle() {
+  items.value = [...items.value].sort(() => Math.random() - 0.5);
+}
+</script>
+
+<style>
+.list-container {
+  position: relative;
+}
+
+.list-item {
+  transition: all 0.5s ease;
+}
+
+.list-enter-from {
+  opacity: 0;
+  transform: translateX(30px);
+}
+
+.list-leave-to {
+  opacity: 0;
+  transform: translateY(-30px);
+}
+
+.list-leave-active {
+  position: absolute;
+  width: 100%;
+}
+
+.list-move {
+  transition: transform 0.8s ease;
+}
+</style>
+```
+
+## Transition
+
+以下是关于 Vue.js 中 `Transition` 组件的详细解析：
+
+---
+
+### **一、核心作用**
+
+`Transition` 是 Vue 的内置组件，用于 **为单个元素或组件添加进入/离开的过渡动画**，主要功能包括：
+
+- **自动应用 CSS 过渡类名**
+- **集成 CSS 动画库（如 Animate.css）**
+- **通过 JavaScript 钩子实现复杂动画**
+- **优化过渡性能（如硬件加速）**
+
+---
+
+### **二、基础用法**
+
+#### 1. 基本结构
+
+```html
+<Transition name="fade">
+  <div v-if="show">需要过渡的内容</div>
+</Transition>
+```
+
+#### 2. 必要 CSS 类
+
+```css
+/* 进入过渡 */
+.fade-enter-from { opacity: 0; }
+.fade-enter-active { transition: opacity 0.5s; }
+.fade-enter-to { opacity: 1; }
+
+/* 离开过渡 */
+.fade-leave-from { opacity: 1; }
+.fade-leave-active { transition: opacity 0.5s; }
+.fade-leave-to { opacity: 0; }
+```
+
+---
+
+### **三、核心特性**
+
+#### 1. **过渡阶段类名**
+
+| 类名               | 作用时机                     |
+|--------------------|-----------------------------|
+| `v-enter-from`     | 进入过渡的开始状态           |
+| `v-enter-active`   | 进入过渡的激活状态（持续）   |
+| `v-enter-to`       | 进入过渡的结束状态           |
+| `v-leave-from`     | 离开过渡的开始状态           |
+| `v-leave-active`   | 离开过渡的激活状态（持续）   |
+| `v-leave-to`       | 离开过渡的结束状态           |
+
+> 通过 `name` 属性自定义类名前缀（如 `name="fade"` → `fade-enter-from`）
+
+#### 2. **过渡模式**
+
+| 模式            | 说明                          |
+|-----------------|-------------------------------|
+| `out-in`        | 先执行离开过渡，再执行进入过渡 |
+| `in-out`        | 先执行进入过渡，再执行离开过渡 |
+
+```html
+<Transition name="slide" mode="out-in">
+  <Component :is="currentView" />
+</Transition>
+```
+
+#### 3. **JavaScript 钩子**
+
+```html
+<Transition
+  @before-enter="onBeforeEnter"
+  @enter="onEnter"
+  @after-enter="onAfterEnter"
+  @enter-cancelled="onEnterCancelled"
+  @before-leave="onBeforeLeave"
+  @leave="onLeave"
+  @after-leave="onAfterLeave"
+  @leave-cancelled="onLeaveCancelled"
+>
+  <!-- 内容 -->
+</Transition>
+```
+
+---
+
+### **四、实现原理**
+
+1. **虚拟 DOM 追踪**  
+   Vue 通过虚拟 DOM 检测元素是否被插入/移除
+
+2. **过渡阶段管理**  
+
+   ```mermaid
+   graph LR
+   A[DOM 插入] --> B[应用 enter-from 类]
+   B --> C[下一帧应用 enter-active + enter-to]
+   C --> D[过渡完成移除类名]
+   
+   E[DOM 移除] --> F[应用 leave-from 类]
+   F --> G[下一帧应用 leave-active + leave-to]
+   G --> H[实际移除元素]
+   ```
+
+3. **性能优化**  
+   - 自动检测 CSS 过渡/动画类型
+   - 优先使用 `requestAnimationFrame`
+   - 自动处理过渡结束事件监听
+
+---
+
+### **五、使用场景**
+
+#### 1. 元素显隐过渡
+
+```html
+<Transition name="slide">
+  <div v-show="isVisible">滑动内容</div>
+</Transition>
+```
+
+#### 2. 组件切换过渡
+
+```html
+<Transition name="fade" mode="out-in">
+  <router-view />
+</Transition>
+```
+
+#### 3. 结合第三方动画库
+
+```html
+<Transition
+  enter-active-class="animate__animated animate__bounceIn"
+  leave-active-class="animate__animated animate__bounceOut"
+>
+  <div v-if="show">Animate.css 动画</div>
+</Transition>
+```
+
+---
+
+### **六、高级用法**
+
+#### 1. 动态过渡类型
+
+```html
+<Transition :name="transitionType">
+  <div v-if="show">动态过渡效果</div>
+</Transition>
+
+<script>
+export default {
+  data() {
+    return {
+      transitionType: 'fade'
+    }
+  }
+}
+</script>
+```
+
+#### 2. 列表项独立过渡
+
+```html
+<div v-for="item in items" :key="item.id">
+  <Transition>
+    <div>{{ item.text }}</div>
+  </Transition>
+</div>
+```
+
+#### 3. 与 GSAP 集成
+
+```javascript
+function onEnter(el, done) {
+  gsap.from(el, {
+    duration: 0.8,
+    opacity: 0,
+    y: 100,
+    onComplete: done
+  });
+}
+```
+
+---
+
+### **七、性能优化**
+
+#### 1. 强制硬件加速
+
+```css
+.v-enter-active,
+.v-leave-active {
+  will-change: transform;
+  transform: translateZ(0);
+}
+```
+
+#### 2. 减少复合动画
+
+避免同时动画多个属性：
+
+```css
+/* 推荐 */
+.fade-enter-active {
+  transition: opacity 0.3s;
+}
+
+/* 不推荐 */
+.fade-enter-active {
+  transition: all 0.3s;
+}
+```
+
+#### 3. 合理使用 `appear`
+
+初始渲染过渡：
+
+```html
+<Transition appear>
+  <!-- 内容 -->
+</Transition>
+```
+
+---
+
+### **八、常见问题**
+
+#### 1. 过渡不生效
+
+- **检查项**：
+  1. 是否使用了 `v-if`/`v-show`
+  2. CSS 类名是否正确
+  3. 过渡属性是否被覆盖
+
+#### 2. 过渡闪烁
+
+- **解决方案**：
+
+  ```css
+  .v-enter-active,
+  .v-leave-active {
+    transition: opacity 0.5s !important;
+  }
+  ```
+
+#### 3. 与 `v-for` 冲突
+
+- **正确做法**：
+
+  ```html
+  <TransitionGroup>
+    <div v-for="item in items" :key="item.id">
+      <!-- 内容 -->
+    </div>
+  </TransitionGroup>
+  ```
+
+---
+
+### **九、完整示例**
+
+```html
+<template>
+  <div>
+    <button @click="show = !show">切换</button>
+    
+    <Transition
+      name="custom"
+      @enter="onEnter"
+      @leave="onLeave"
+      :css="false"
+    >
+      <div 
+        v-if="show" 
+        class="box"
+      >
+        动态内容
+      </div>
+    </Transition>
+  </div>
+</template>
+
+<script setup>
+import { ref } from 'vue';
+import gsap from 'gsap';
+
+const show = ref(true);
+
+function onEnter(el, done) {
+  gsap.from(el, {
+    duration: 0.8,
+    x: 100,
+    opacity: 0,
+    ease: 'power4.out',
+    onComplete: done
+  });
+}
+
+function onLeave(el, done) {
+  gsap.to(el, {
+    duration: 0.8,
+    x: -100,
+    opacity: 0,
+    ease: 'power4.in',
+    onComplete: done
+  });
+}
+</script>
+
+<style>
+.box {
+  width: 200px;
+  height: 200px;
+  background: #42b983;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+</style>
+```
+
+---
+
+### **十、与 TransitionGroup 对比**
+
+| 特性               | Transition                  | TransitionGroup             |
+|--------------------|-----------------------------|-----------------------------|
+| **作用对象**       | 单个元素/组件               | 多个元素组成的列表          |
+| **DOM 操作**       | 不修改 DOM 结构             | 自动处理元素位置变化        |
+| **动画类型**       | 进入/离开                   | 进入/离开 + 位置移动        |
+| **性能消耗**       | 较低                        | 较高                        |
+
+# vue 项目中如何使用 cdn axios
 
    在 `Vue` 项目中使用 `CDN` 引入 `Axios`，可以通过以下步骤完成：使用 `CDN` 引入 `Axios` 的好处包括减少打包体积、提升加载速度、简化项目依赖管理。其中，减少打包体积是最显著的优势之一。通过 `CDN` 引入，`Axios` 库不需要被打包进项目的最终构建文件，极大地减少了文件体积，提高了网页的加载速度。
 
-   ## 一、什么是 CDN 和 Axios？
+## 一、什么是 CDN 和 Axios？
 
-   ### 1、CDN 的定义和作用
+### 1、CDN 的定义和作用
 
    `CDN`（内容分发网络）是一种通过分布在多个不同地理位置的服务器网络来分发内容的技术。它的主要作用是通过将内容缓存到离用户最近的服务器上，从而加速内容的传输速度，减少网络延迟，提高用户体验。
 
-   ### 2、Axios 的定义和功能
+### 2、Axios 的定义和功能
 
    `Axios` 是一个基于 `Promise` 的 `HTTP` 库，可以用在浏览器和 `Node.js` 中。它提供了一系列功能，如发送异步`HTTP` 请求、拦截请求和响应、转换请求和响应数据、取消请求、自动转换 `JSON` 数据等。`Axios` 的易用性和强大的功能使其成为许多前端开发者的首选 `HTTP` 库。
 
-   ## 二、为什么选择 CDN 引入 Axios？
+## 二、为什么选择 CDN 引入 Axios？
 
-   ### 1、减少打包体积
+### 1、减少打包体积
 
    通过 `CDN` 引入 `Axios`，项目的构建文件中不需要包含 `Axios` 库，这可以显著减少打包体积，提高网页的加载速度。对于大型项目，减少打包体积尤为重要，因为这可以显著提升用户体验。
 
-   ### 2、提升加载速度
+### 2、提升加载速度
 
    `CDN` 服务器通常分布在全球各地，可以通过就近原则将内容传输给用户，从而加速内容加载速度。`CDN` 还可以利用浏览器的缓存机制，当用户访问不同使用相同 `CDN` 资源的网站时，可以直接从缓存中读取资源，进一步提升加载速度。
 
-   ### 3、简化项目依赖管理
+### 3、简化项目依赖管理
 
    使用 `CDN` 引入可以减少项目中的依赖包，使项目结构更加简洁。特别是在多团队协作开发中，使用 `CDN` 可以减少依赖冲突和版本不一致的问题。
 
-   ## 三、如何在 Vue 项目中使用 CDN 引入 Axios？
+## 三、如何在 Vue 项目中使用 CDN 引入 Axios？
 
-   ### 1、在 HTML 文件中引入 Axios
+### 1、在 HTML 文件中引入 Axios
 
    首先，在 `Vue` 项目的`public/index.html`文件中，通过 `script` 标签引入 `Axios` 的 `CDN` 链接：
 
@@ -3098,7 +3752,7 @@ defineExpose({ name, age });
    </html>
    ```
 
-   ### 2、在 Vue 组件中使用 Axios
+### 2、在 Vue 组件中使用 Axios
 
    在 `Vue` 组件中，你可以直接使用全局 `Axios` 对象进行 `HTTP` 请求：
 
@@ -3136,7 +3790,7 @@ defineExpose({ name, age });
    </script>
    ```
 
-   ### 3、配置环境变量
+### 3、配置环境变量
 
    为了在开发和生产环境中灵活切换 `Axios` 的引入方式，可以使用环境变量。在项目根目录下创建`.env.development`和`.env.production`文件：
 
@@ -3158,7 +3812,7 @@ defineExpose({ name, age });
    <script src="<%= process.env.VUE_APP_AXIOS_CDN %>"></script>
    ```
 
-   ### 4、使用 Webpack 插件动态引入 CDN
+### 4、使用 Webpack 插件动态引入 CDN
 
    通过`html-webpack-plugin`插件，可以在构建过程中动态引入 `CDN` 资源。首先，安装插件：
 
@@ -3189,31 +3843,31 @@ defineExpose({ name, age });
    <script src="<%= htmlWebpackPlugin.options.cdn %>"></script>
    ```
 
-   ## 四、常见问题及解决方案
+## 四、常见问题及解决方案
 
-   ### 1、Axios 未定义
+### 1、Axios 未定义
 
    如果在使用 `CDN` 引入 `Axios` 后，控制台报错“ `Axios` 未定义”，可能是因为 `Axios` 的 `CDN` 资源加载失败或加载顺序不正确。确保 `CDN` 链接正确，并在 `Vue` 实例初始化之前加载 `Axios`。
 
-   ### 2、环境变量未生效
+### 2、环境变量未生效
 
    如果环境变量未生效，检查`.env`文件的命名是否正确，确保以`VUE_APP_`开头，并在`vue.config.js`中正确引用环境变量。
 
-   ### 3、版本不兼容
+### 3、版本不兼容
 
    使用 `CDN` 时，注意 `Axios` 版本与项目中其他依赖库的兼容性。尽量选择稳定版本的 `Axios`，避免使用 `beta` 或`alpha` 版本。
 
-   ## 五、总结
+## 五、总结
 
    通过 `CDN` 引入`Axios`，可以显著减少打包体积、提升加载速度、简化项目依赖管理。具体步骤包括在 `HTML` 文件中引入 `Axios` 、在 `Vue` 组件中使用 `Axios`、**配置环境变量**、使用 `Webpack` 插件动态引入 `CDN` 等。遇到常见问题时，可以通过检查 `CDN` 链接、环境变量配置、版本兼容性等方式进行排查和解决。**通过合理使用 CDN 和 Axios，可以提升 Vue 项目的性能和开发效率。**
 
-   # data 为什么是一个函数而不是一个对象
+# data 为什么是一个函数而不是一个对象
 
    > [!IMPORTANT]
    >
    > `Vue` 组件可能存在多个实例，如果使用对象形式定义 `data`，则会导致它们共用一个 `data` 对象，那么状态变更将会影响所有组件实例，这是不合理的；采用函数形式定义，在 `initData` 时会将其作为工厂函数返回全新 `data` 对象，有效规避多实例之间状态污染问题。而在 `Vue` 根实例创建过程中则不存在该限制，也是因为根实例只能有一个，不需要担心这种情况。
 
-   # keep-alive
+# keep-alive
 
    如果需要在组件切换的时候，保存一些组件的状态防止多次渲染，就可以使用 `keep-alive` 组件包裹需要保存的组件。
 
@@ -3253,8 +3907,8 @@ defineExpose({ name, age });
    2. 通过当前组件名去匹配原来 `include` 和 `exclude`，判断当前组件是否需要缓存，不需要缓存，直接返回当前组件的实例 `vNode`
    3. 需要缓存，判断他当前是否在缓存数组里面：
 
-   - 存在，则将他原来位置上的 `key` 给移除，同时将这个组件的 `key` 放到数组最后面（`LRU`）
-   - 不存在，将组件 `key` 放入数组，然后判断当前 `key` 数组是否超过 `max` 所设置的范围，超过，那么削减未使用时间最长的一个组件的 `key`
+- 存在，则将他原来位置上的 `key` 给移除，同时将这个组件的 `key` 放到数组最后面（`LRU`）
+- 不存在，将组件 `key` 放入数组，然后判断当前 `key` 数组是否超过 `max` 所设置的范围，超过，那么削减未使用时间最长的一个组件的 `key`
 
    4. 最后将这个组件的 `keepAlive` 设置为 `true`
 
@@ -3264,8 +3918,8 @@ defineExpose({ name, age });
 
    **首次渲染**
 
-   - 组件的首次渲染 ∶ 判断组件的 `abstract` 属性，才往父组件里面挂载 `DOM`
-   - 判断当前 `keepAlive` 和 `componentInstance` 是否存在来判断是否要执行组件 `prepatch` 还是执行创建 `componentlnstance`
+- 组件的首次渲染 ∶ 判断组件的 `abstract` 属性，才往父组件里面挂载 `DOM`
+- 判断当前 `keepAlive` 和 `componentInstance` 是否存在来判断是否要执行组件 `prepatch` 还是执行创建 `componentlnstance`
 
    `prepatch` 操作就不会在执行组件的 `mounted` 和 `created` 生命周期函数，而是直接将 `DOM` 插入
 
@@ -3275,7 +3929,7 @@ defineExpose({ name, age });
    >
    > 当组件被换掉时，会被缓存到内存中、触发 `deactivated` 生命周期；当组件被切回来时，再去缓存里找这个组件、触发 `activated` 钩子函数。
 
-   # $nextTick 原理及作用
+# $nextTick 原理及作用
 
    `nextTick` 的核心是利用了如 `Promise 、MutationObserver、setImmediate、setTimeout` 的原生 `JavaScript` 方法来模拟对应的微/宏任务的实现，本质是为了利用 `JavaScript` 的这些异步回调任务队列来实现 `Vue` 框架中自己的异步回调队列。
 
@@ -3283,20 +3937,20 @@ defineExpose({ name, age });
 
    在以下情况下，会用到 `nextTick`：
 
-   - 在数据变化后执行的某个操作，而这个操作需要使用随数据变化而变化的 `DOM` 结构的时候，这个操作就需要方法在`nextTick()`的回调函数中。
-   - 在 `vue` 生命周期中，如果在 `created()` 钩子进行 `DOM` 操作，也一定要放在`nextTick()`的回调函数中。
+- 在数据变化后执行的某个操作，而这个操作需要使用随数据变化而变化的 `DOM` 结构的时候，这个操作就需要方法在`nextTick()`的回调函数中。
+- 在 `vue` 生命周期中，如果在 `created()` 钩子进行 `DOM` 操作，也一定要放在`nextTick()`的回调函数中。
 
    > [!IMPORTANT]
    >
    > 因为在 `created()` 钩子函数中，页面的 `DOM` 还未渲染，这时候也没办法操作 `DOM` ，所以，此时如果想要操作 `DOM`，必须将操作的代码放在`nextTick()`的回调函数中。
 
-   # Vue2 重新数组方法
+# Vue2 重新数组方法
 
    > [!TIP]
    >
-   > 重写了数组的原生方法，先获取到数组的 `observer` 监视器对象，如果有新的值，就调用 `observeArray` 对新的值继续观察变化，手动调用 `notify` 通知依赖更新，通知 `watcher `订阅者，执行 `update` 函数。
+   > 重写了数组的原生方法，先获取到数组的 `observer` 监视器对象，如果有新的值，就调用 `observeArray` 对新的值继续观察变化，手动调用 `notify` 通知依赖更新，通知 `watcher`订阅者，执行 `update` 函数。
 
-   # Vue template 到 render 的过程
+# Vue template 到 render 的过程
 
    `vue` 的模版编译过程主要如下：**template -> ast -> render 函数**
 
@@ -3309,20 +3963,20 @@ defineExpose({ name, age });
 
    `CompileToFunctions` 中的主要逻辑如下 ∶
 
-   ## 1. 调用 parse 方法将 template 转化为 ast（抽象语法树）
+## 1. 调用 parse 方法将 template 转化为 ast（抽象语法树）
 
    ```js
    const ast = parse(template.trim(), options);
    ```
 
-   - **parse 的目标**：把 `tamplate` 转换为 `AST` 树，它是一种用 `JavaScript` 对象的形式来描述整个模板。
-   - **解析过程**：利用正则表达式顺序解析模板，当解析到开始标签、闭合标签、文本的时候都会分别执行对应的 回调函数，来达到构造 `AST` 树的目的。
+- **parse 的目标**：把 `tamplate` 转换为 `AST` 树，它是一种用 `JavaScript` 对象的形式来描述整个模板。
+- **解析过程**：利用正则表达式顺序解析模板，当解析到开始标签、闭合标签、文本的时候都会分别执行对应的 回调函数，来达到构造 `AST` 树的目的。
 
    > [!TIP]
    >
    > `AST` 元素节点总共三种类型：`type` 为 `1` 表示普通元素、`2` 为表达式、`3` 为纯文本。
 
-   ## 2. **对静态节点做优化**
+## 2. **对静态节点做优化**
 
    ```js
    optimize(ast, options);
@@ -3332,7 +3986,7 @@ defineExpose({ name, age });
 
    深度遍历 `AST`，查看每个子树的节点元素是否为静态节点或者静态节点根。如果为静态节点，他们生成的 `DOM` 永远不会改变，这对运行时模板更新起到了极大的优化作用。
 
-   ## 3. 生成代码
+## 3. 生成代码
 
    ```js
    const code = generate(ast, options);
@@ -3340,7 +3994,7 @@ defineExpose({ name, age });
 
    `generate` 将 `ast` 抽象语法树编译成 `render` 字符串并将静态部分放到 `staticRenderFns` 中，最后通过 `new Function(render)` 生成 `render` 函数。
 
-   # Vue 是如何收集依赖的
+# Vue 是如何收集依赖的
 
    `Vue` 的依赖收集机制主要基于 `Observer`、`Watcher` 和 `Dep` 三个类。
 
@@ -3357,20 +4011,20 @@ defineExpose({ name, age });
       > 4. **数据变更**：当数据属性发生变化时，`Object.defineProperty` 的 `set` 方法会被调用。
       > 5. **通知更新**：在 `set` 方法中，调用 `dep.notify()` 通知所有订阅的 `Watcher` 实例，这些 `Watcher` 实例会调用 `update` 方法更新视图。
 
-   # delete 和 Vue.delete 的区别
+# delete 和 Vue.delete 的区别
 
    > [!IMPORTANT]
    >
    > `delete` 和 `Vue.delete` 都是对数组或对象的删除。这两种方法对于**对象**来说没有区别，直接删除对象的属性；但是对于数组来说有区别。`delete` 只是被删除的元素变成了 `empty/undefined` 其他的元素的键值还是不变，数组长度也不变。 `Vue.delete` 是直接删除该元素，长度发生变化。
 
-   # vm.$set 的实现原理
+# vm.$set 的实现原理
 
    > [!IMPORTANT]
    >
    > - 如果目标是**数组**，直接使用数组的 `splice` 方法触发响应式；
    > - 如果目标是**对象**，会先判断属性是否存在、对象是否是响应式，最终如果要对属性进行响应式处理，则是通过调用 `defineReactive` 方法进行响应式处理（ `defineReactive` 方法就是 `Vue` 在初始化对象时，给对象属性采用 `Object.defineProperty` 动态添加 `getter` 和 `setter` 的功能所调用的方法。）
 
-   # Vue-router 跳转和 location.href 有什么区别
+# Vue-router 跳转和 location.href 有什么区别
 
    > [!IMPORTANT]
    >
@@ -3378,18 +4032,18 @@ defineExpose({ name, age });
    > `vue-router` 是路由跳转或同一个页面跳转；`location.href` 是不同页面间跳转；
    > `vue-router` 是异步加载 `this.$nextTick(()=>{获取url});` `location.href` 是同步加载。
 
-   # Vuex
+# Vuex
 
-   ## Vuex 核心流程
+## Vuex 核心流程
 
    > [!TIP]
    >
-   > - `vue `组件会触发（`dispatch`）一些事件或动作，也就是图中的 `Actions`;
+   > - `vue`组件会触发（`dispatch`）一些事件或动作，也就是图中的 `Actions`;
    > - 在组件中发出的动作，肯定是想获取或者改变数据的，但是在 `vuex` 中，数据是集中管理的，不能直接去更改数据，所以会把这个动作提交（`Commit`）到 `Mutations` 中;
    > - 然后 `Mutations` 就去改变（`Mutate`）`State` 中的数据;
    > - 当 `State` 中的数据被改变之后，就会重新渲染（`Render`）到 `Vue Components` 中去，组件展示更新后的数据，完成一个流程。
 
-   ## Vuex 有哪几种属性
+## Vuex 有哪几种属性
 
    > [!IMPORTANT]
    >
@@ -3401,14 +4055,14 @@ defineExpose({ name, age });
    > - `actions` => 像一个装饰器，包裹 `mutations`，使之可以异步。
    > - `modules` => 模块化 `Vuex`
 
-   ## 为什么 Vuex 的 mutation 中不能做异步操作
+## 为什么 Vuex 的 mutation 中不能做异步操作
 
    > [!TIP]
    >
    > - `Vuex` 中所有的状态更新的唯一途径都是 `mutation`，异步操作通过 `Action` 来提交 `mutation` 实现，这样可以方便地跟踪每一个状态的变化，从而能够实现一些工具帮助更好地了解我们的应用。
-   > - 每个 `mutation` 执行完成后都会对应到一个新的状态变更，这样 `devtools` 就可以打个快照存下来，然后就可以实现 `time-travel` 了。如果 `mutation ` 支持异步操作，就没有办法知道状态是何时更新的，无法很好的进行状态的追踪，给调试带来困难。
+   > - 每个 `mutation` 执行完成后都会对应到一个新的状态变更，这样 `devtools` 就可以打个快照存下来，然后就可以实现 `time-travel` 了。如果 `mutation` 支持异步操作，就没有办法知道状态是何时更新的，无法很好的进行状态的追踪，给调试带来困难。
 
-   ## Vuex 的严格模式是什么,有什么作用，如何开启？
+## Vuex 的严格模式是什么,有什么作用，如何开启？
 
    在严格模式下，无论何时发生了状态变更且不是由 `mutation` 函数引起的，将会抛出错误。这能保证所有的状态变更都能被调试工具跟踪到。
 
@@ -3420,28 +4074,28 @@ defineExpose({ name, age });
    });
    ```
 
-   ## Vuex 和 localStorage 的区别
+## Vuex 和 localStorage 的区别
 
    **1）最重要的区别**
 
-   - vuex 存储在**内存**中
-   - **localstorage 则以文件的方式存储在本地，只能存储字符串类型的数据，存储对象需要 JSON 的 stringify 和 parse 方法进行处理。 读取内存比读取硬盘速度要快**
+- vuex 存储在**内存**中
+- **localstorage 则以文件的方式存储在本地，只能存储字符串类型的数据，存储对象需要 JSON 的 stringify 和 parse 方法进行处理。 读取内存比读取硬盘速度要快**
 
    **（2）应用场景**
 
-   - **Vuex 是一个专为 Vue.js 应用程序开发的状态管理模式。它采用集中式存储管理应用的所有组件的状态，并以相应的规则保证状态以一种可预测的方式发生变化。vuex 用于组件之间的传值。**
-   - **localstorage 是本地存储，是将数据存储到浏览器的方法，一般是在跨页面传递数据时使用 。**
-   - **Vuex 能做到数据的响应式，localstorage 不能**
+- **Vuex 是一个专为 Vue.js 应用程序开发的状态管理模式。它采用集中式存储管理应用的所有组件的状态，并以相应的规则保证状态以一种可预测的方式发生变化。vuex 用于组件之间的传值。**
+- **localstorage 是本地存储，是将数据存储到浏览器的方法，一般是在跨页面传递数据时使用 。**
+- **Vuex 能做到数据的响应式，localstorage 不能**
 
    **（3）永久性**
 
-   - **刷新页面时 vuex 存储的值会丢失，localstorage 不会。**
+- **刷新页面时 vuex 存储的值会丢失，localstorage 不会。**
 
    > [!TIP]
    >
    > 注意：**对于不变的数据确实可以**用 `localstorage` 可以代替 `vuex`，但是当两个组件共用一个数据源（对象或数组）时，如果其中一个组件改变了该数据源，希望另一个组件响应该变化时，`localstorage` 无法做到。
 
-   ## Vuex 和 Redux 区别与联系
+## Vuex 和 Redux 区别与联系
 
    共同思想：
 

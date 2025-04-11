@@ -1340,13 +1340,57 @@ function curry(fn, args) {
 
 // es6 实现
 function curry(fn, ...args) {
-  return fn.length <= args.length ? fn(...args) : curry.bind(null, fn, ...args);
+  /**
+    fn.length：函数的形参个数
+    args.length：当前已收集的参数个数
+    ...args：收集剩余参数
+    bind：创建新函数，保存当前参数
+  */
+  return fn.length <= args.length 
+  ? fn(...args) // 执行函数
+  : curry.bind(null, fn, ...args); // 继续收集参数
 }
 
 // 使用示例
 const curriedAdd = curry((a, b, c) => a + b + c);
 console.log(curriedAdd(1)(2)(3)); // 6
 console.log(curriedAdd(1, 2)(3)); // 6
+
+// 运行流程
+function add(a, b, c) {
+    return a + b + c;
+}
+  
+// 普通调用
+add(1, 2, 3); // 6
+
+// 柯里化调用
+const curriedAdd = curry(add);
+curriedAdd(1)(2)(3);
+// 第一次调用：curriedAdd(1)
+function curry(add, 1) {
+    // add.length = 3（形参数量）
+    // args.length = 1（当前参数数量）
+    // 3 > 1，继续柯里化
+    return curry.bind(null, add, 1);
+}
+  
+// 第二次调用：curriedAdd(1)(2)
+function curry(add, 1, 2) {
+    // add.length = 3
+    // args.length = 2
+    // 3 > 2，继续柯里化
+    return curry.bind(null, add, 1, 2);
+}
+  
+// 第三次调用：curriedAdd(1)(2)(3)
+function curry(add, 1, 2, 3) {
+    // add.length = 3
+    // args.length = 3
+    // 3 = 3，参数够了，执行函数
+    return add(1, 2, 3); // 6
+}
+  
 ```
 
 # 函数的 arguments 参数
@@ -3041,4 +3085,3 @@ Reflect 的核心价值：
 | **基本的获取响应能力** | ✅ | ✅ |
 | **监控请求进度** | ✅ | ✅ |
 | **监控响应进度** | ✅ | ✅ |
-
