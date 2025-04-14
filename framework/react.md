@@ -3993,6 +3993,63 @@ export const Counter: React.FC = () => {
 >```
 >
 
+### `React` 是如何保证单向数据流的
+
+#### 1. **Props 的只读性**
+
+自上而下传递：父组件通过 `props` 向子组件传递数据，子组件无法直接修改接收到的 `props`。
+显式更新：若子组件需要影响父组件状态，必须通过父组件传递的回调函数触发状态变更。
+
+```jsx
+// 父组件
+function Parent() {
+  const [count, setCount] = useState(0);
+  return <Child count={count} onIncrement={() => setCount(c => c + 1)} />;
+}
+
+// 子组件
+function Child({ count, onIncrement }) {
+  return (
+    <div>
+      <span>{count}</span>
+      <button onClick={onIncrement}>+1</button>
+    </div>
+  );
+}
+```
+
+#### 2. **状态提升**
+
+共享状态：多个组件需要共享状态时，需将状态提升至最近的共同祖先组件，通过 `props` 分发。
+单一数据源：避免状态分散，确保数据变更源头唯一。
+
+```jsx
+function TemperatureInput({ temperature, onTemperatureChange }) {
+  return (
+    <input 
+      value={temperature}
+      onChange={(e) => onTemperatureChange(e.target.value)}
+    />
+  );
+}
+
+function Calculator() {
+  const [temperature, setTemperature] = useState('');
+  return (
+    <div>
+      <TemperatureInput
+        temperature={temperature}
+        onTemperatureChange={setTemperature}
+      />
+      <TemperatureInput
+        temperature={temperature}
+        onTemperatureChange={setTemperature}
+      />
+    </div>
+  );
+}
+```
+
 ### 1. `React` 中 `setState` 后 发生了什么
 
 在代码中调用 `setState` 函数之后，`React` 会将传入的参数对象与组件当前的状态合并，然后触发调和过程(`Reconciliation`)。经过调和过程，`React` 会以相对高效的方式根据新的状态构建 `React` 元素树并且着手重新渲染整个 `UI` 界面。
