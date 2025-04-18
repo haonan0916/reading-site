@@ -1009,6 +1009,100 @@ var hasPathSum = function(root, targetSum) {
 >
 >
 
+# 回溯法
+
+## 求数组中的所有组合
+
+```js
+function getAllCombinations(arr) {
+  const res = [];
+  const path = [];
+  const dfs = (start) => {
+    // 每个路径都是一个合法组合，直接加入结果
+    res.push([...path]);
+    // 从start开始，避免重复选择
+    for (let i = start; i < arr.length; i++) {
+      path.push(arr[i]);
+      dfs(i + 1);
+      path.pop();
+    }
+  }
+  dfs(0);
+  return res;
+}
+
+console.log(getAllCombinations([1, 2, 3]));
+// 输出: [[], [1], [1,2], [1,2,3], [1,3], [2], [2,3], [3]]
+```
+
+## 求无重复元素数组的所有排列
+
+```js
+function getAllPermutations(arr) {
+  const res = [];
+  const n = arr.length;
+  const visited = Array.from({length: n}, () => false);
+  const path = [];
+  const dfs = () => {
+    if (path.length === n) {
+      result.push([...path]);
+      return;
+    }
+    // 尝试每个位置
+    for (let i = 0; i < n; i++) {
+      // 如果当前数字已经使用过，则跳过
+      if (visited[i]) continue;
+      visited[i] = true;
+      path.push(arr[i]);
+      dfs();
+      path.pop();
+      visited[i] = false;
+    }
+  };
+  dfs();
+  return res;
+}
+
+console.log(getAllPermutations([1, 2, 3]));
+// 输出: [[1,2,3], [1,3,2], [2,1,3], [2,3,1], [3,1,2], [3,2,1]]
+```
+
+## 有重复元素数组的所有排列
+
+```js
+function getAllPermutationsWithDuplicates(arr) {
+  const res = [];
+  const n = arr.length;
+  const visited = Array.from({length: n}, () => false);
+  const path = [];
+
+  // 先排序，便于去重
+  arr.sort((a, b) => a - b);
+
+  const dfs = () => {
+    if (path.length === n) {
+      res.push([...path]);
+      return;
+    }
+    for (let i = 0; i < n; i++) {
+      // 去重逻辑：如果当前元素与前一个元素相同，且前一个元素未使用，则跳过
+      if (visited[i] || (i > 0 && arr[i] === arr[i-1] && !visited[i-1])) continue;
+      visited[i] = true;
+      path.push(arr[i]);
+      backtrack();
+      path.pop();
+      visited[i] = false;
+    }
+  };
+
+  backtrack();
+  return result;
+}
+
+console.log(getAllPermutationsWithDuplicates([1, 2, 2]));
+// 输出: [[1,2,2], [2,1,2], [2,2,1]]
+```
+
 # bfs 及其拓展
 
 ## bfs 模板

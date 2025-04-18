@@ -94,7 +94,7 @@ export default defineConfig({
             link: '/engineering/git'
           },
           {
-            text: 'Webpack',
+            text: 'Webpack与Vite',
             link: '/engineering/webpack'
           }
         ]
@@ -208,7 +208,7 @@ export default defineConfig({
             link: '/engineering/git'
           },
           {
-            text: 'Webpack',
+            text: 'Webpack与Vite',
             link: '/engineering/webpack'
           }
         ]
