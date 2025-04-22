@@ -2800,9 +2800,9 @@ defineExpose({ name, age });
 
      ......
 
-   # 9. 虚拟 DOM
+# 9. 虚拟 DOM
 
-   ## 9.1. 虚拟 DOM 真的比真实 DOM 性能好吗
+## 9.1. 虚拟 DOM 真的比真实 DOM 性能好吗
 
    > [!IMPORTANT]
    >
@@ -2812,7 +2812,7 @@ defineExpose({ name, age });
    >
    > 在整个 `DOM` 操作的演化过程中，主要矛盾并不在于性能，而在于开发者写得爽不爽，在于研发体验/研发效率。虚拟 `DOM` 不是别的，正是前端开发们为了追求更好的研发体验和研发效率而创造出来的高阶产物。虚拟 `DOM` 并不一定会带来更好的性能，虚拟 `DOM` 的优越之处在于，它能够在提供更爽、更高效的研发模式的同时，仍然保持一个还不错的性能。
 
-   # 10. 虚拟列表
+# 10. 虚拟列表
 
    > [!TIP]
    >
@@ -2921,7 +2921,7 @@ defineExpose({ name, age });
    </style>
    ```
 
-   # 11. 自定义指令
+# 11. 自定义指令
 
    自定义指令的生命周期与 `Vue` 的生命周期基本一致。
 
@@ -2956,11 +2956,11 @@ defineExpose({ name, age });
    </script>
    ```
 
-   ## 函数简写
+## 函数简写
 
    如果我们只想在 `mounted` 和 `updated` 时触发相同行为，而不关心其他钩子函数。我们可以通过这个函数模式实现。
 
-   # Scoped 是怎么实现样式隔离的
+# Scoped 是怎么实现样式隔离的
 
    > [!TIP]
    >
@@ -2970,7 +2970,7 @@ defineExpose({ name, age });
    > 2. 添加作用域 `ID` 到模板元素：`Vue` 会在编译组件模板的过程中，将这个作用域 `ID` 作为自定义属性添加到组件模板的所有元素上。例如：添加作用域 `ID` 是 `data-v-f3f3eg7` ，那么在该组件模板上的所有元素都会添加一个属性 `data-v-f3f3eg7`。
    > 3. 修改 `css` 选择器：对于组件内部的每个 `CSS` 规则， `Vue` 会自动转换其选择器，使其仅匹配带有对应作用域 `ID` 的元素。这是通过在 `CSS` 选择其的末尾添加相应的作用域 `ID` 属性选择器来实现的。例如：如果 `CSS` 的规则是 `.btn {color: red;}`，并且作用域 `ID` 是 `data-v-f3f3eg7` 那么该规则会被转换成 `.btn[data-v-f3f3eg7] {color: red;}`。
 
-   # 组件库二次封装思路
+# 组件库二次封装思路
 
    > [!TIP]
    >
@@ -2981,74 +2981,299 @@ defineExpose({ name, age });
    > 首先，我们要明确一点，不应该在组件中一个一个的定义 `props`，我们需要使用 `$attrs` 来规避这个问题。
    >
    > > `$attrs`：组件实例的该属性包含了父作用域中不作为 `prop` 被识别 (且获取) 的 `attribute` 绑定 (`class` 和 `style` 除外)。当一个组件没有声明任何 `prop` 时，这里会包含所有父作用域的绑定 (`class` 和 `style` 除外)，并且可以通过 `v-bind="$attrs"` 传入内部的 UI 库组件中。
-   >
-   > ```vue
-   > <template>
-   >   <div class="t_select">
-   >     <el-select
-   >       v-model="childSelectedValue"
-   >       :style="{ width: width || '100%' }"
-   >       v-bind="attrs"
-   >     >
-   >       <el-option
-   >         v-for="(item, index) in optionSource"
-   >         :key="index + 'i'"
-   >         :label="item[labelKey]"
-   >         :value="item[valueKey]"
-   >       ></el-option>
-   >     </el-select>
-   >   </div>
-   > </template>
-   > <script>
-   > export default {
-   >   name: 'TSelect',
-   >   computed: {
-   >     attrs() {
-   >       return {
-   >         // 'popper-append-to-body': false,
-   >         clearable: true, // 默认开启清空
-   >         filterable: true, // 默认开启过滤
-   >         ...this.$attrs
-   >       }
-   >     }
-   >   }
-   > </script>
-   > ```
-   >
-   > 对于插槽，我们使用 `$slots`。
 
-   # diff 算法
+## 属性、事件
+
+封装 `MyInput` 组件，添加一个名为 `box-shadow` 的属性，该属性可以用于设置组件的阴影效果。
+
+```vue
+<!-- MyInput.vue -->
+<template>
+  <el-input :class="{box_shadow: boxShadow}"> </el-input>
+</template>
+
+<script setup>
+defineProps({
+  boxShadow: {
+    type: Boolean,
+    default: false,
+  },
+});
+</script>
+
+<style scoped>
+.box_shadow {
+  box-shadow: 4px 4px 10px #40a0ff7b;
+}
+</style>
+```
+
+### 使用v-bind="$attrs"
+>
+> [!TIP]
+>在 `el-input` 组件中，存在许多可选的属性和事件。在封装组件时，逐个定义这些属性和事件是不现实的。为了更便捷地处理这种情况，我们可以使用 `v-bind="$attrs"`。该指令允许将父组件传递给子组件的非 `props` 属性绑定到子组件内部的元素上，从而实现更灵活的数据传递和绑定。
+
+```vue
+<template>
+ <MyInput
+     placeholder="请输入关键内容"
+     v-model="value"
+     @input="inputValue"
+   >
+ </MyInput>
+</template>
+
+<script setup>
+import { ref } from "vue";
+import MyInput from "./components/MyInput.vue";
+
+const value = ref("123");
+
+const inputValue = (v) => {
+  console.log(v);
+};
+</script>
+```
+
+```vue
+<!-- MyInput.vue -->
+<template>
+  <el-input v-bind="$attrs" :class="{box_shadow: boxShadow}"> </el-input>
+</template>
+
+<script setup>
+defineProps({
+  boxShadow: {
+    type: Boolean,
+    default: false,
+  },
+});
+</script>
+
+<style scoped>
+.box_shadow {
+  box-shadow: 4px 4px 10px #40a0ff7b;
+}
+</style>
+```
+
+在这个例子中，父组件中的 `placeholder、v-model` 属性和 `input` 事件并没有在 `MyInput` 的 `props` 中进行显式声明。然而，通过使用 `v-bind="$attrs"`，我们能够将这些属性和事件传递给 `el-input` 元素。
+上面代码等同与：
+
+```vue
+<!-- MyInput.vue -->
+<template>
+  <el-input 
+      v-model="value"
+      :placehoder="placehoder"
+      :class="{box_shadow: boxShadow}"
+      @input="$emit('input', $event)"
+      > 
+  </el-input>
+</template>
+
+<script setup>
+defineProps({
+  boxShadow: {
+    type: Boolean,
+    default: false,
+  },
+});
+</script>
+
+<style scoped>
+.box_shadow {
+  box-shadow: 4px 4px 10px #40a0ff7b;
+}
+</style>
+```
+
+## 插槽
+
+> [!TIP]
+> 在 `el-input` 组件中，同样存在许多可选的插槽。逐个去定义这些插槽是不现实的，因此我们可以使用 `useSlots` 方法来获取父组件传入的插槽内容，并通过遍历这些插槽来支持它们的使用。
+
+```vue
+<template>
+  <!-- MyInput.vue -->
+  <el-input v-bind="$attrs" :class="{ box_shadow: boxShadow }">
+    <template v-for="(value, name) in slots" #[name]="scope">
+      <slot :name="name" v-bind="scope || {}"></slot>
+    </template>
+  </el-input>
+</template>
+
+<script setup>
+import { onMounted, ref, useSlots, defineExpose } from "vue";
+
+defineProps({
+  boxShadow: {
+    type: Boolean,
+    default: false,
+  },
+});
+
+const slots = useSlots();
+</script>
+
+<style scoped>
+.box_shadow {
+  box-shadow: 4px 4px 10px #40a0ff7b;
+}
+</style>
+```
+
+### 使用
+
+```vue
+<template>
+  <MyInput
+    placeholder="请输入关键内容"
+    v-model="value"
+    @input="inputValue"
+  >
+    <template #prepend>Http://</template>
+  </MyInput>
+</template>
+
+<script setup>
+import { ref } from "vue";
+import MyInput from "./components/MyInput.vue";
+
+const value = ref("123");
+
+const inputValue = (v) => {
+  console.log(v);
+};
+</script>
+```
+
+## 方法
+>
+> [!TIP]
+> 在 `el-input` 组件中，暴露了许多方法。逐个去定义这些方法是不现实的。因此，我们可以通过 `ref` 来获取 `el-input` 组件的实例，然后定义一个 `expose` 变量，通过遍历 `ref` 获取的方法，将它们存放到 `expose` 变量中。接着，我们可以使用 `defineExpose` 将 `expose` 暴露出来，这样父组件就能通过 `ref` 使用这些方法了。
+
+```vue
+<template>
+  <!-- MyInput.vue -->
+  <el-input v-bind="$attrs" ref="elInputRef" :class="{ box_shadow: boxShadow }">
+    <!-- // -->
+  </el-input>
+</template>
+
+<script setup>
+import { onMounted, ref, useSlots, defineExpose } from "vue";
+
+// ...
+
+const expose = {};
+
+onMounted(() => {
+  const entries = Object.entries(elInputRef.value);
+  for (const [method, fn] of entries) {
+    expose[method] = fn;
+  }
+});
+defineExpose(expose);
+</script>
+
+<style scoped>
+/* ... */
+</style>
+```
+
+### 使用
+
+```vue
+<template>
+  <MyInput
+    placeholder="请输入关键内容"
+    v-model="value"
+    @input="inputValue"
+    ref="myInputRef"
+  >
+    <template #prepend>Http://</template>
+  </MyInput>
+</template>
+
+<script setup>
+import { onMounted, ref } from "vue";
+import MyInput from "./components/MyInput.vue";
+
+const value = ref("123");
+
+const myInputRef = ref();
+
+const inputValue = (v) => {
+  console.log(v);
+};
+
+onMounted(() => {
+  myInputRef.value.focus();
+});
+</script>
+
+<style>
+/* ... */
+</style>
+```
+
+## 类型提示丢失问题
+
+参考解决方案：
+
+```js
+import { drawerProps } from 'naive-ui';
+
+type Props = typeof drawerProps & { title: StringConstructor };
+
+const props = defineProps({
+  title: {
+    type: String,
+    required: true,
+  },
+  width: {
+    type: String,
+    require: false,
+    default: '1000px',
+  },
+} as unknown as Props);
+
+const width = ref(props.width);
+```
+
+# diff 算法
 
    > [!TIP]
    >
    > `diff` 算法有两个比较显著的特点：比较只会在同层级进行, 不会跨层级比较。
 
-   ## Vue2 的 diff 算法核心
+## Vue2 的 diff 算法核心
 
-   ### 基本原理
+### 基本原理
 
-   - 首先进行新老节点头尾对比，头与头、尾与尾对比，寻找未移动的节点。
-   - 新老节点头尾对比完后，进行交叉对比，头与尾、尾与头对比，这一步即寻找移动后可复用的节点。
-   - 然后在剩余新老结点中对比寻找可复用节点，创建一个老节点 `keyToIndex` 的哈希表 `map` 记录 `key`，然后继续遍历新节点索引通过 `key` 查找可以复用的旧的节点。
-   - 节点遍历完成后，通过新老索引，进行移除多余老节点或者增加新节点的操作。
+- 首先进行新老节点头尾对比，头与头、尾与尾对比，寻找未移动的节点。
+- 新老节点头尾对比完后，进行交叉对比，头与尾、尾与头对比，这一步即寻找移动后可复用的节点。
+- 然后在剩余新老结点中对比寻找可复用节点，创建一个老节点 `keyToIndex` 的哈希表 `map` 记录 `key`，然后继续遍历新节点索引通过 `key` 查找可以复用的旧的节点。
+- 节点遍历完成后，通过新老索引，进行移除多余老节点或者增加新节点的操作。
 
-   ## Vue3 的 diff 算法核心
+## Vue3 的 diff 算法核心
 
-   ### 基本原理
+### 基本原理
 
-   - 首先进行新老节点头尾对比，头与头、尾与尾对比，寻找未移动的节点。
-   - 然后创建一个新节点在旧节点中的位置的映射表，这个映射表的元素如果不为空，代表可复用。
-   - 然后根据这个映射表计算出最长递增子序列，这个序列中的结点代表可以原地复用。之后移动剩下的新结点到正确的位置即递增序列的间隙中。
+- 首先进行新老节点头尾对比，头与头、尾与尾对比，寻找未移动的节点。
+- 然后创建一个新节点在旧节点中的位置的映射表，这个映射表的元素如果不为空，代表可复用。
+- 然后根据这个映射表计算出最长递增子序列，这个序列中的结点代表可以原地复用。之后移动剩下的新结点到正确的位置即递增序列的间隙中。
 
-   ## diff 差别总结
+## diff 差别总结
 
-   - `vue2、vue3` 的 `diff` 算法实现差异主要体现在：处理完首尾节点后，对剩余节点的处理方式。
-   - `vue2` 是通过对旧节点列表建立一个 `{ key, oldVnode }` 的映射表，然后遍历新节点列表的剩余节点，根据`newVnode.key` 在旧映射表中寻找可复用的节点，然后打补丁并且移动到正确的位置。
-   - `vue3` 则是建立一个存储新节点数组中的剩余节点在旧节点数组上的索引的映射关系数组，建立完成这个数组后也即找到了可复用的节点，然后通过这个数组计算得到最长递增子序列，这个序列中的节点保持不动，然后将新节点数组中的剩余节点移动到正确的位置。
+- `vue2、vue3` 的 `diff` 算法实现差异主要体现在：处理完首尾节点后，对剩余节点的处理方式。
+- `vue2` 是通过对旧节点列表建立一个 `{ key, oldVnode }` 的映射表，然后遍历新节点列表的剩余节点，根据`newVnode.key` 在旧映射表中寻找可复用的节点，然后打补丁并且移动到正确的位置。
+- `vue3` 则是建立一个存储新节点数组中的剩余节点在旧节点数组上的索引的映射关系数组，建立完成这个数组后也即找到了可复用的节点，然后通过这个数组计算得到最长递增子序列，这个序列中的节点保持不动，然后将新节点数组中的剩余节点移动到正确的位置。
 
-   # Transition 与 TransitionGroup
+# Transition 与 TransitionGroup
 
-   ## TransitionGroup
+## TransitionGroup
 
 以下是关于 Vue.js 中 `TransitionGroup` 组件的详细解析：
 

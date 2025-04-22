@@ -3085,3 +3085,174 @@ Reflect 的核心价值：
 | **基本的获取响应能力** | ✅ | ✅ |
 | **监控请求进度** | ✅ | ✅ |
 | **监控响应进度** | ✅ | ✅ |
+
+# 前端性能指标
+
+以下是前端性能核心指标 **FCP（首次内容绘制）**、**LCP（最大内容绘制）** 和 **TTI（可交互时间）** 的详细解析：
+
+### **一、FCP（First Contentful Paint）**
+
+#### **定义**
+
+浏览器首次渲染 **任何文本、图片（包含背景图）、非白色 canvas/SVG** 的时间点。
+
+#### **测量方式**
+
+```javascript
+// 通过 PerformanceObserver 监听
+const observer = new PerformanceObserver((list) => {
+  for (const entry of list.getEntriesByName('first-contentful-paint')) {
+    console.log('FCP:', entry.startTime);
+  }
+});
+observer.observe({ type: 'paint', buffered: true });
+```
+
+#### **优化目标**
+
+- **良好**：≤1.8 秒
+- **需改进**：1.8~3 秒
+- **差**：>3 秒
+
+#### **优化策略**
+
+1. **关键资源预加载**
+
+   ```html
+   <link rel="preload" href="critical.css" as="style">
+   ```
+
+2. **消除渲染阻塞**
+   - 内联关键CSS
+   - 异步加载非关键CSS（media="print"）
+3. **服务端优化**
+   - 开启HTTP/2 Server Push
+   - 使用CDN边缘缓存
+
+### **二、LCP（Largest Contentful Paint）**
+
+#### **定义**
+
+视口内 **最大可见内容元素**（图片/视频/块级文本）完成渲染的时间。
+
+#### **元素权重**
+
+| 元素类型       | 权重系数 |
+|----------------|----------|
+| `<img>`        | 1.0      |
+| `<video>`      | 1.0      |
+| 文本块         | 0.8      |
+| 背景图         | 0.6      |
+
+#### **测量工具**
+
+```bash
+# WebPageTest 命令行
+webpagetest test https://example.com --key YOUR_API_KEY --lcp
+```
+
+#### **优化目标**
+
+- **良好**：≤2.5 秒
+- **需改进**：2.5~4 秒
+- **差**：>4 秒
+
+#### **优化策略**
+
+1. **优先级加载**
+
+   ```html
+   <img src="hero.jpg" loading="eager" fetchpriority="high">
+   ```
+
+2. **尺寸优化**
+   - 响应式图片（srcset）
+   - 新一代格式（WebP/AVIF）
+3. **字体优化**
+
+   ```css
+   @font-face {
+     font-display: swap;
+   }
+   ```
+
+#### **性能影响**
+
+- LCP每降低0.1秒 → 用户参与度提升0.6%
+- LCP达标网站比未达标的跳出率低35%
+
+### **三、TTI（Time to Interactive）**
+
+#### **定义**
+
+页面 **完全可交互** 的时间点，需满足：
+
+1. 已显示有用内容（FCP完成）
+2. 可见元素的事件绑定完成
+3. 主线程连续5秒无长任务（>50ms）
+
+#### **计算逻辑**
+
+```javascript
+TTI = FCP + 主线程安静窗口
+```
+
+#### **测量工具**
+
+- **Lighthouse** 实验室数据
+- **Chrome DevTools** Performance面板
+
+#### **优化目标**
+
+- **良好**：≤3.9 秒
+- **需改进**：3.9~7.3 秒
+- **差**：>7.3 秒
+
+#### **优化策略**
+
+1. **代码分割**
+
+   ```javascript
+   // 动态导入非关键模块
+   const module = await import('./non-critical.js');
+   ```
+
+2. **任务分解**
+
+   ```javascript
+   // 将长任务拆分为微任务
+   function chunkTask() {
+     requestIdleCallback(processChunk);
+   }
+   ```
+
+3. **预连接关键域名**
+
+   ```html
+   <link rel="preconnect" href="https://api.example.com">
+   ```
+
+### **四、指标关联分析**
+
+#### **1. 阶段关系**
+
+```plaintext
+FCP → LCP → TTI → FID（首次输入延迟）
+```
+
+#### **2. 瓶颈定位**
+
+| 问题现象                | 可能原因               | 解决方案               |
+|-------------------------|------------------------|------------------------|
+| FCP正常但LCP高          | 首屏大图加载慢         | 图片懒加载+尺寸优化    |
+| LCP达标但TTI差          | JavaScript执行过久     | 代码分割+任务调度      |
+| TTI正常但FID高          | 主线程被长任务阻塞     | 异步处理+Web Worker    |
+
+#### **3. 工具链推荐**
+
+| 工具类型       | 推荐方案                          |
+|----------------|-----------------------------------|
+| 实验室测试     | Lighthouse + WebPageTest          |
+| 真实用户监控   | Google Analytics + New Relic      |
+| 性能分析       | Chrome DevTools Performance面板   |
+| 自动化检测     | Puppeteer + CI/CD集成             |

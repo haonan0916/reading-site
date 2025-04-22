@@ -1089,13 +1089,13 @@ function getAllPermutationsWithDuplicates(arr) {
       if (visited[i] || (i > 0 && arr[i] === arr[i-1] && !visited[i-1])) continue;
       visited[i] = true;
       path.push(arr[i]);
-      backtrack();
+      dfs();
       path.pop();
       visited[i] = false;
     }
   };
 
-  backtrack();
+  dfs();
   return result;
 }
 
