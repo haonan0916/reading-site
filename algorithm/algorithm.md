@@ -1319,6 +1319,70 @@ const minCost = (grid) => {
 };
 ```
 
+# 滑动窗口
+
+[长度最小的子数组](https://leetcode.cn/problems/minimum-size-subarray-sum/description/)
+
+```js
+var minSubArrayLen = function (target, nums) {
+  let ans = Number.MAX_VALUE;
+  let sum = 0;
+  for (let l = 0, r = 0; r < nums.length; r++) {
+    sum += nums[r];
+    while (sum - nums[l] >= target) {
+      sum -= nums[l++];
+    }
+    if (sum >= target) {
+      ans = Math.min(ans, r - l + 1);
+    }
+  }
+  return ans === Number.MAX_VALUE ? 0 : ans;
+};
+```
+
+[无重复字符的最长子串](https://leetcode.cn/problems/longest-substring-without-repeating-characters/)
+
+```js
+var lengthOfLongestSubstring = function (s) {
+  let ans = 0;
+  let last = Array.from({length: 256}, () => -1);
+  for (let l = 0, r = 0; r < s.length; r++) {
+    l = Math.max(l, last[s[r].charCodeAt()] + 1);
+    ans = Math.max(ans, r - l + 1);
+    last[s[r].charCodeAt()] = r;
+  }
+  return ans;
+};
+```
+
+[最小覆盖子串](https://leetcode.cn/problems/minimum-window-substring/)
+
+```js
+var minWindow = function (s, t) {
+  let cnts = Array.from({length: 256}, () => 0);
+  for (let i = 0; i < t.length; i++) {
+    cnts[t[i].charCodeAt()]--;
+  }
+  let debt = t.length;
+  let start = 0;
+  for (let l = 0, r = 0; r < s.length; r++) {
+    if (cnts[s[r].charCodeAt()]++ < 0) {
+      debt--;
+    }
+    if (debt === 0) {
+      while (cnts[s[l].charCodeAt()] > 0) {
+        cnts[s[l++].charCodeAt()]--;
+      }
+      if (r - l + 1 < len) {
+        len = r - l + 1;
+        start = l;
+      }
+    }
+  }
+  return len === Number.MAX_VALUE ? "" : s.slice(start, start + len);
+};
+```
+
 # Dijkstra 算法
 
 > [!IMPORTANT]

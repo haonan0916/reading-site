@@ -3256,3 +3256,171 @@ FCP → LCP → TTI → FID（首次输入延迟）
 | 真实用户监控   | Google Analytics + New Relic      |
 | 性能分析       | Chrome DevTools Performance面板   |
 | 自动化检测     | Puppeteer + CI/CD集成             |
+
+# 对象属性描述符
+
+在 JavaScript 中，对象属性描述符（Property Descriptors）是用于**精确控制对象属性行为**的元数据配置。每个对象属性都关联一个描述符对象，可通过 `Object.defineProperty()` 或 `Object.defineProperties()` 进行配置。
+
+---
+
+### **一、属性描述符类型**
+
+#### **1. 数据描述符（Data Descriptor）**
+
+```javascript
+const obj = {};
+Object.defineProperty(obj, 'name', {
+  value: 'John',        // 属性值
+  writable: true,       // 是否可修改
+  enumerable: true,     // 是否可枚举
+  configurable: true    // 是否可配置
+});
+```
+
+#### **2. 访问器描述符（Accessor Descriptor）**
+
+```javascript
+let _age = 0;
+Object.defineProperty(obj, 'age', {
+  get() { return _age },          // 取值器
+  set(value) { _age = value },    // 存值器
+  enumerable: true,
+  configurable: true
+});
+```
+
+---
+
+### **二、描述符属性详解**
+
+| 属性            | 类型      | 默认值    | 作用域               | 说明                                                                 |
+|-----------------|-----------|-----------|----------------------|----------------------------------------------------------------------|
+| `value`         | any       | undefined | 数据描述符           | 属性的值                                                             |
+| `writable`      | boolean   | false     | 数据描述符           | 是否允许通过赋值运算符修改属性值                                      |
+| `enumerable`    | boolean   | false     | 两者                 | 是否出现在 `for...in` 循环和 `Object.keys()` 中                      |
+| `configurable`  | boolean   | false     | 两者                 | 是否允许删除属性或修改属性描述符（除 `value` 和 `writable` 的修改）  |
+| `get`           | function  | undefined | 访问器描述符         | 属性访问时的回调函数                                                 |
+| `set`           | function  | undefined | 访问器描述符         | 属性赋值时的回调函数                                                 |
+
+---
+
+### **三、核心操作 API**
+
+#### **1. 定义属性**
+
+```javascript
+// 单个属性定义
+Object.defineProperty(obj, 'prop', descriptor);
+
+// 批量定义
+Object.defineProperties(obj, {
+  prop1: descriptor1,
+  prop2: descriptor2
+});
+```
+
+#### **2. 获取描述符**
+
+```javascript
+const descriptor = Object.getOwnPropertyDescriptor(obj, 'prop');
+
+// 获取所有属性描述符
+const descriptors = Object.getOwnPropertyDescriptors(obj);
+```
+
+#### **3. 限制修改**
+
+```javascript
+// 冻结对象（最高限制级别）
+Object.freeze(obj);
+
+// 密封对象（允许修改现有属性值）
+Object.seal(obj);
+
+// 阻止扩展（禁止添加新属性）
+Object.preventExtensions(obj);
+```
+
+---
+
+### **四、典型应用场景**
+
+#### **1. 创建不可变属性**
+
+```javascript
+Object.defineProperty(obj, 'PI', {
+  value: 3.1415926,
+  writable: false,
+  configurable: false
+});
+
+obj.PI = 3; // 严格模式下报错，非严格模式静默失败
+```
+
+#### **2. 隐藏私有属性**
+
+```javascript
+function createCounter() {
+  let _count = 0;
+  
+  return {
+    get count() { return _count },
+    increment() { _count++ }
+  };
+}
+
+const counter = createCounter();
+console.log(counter.count); // 0
+counter.increment();
+console.log(counter.count); // 1
+```
+
+#### **3. 数据验证**
+
+```javascript
+const user = {};
+Object.defineProperty(user, 'age', {
+  set(value) {
+    if (typeof value !== 'number' || value < 0) {
+      throw new Error('Invalid age');
+    }
+    this._age = value;
+  },
+  get() { return this._age }
+});
+
+user.age = 25;    // 正常
+user.age = -5;    // 抛出错误
+```
+
+---
+
+### **五、描述符特性关系**
+
+```mermaid
+graph TD
+    A[描述符类型] --> B{数据描述符}
+    A --> C{访问器描述符}
+    B --> D[必须包含 value]
+    B --> E[可选 writable]
+    C --> F[必须包含 get/set]
+    D & E & F --> G[共享 enumerable/configurable]
+```
+
+---
+
+### **六、兼容性注意事项**
+
+1. IE9+ 支持基本属性描述符操作
+2. `Object.getOwnPropertyDescriptors` 需要 ES2017+ 支持
+3. 严格模式下违反描述符限制会抛出错误，非严格模式静默失败
+
+---
+
+通过合理使用属性描述符，可以实现：
+
+- 属性访问控制 ✅
+- 数据验证机制 ✅  
+- 不可变数据结构 ✅  
+- 私有属性模拟 ✅  
+- 元编程能力增强 ✅
