@@ -116,7 +116,7 @@ foo(); // 1
 
 > [!TIP]
 >
-> 输出结果：` 2 1 1`
+> 输出结果：`2 1 1`
 >
 > **解析：**
 >
@@ -211,7 +211,7 @@ Promise.race([promise1, timeOutPromise(5000)]).then((res) => {});
 
 **总结：**
 
-`Promise` 对象是异步编程的一种解决方案，最早由社区提出。`Promise` 是一个**构造函数**，接收一个函数作为参数，返回一个 `Promise` 实例。一个 `Promise `实例有三种状态，分别是 `pending、fulfilled` 和 `rejected`，分别代表了进行中、已成功和已失败。实例的状态只能由 `pending` 转变 `resolved` 或者 `rejected` 状态，并且状态一经改变，就凝固了，无法再被改变了。
+`Promise` 对象是异步编程的一种解决方案，最早由社区提出。`Promise` 是一个**构造函数**，接收一个函数作为参数，返回一个 `Promise` 实例。一个 `Promise`实例有三种状态，分别是 `pending、fulfilled` 和 `rejected`，分别代表了进行中、已成功和已失败。实例的状态只能由 `pending` 转变 `resolved` 或者 `rejected` 状态，并且状态一经改变，就凝固了，无法再被改变了。
 
 **状态的改变是通过 `resolve()` 和 `reject()` 函数来实现的**，可以在异步操作结束后调用这两个函数改变 `Promise` 实例的状态，它的原型上定义了一个 `then` 方法，使用这个 `then` 方法可以为两个状态的改变注册回调函数。**这个回调函数属于微任务，会在本轮事件循环的末尾执行。**
 
@@ -262,11 +262,11 @@ Promise.resolve(11).then(function (value) {
 Promise.reject(new Error(“我错了，请原谅俺！！”));
 ```
 
-就是下面的代码 `new Promise ` 的简单形式：
+就是下面的代码 `new Promise` 的简单形式：
 
 ```js
 new Promise(function(resolve, reject) => {
-	reject(new Error("我错了，请原谅俺！！"));
+ reject(new Error("我错了，请原谅俺！！"));
 });
 ```
 
@@ -406,23 +406,23 @@ Promise.all([promise1, promise2, promise3]).then((res) => {
 
 ```js
 let promise1 = new Promise((resolve,reject)=>{
-	setTimeout(()=>{
+ setTimeout(()=>{
        reject(1);
-	},2000)
+ },2000)
 });
 let promise2 = new Promise((resolve,reject)=>{
-	setTimeout(()=>{
+ setTimeout(()=>{
        resolve(2);
-	},1000)
+ },1000)
 });
 let promise3 = new Promise((resolve,reject)=>{
-	setTimeout(()=>{
+ setTimeout(()=>{
        resolve(3);
-	},3000)
+ },3000)
 });
 Promise.race([promise1,promise2,promise3]).then(res=>{
-	console.log(res);
-	//结果：2
+ console.log(res);
+ //结果：2
 },rej=>{
     console.log(rej)};
 )
@@ -653,7 +653,7 @@ testAwt();
 console.log("cuger"); // 立即输出 cuger
 ```
 
-这就是 `await` 必须用在 `async` 函数中的原因。`async` 函数调用不会造成阻塞，它内部所有的阻塞都被封装在一个 `Promise` 对象中异步执行。`await` 暂停当前 `async` 的执行，所以 `'cuger `最先输出，`hello world`和 `‘cuger’` 是 3 秒钟后同时出现的。
+这就是 `await` 必须用在 `async` 函数中的原因。`async` 函数调用不会造成阻塞，它内部所有的阻塞都被封装在一个 `Promise` 对象中异步执行。`await` 暂停当前 `async` 的执行，所以 `'cuger`最先输出，`hello world`和 `‘cuger’` 是 3 秒钟后同时出现的。
 
 ## 6. async/await 的优势
 
@@ -870,7 +870,7 @@ function throttle(fn, delay) {
 >
 > `new Worker()` 里面的 `js` 文件必须是线上的一个文件地址，不能是本地的 `js` 文件。
 >
-> 如果是 `vite / webpack` 项目，我们可以先把该 `js` 文件放到 `public ` 文件夹下来进行使用。
+> 如果是 `vite / webpack` 项目，我们可以先把该 `js` 文件放到 `public` 文件夹下来进行使用。
 >
 > - `webworker` 不能使用本地文件，必须是网络上的同源文件。
 > - `webwoker` 不能使用 `window` 上的 `dom` 操作，也不能获取 `dom` 对象，`dom` 相关的东西只有主线程有。只能做一些计算相关的操作。
@@ -1043,7 +1043,7 @@ function exportExcel() {
 **2）引用计数**
 
 - 另外一种垃圾回收机制就是引用计数，**这个用的相对较少**。引用计数就是跟踪记录每个值被引用的次数。当声明了一个变量并将一个引用类型赋值给该变量时，则这个值的引用次数就是 `1`。相反，如果包含对这个值引用的变量又取得了另外一个值，则这个值的引用次数就减 `1`。当这个引用次数变为 `0` 时，说明这个变量已经没有价值，因此，在垃圾回收期下次再运行时，这个变量所占有的内存空间就会被释放出来。
-- 这种方法会引起**循环引用**的问题：例如：` obj1`和 `obj2`通过属性进行相互引用，两个对象的引用次数都是 `2`。当使用循环计数时，由于函数执行完后，两个对象都离开作用域，函数执行结束，`obj1`和 `obj2`还将会继续存在，因此它们的引用次数永远不会是 `0`，就会引起循环引用。
+- 这种方法会引起**循环引用**的问题：例如：`obj1`和 `obj2`通过属性进行相互引用，两个对象的引用次数都是 `2`。当使用循环计数时，由于函数执行完后，两个对象都离开作用域，函数执行结束，`obj1`和 `obj2`还将会继续存在，因此它们的引用次数永远不会是 `0`，就会引起循环引用。
 
 ```js
 function fun() {
@@ -1254,7 +1254,7 @@ obj2.a = null;
 - 每个任务都有一个任务类型，同一个类型的任务必须在一个队列，不同类型的任务可以分属于不同的队列。
   在一次事件循环中，浏览器可以根据实际情况从不同的队列中取出任务执行。
 - 浏览器必须准备好一个微队列，微队列中的任务优先所有其他任务执行
-  https://html.spec.whatwg.org/multipage/webappapis.html#perform-a-microtask-checkpoint
+  <https://html.spec.whatwg.org/multipage/webappapis.html#perform-a-microtask-checkpoint>
 
 > 随着浏览器的复杂度急剧提升，`W3C` 不再使用**宏队列**的说法
 
@@ -1340,13 +1340,57 @@ function curry(fn, args) {
 
 // es6 实现
 function curry(fn, ...args) {
-  return fn.length <= args.length ? fn(...args) : curry.bind(null, fn, ...args);
+  /**
+    fn.length：函数的形参个数
+    args.length：当前已收集的参数个数
+    ...args：收集剩余参数
+    bind：创建新函数，保存当前参数
+  */
+  return fn.length <= args.length 
+  ? fn(...args) // 执行函数
+  : curry.bind(null, fn, ...args); // 继续收集参数
 }
 
 // 使用示例
 const curriedAdd = curry((a, b, c) => a + b + c);
 console.log(curriedAdd(1)(2)(3)); // 6
 console.log(curriedAdd(1, 2)(3)); // 6
+
+// 运行流程
+function add(a, b, c) {
+    return a + b + c;
+}
+  
+// 普通调用
+add(1, 2, 3); // 6
+
+// 柯里化调用
+const curriedAdd = curry(add);
+curriedAdd(1)(2)(3);
+// 第一次调用：curriedAdd(1)
+function curry(add, 1) {
+    // add.length = 3（形参数量）
+    // args.length = 1（当前参数数量）
+    // 3 > 1，继续柯里化
+    return curry.bind(null, add, 1);
+}
+  
+// 第二次调用：curriedAdd(1)(2)
+function curry(add, 1, 2) {
+    // add.length = 3
+    // args.length = 2
+    // 3 > 2，继续柯里化
+    return curry.bind(null, add, 1, 2);
+}
+  
+// 第三次调用：curriedAdd(1)(2)(3)
+function curry(add, 1, 2, 3) {
+    // add.length = 3
+    // args.length = 3
+    // 3 = 3，参数够了，执行函数
+    return add(1, 2, 3); // 6
+}
+  
 ```
 
 # 函数的 arguments 参数
@@ -1581,7 +1625,7 @@ function deepCopy(object) {
 
 ## 1. abort()
 
-`XMLHttpRequest.abort() ` 方法用于终止 `XMLHttpRequest` 对象的请求，该方法没有参数，也没有返回值。当调用该方法时，如果对应 `XMLHttpRequest` 对象的请求已经被发送并且正在处理中，则会中止该请求；如果请求已经完成（即已经接收到完整的响应），则不会执行任何操作。而且调用该方法后，还会触发 `XMLHttpRequest `对象的 `abort` 事件，我们可以在该事件的处理函数中执行后续相关逻辑代码，例如清除请求相关数据等等。
+`XMLHttpRequest.abort()` 方法用于终止 `XMLHttpRequest` 对象的请求，该方法没有参数，也没有返回值。当调用该方法时，如果对应 `XMLHttpRequest` 对象的请求已经被发送并且正在处理中，则会中止该请求；如果请求已经完成（即已经接收到完整的响应），则不会执行任何操作。而且调用该方法后，还会触发 `XMLHttpRequest`对象的 `abort` 事件，我们可以在该事件的处理函数中执行后续相关逻辑代码，例如清除请求相关数据等等。
 
 当一个请求被终止后，该请求的 `readyState` 将会变为 `0`，并且 `status` 属性也会变为 `0`。
 
@@ -2552,7 +2596,7 @@ export default {
 ### 具体过程
 
 - 客户端发送一个 `HTTP GET` 请求到服务器，请求的路径是 `WebSocket` 的路径（类似 `ws://example.com/socket`）。请求中包含一些特殊的头字段，如 `Upgrade: websocket 和 Connection: Upgrade`，以表明客户端希望升级连接为 `WebSocket`。
-- 服务器收到这个请求后，会返回一个 `HTTP 101` 状态码（协议切换协议）。同样在响应头中包含 `Upgrade: websocket `和 `Connection: Upgrade`，以及一些其他的 `WebSocket` 特定的头字段，例如 `Sec-WebSocket-Accept`，用于验证握手的合法性。
+- 服务器收到这个请求后，会返回一个 `HTTP 101` 状态码（协议切换协议）。同样在响应头中包含 `Upgrade: websocket`和 `Connection: Upgrade`，以及一些其他的 `WebSocket` 特定的头字段，例如 `Sec-WebSocket-Accept`，用于验证握手的合法性。
 - 客户端和服务器之间的连接从普通的 `HTTP` 连接升级为 `WebSocket` 连接。之后，客户端和服务器之间的通信就变成了 `WebSocket` 帧的传输，而不再是普通的 `HTTP` 请求和响应。
 
 ### 示例
@@ -2682,3 +2726,701 @@ ws.onclose = function () {
 - **Socket.IO**：提供自动重连和丰富的事件系统。
 - **ReconnectingWebSocket**：自动处理断线重连。
 - **SockJS**：提供向后兼容性，能在不支持 `WebSocket` 的浏览器上工作。
+
+# Proxy
+
+> [!IMPORTANT]
+>
+> 首先要明确一点，`Proxy` **只能代理引用数据类型**
+
+ES6 的 **Proxy** 机制是 JavaScript 元编程的重要特性，它通过创建对象的代理层，实现了对对象操作的**拦截和自定义处理**。
+
+## **1. 基础结构**
+
+`Proxy` 通过**目标对象**和**处理器对象**共同工作：
+
+```js
+const target = {}; // 被代理的原始对象
+const handler = {}; // 定义拦截行为的处理器
+const proxy = new Proxy(target, handler); // 创建代理对象
+```
+
+## **2. 核心拦截机制**
+
+### **(1) 常用陷阱方法（Trap）**
+
+| 陷阱方法         | 触发场景           | 示例用法                 |
+| ---------------- | ------------------ | ------------------------ |
+| `get`            | 读取属性           | 访问`proxy.property`     |
+| `set`            | 设置属性           | `proxy.property = value` |
+| `has`            | `in` 操作符        | `'prop' in proxy`        |
+| `deleteProperty` | `delete` 操作符    | `delete proxy.property`  |
+| `apply`          | 函数调用           | `proxy()`                |
+| `construct`      | `new` 操作符       | `new Proxy()`            |
+| `ownKeys`        | `Object.keys()` 等 | `Object.keys(proxy)`     |
+
+### (2) 典型拦截示例
+
+```js
+const validator = {
+  set(obj, prop, value) {
+    if (prop === "age") {
+      if (!Number.isInteger(value)) {
+        throw new TypeError("Age must be integer");
+      }
+      if (value < 0) {
+        throw new RangeError("Age cannot be negative");
+      }
+    }
+    return Reflect.set(...arguments);
+  },
+};
+
+const person = new Proxy({}, validator);
+person.age = 25; // 正常
+person.age = -5; // 抛出 RangeError
+person.age = "30"; // 抛出 TypeError
+```
+
+## **3. 反射 API 配合**
+
+`Reflect` 对象方法与 `Proxy` 陷阱方法一一对应：
+
+```js
+const handler = {
+  get(target, prop, receiver) {
+    console.log(`Getting ${prop}`);
+    return Reflect.get(...arguments);
+  },
+};
+```
+
+## **4. 注意事项**
+
+| 要点             | 说明                                                               |
+| ---------------- | ------------------------------------------------------------------ |
+| **目标对象隔离** | 直接修改目标对象会绕过代理拦截                                     |
+| **性能损耗**     | 频繁操作代理对象比直接操作原生对象慢约 50%（V8 引擎基准测试）      |
+| **不可撤销代理** | 标准`Proxy` 不可撤销，需使用`Proxy.revocable()` 创建可撤销代理     |
+| **原型链拦截**   | 无法拦截`Object.create(proxy)` 的原型链访问                        |
+| **严格模式要求** | `set` 陷阱在成功时必须返回 `true`（严格模式下返回 `false` 会报错） |
+
+## **5. 与 Object.defineProperty 对比**
+
+| 特性       | Proxy          | Object.defineProperty |
+| ---------- | -------------- | --------------------- |
+| 拦截范围   | 全操作类型     | 仅限于属性访问/修改   |
+| 数组处理   | 完美支持       | 需要重写数组方法      |
+| 性能开销   | 较高           | 较低                  |
+| 动态属性   | 自动处理新属性 | 需要预先定义          |
+| 代码侵入性 | 无侵入         | 需要修改对象描述符    |
+
+# 6. Reflect
+
+`ES6` 引入的 **Reflect** 对象是 `JavaScript` 元编程的核心工具之一，它提供了一套**标准化、函数式**的操作对象方法，与 `Proxy` 的**陷阱( Trap )方法**一一对应。
+
+## **1. 设计目标**
+
+- **统一对象操作**：将 `Object` 的分散方法（如 `defineProperty`）和操作符（如 `in`、`delete`）转化为统一函数式 API
+- **完善返回值**：所有操作返回布尔值或结果值（替代可能抛出错误的操作符）
+- **配合 Proxy**：为 `Proxy` 陷阱提供**标准化**的默认行为实现
+
+## **2. 核心方法对照表**
+
+| Reflect 方法                                 | 等效操作                    | 特殊差异                   |
+| -------------------------------------------- | --------------------------- | -------------------------- |
+| `Reflect.get(target, prop, receiver)`        | `target[prop]`              | 支持`receiver` 绑定 `this` |
+| `Reflect.set(target, prop, value, receiver)` | `target[prop] = value`      | 返回布尔值表示是否成功     |
+| `Reflect.has(target, prop)`                  | `prop in target`            | 更安全的类型检查           |
+| `Reflect.deleteProperty(target, prop)`       | `delete target[prop]`       | 返回删除是否成功           |
+| `Reflect.construct(target, args)`            | `new target(...args)`       | 支持`newTarget` 参数       |
+| `Reflect.apply(func, thisArg, args)`         | `func.apply(thisArg, args)` | 统一函数调用方式           |
+| `Reflect.defineProperty(target, prop, desc)` | `Object.defineProperty()`   | 返回是否定义成功           |
+
+## **3. 关键特性**
+
+### **(1) 标准化返回值**
+
+```js
+// 传统方式
+try {
+  Object.defineProperty(obj, "prop", { value: 1 });
+} catch (e) {
+  console.error("定义失败");
+}
+
+// Reflect 方式
+if (!Reflect.defineProperty(obj, "prop", { value: 1 })) {
+  console.error("定义失败"); // 通过返回值判断
+}
+```
+
+### **(2) 接收器(receiver)参数**
+
+```js
+const parent = { a: 1 };
+const child = {
+  get a() {
+    return super.a * 2;
+  },
+};
+Object.setPrototypeOf(child, parent);
+
+console.log(Reflect.get(child, "a", child)); // 2（正确绑定this）
+console.log(child.a); // 2
+```
+
+### **(3) 函数式编程支持**
+
+```js
+// 操作符转函数
+const ops = {
+  get: Reflect.get,
+  set: Reflect.set,
+  has: Reflect.has,
+};
+
+function operate(target, opName, ...args) {
+  return ops[opName](target, ...args);
+}
+
+const obj = { x: 10 };
+operate(obj, "set", "x", 20); // 设置成功返回true
+console.log(operate(obj, "get", "x")); // 20
+```
+
+## **4. 与 Proxy 的配合**
+
+**最佳实践**：在 Proxy 陷阱中始终使用 Reflect 方法保持默认行为
+
+```js
+const proxy = new Proxy(
+  {},
+  {
+    get(target, prop, receiver) {
+      console.log(`访问属性: ${prop}`);
+      return Reflect.get(...arguments); // 保持默认获取行为
+    },
+    set(target, prop, value, receiver) {
+      if (prop === "age" && value < 0) {
+        throw new Error("年龄不能为负");
+      }
+      return Reflect.set(...arguments); // 保持默认设置行为
+    },
+  }
+);
+
+proxy.name = "Alice"; // 正常设置
+proxy.age = -5; // 抛出错误
+```
+
+## **5. 实际应用场景**
+
+### **(1) 元编程框架**
+
+```js
+function createObservable(target) {
+  return new Proxy(target, {
+    set(target, prop, value, receiver) {
+      const success = Reflect.set(...arguments);
+      if (success) {
+        console.log(`属性 ${prop} 已更新为 ${value}`);
+      }
+      return success;
+    },
+  });
+}
+
+const data = createObservable({});
+data.count = 0; // 输出 "属性 count 已更新为 0"
+```
+
+### **(2) 安全属性访问**
+
+```js
+function safeGet(obj, path) {
+  return path
+    .split(".")
+    .reduce(
+      (acc, key) => (acc !== undefined ? Reflect.get(acc, key) : undefined),
+      obj
+    );
+}
+
+const obj = { a: { b: { c: 42 } } };
+console.log(safeGet(obj, "a.b.c")); // 42
+console.log(safeGet(obj, "a.x.y")); // undefined（不会报错）
+```
+
+### **(3) 动态方法调用**
+
+```js
+class API {
+  getUsers() {
+    return ["Alice", "Bob"];
+  }
+  getPosts() {
+    return ["Post1", "Post2"];
+  }
+}
+
+function callMethod(instance, method, ...args) {
+  if (Reflect.has(instance, method)) {
+    return Reflect.apply(instance[method], instance, args);
+  }
+  throw new Error(`方法 ${method} 不存在`);
+}
+
+const api = new API();
+console.log(callMethod(api, "getUsers")); // ['Alice', 'Bob']
+```
+
+## **6. 与传统方式的对比**
+
+| 场景         | 传统方式                     | Reflect 方式                          |
+| ------------ | ---------------------------- | ------------------------------------- |
+| 属性定义     | `Object.defineProperty()`    | `Reflect.defineProperty()`            |
+| 属性检查     | `'prop' in obj`              | `Reflect.has(obj, 'prop')`            |
+| 函数调用     | `func.apply(thisAr`g, args)` | `Reflect.apply(func, thisArg, args)`  |
+| 构造函数调用 | `new Func(...args)`          | `Reflect.construct(Func, args)`       |
+| 删除属性     | `delete obj.prop`            | `Reflect.deleteProperty(obj, 'prop')` |
+
+## **7. 注意事项**
+
+- **不可用于原始值**：所有方法第一个参数必须是对象
+- **严格模式影响**：`Reflect.set` 在严格模式下更安全
+- **性能考量**：直接操作 vs Reflect 方法性能差异可忽略（现代引擎优化后）
+- **错误处理**：优先使用返回值而非 `try/catch`
+
+## **总结**
+
+Reflect 的核心价值：
+
+1. **标准化 API**：统一对象操作方式
+2. **函数式接口**：更适合现代编程范式
+3. **Proxy 最佳拍档**：确保代理行为的正确性
+4. **安全增强**：避免操作符的意外行为
+
+实际开发建议：
+
+- 在编写 Proxy 处理器时优先使用 Reflect 方法
+- 替代易出错的 `Object` 方法（如 `defineProperty`）
+- 需要精确控制操作结果时使用（如判断属性是否删除成功）
+
+# 7. JS Array.sort 原理
+
+## 一、默认排序机制
+
+当不提供比较函数时
+
+```js
+[3, 10, 1].sort(); // 输出[1, 10, 3]（不符合数值预期）
+```
+
+- **元素转换**：将所有元素隐式转换为字符串
+- **字典序比较**：按照 Unicode 码顺序比较字符串
+- **编码示例**：
+
+```js
+[3, 10, 1].map(x => String(x)); // ["3", "10", "1"]
+"3".codePointAt(0); // 51
+"10".codePointAt(0); // 49
+"1".codePointAt(0); // 49
+```
+
+## 二、比较函数原理
+
+当提供比较函数时：
+
+```js
+[3, 10, 1].sort((a, b) => a - b); // [1, 3, 10]
+```
+
+- **函数签名**：`compareFunction(a, b)`
+- **返回值规则**：
+  - `< 0`：`a` 排在 `b` 前面
+  - `= 0`：`a` 和 `b` 保持相对位置不变
+  - `> 0`：`b` 排在 `a` 前面
+
+底层实现流程：
+
+1. 将数组元素两两比较
+2. 根据比较函数返回值决定元素位置
+3. 采用分治策略（不同引擎实现不同）
+
+## 三、引擎实现差异
+
+1. V8 引擎（Chrome/Node.js）
+
+- 小数组（长度 <= 10）：插入排序
+- 大数组：快速排序 + 插入排序
+
+2. SpiderMonkey 引擎（Firefox）
+
+- 归并排序
+
+3. JavaScriptCore 引擎（Safari）
+
+- 快速排序
+
+# 埋点
+
+前端埋点是**收集用户行为数据的关键技术手段**，主要用于产品优化、用户行为分析和业务决策支持。
+
+## 埋点类型与场景
+
+| 类型 | 触发方式 | 适用场景 | 示例 |
+|------|----------|----------|------|
+| **点击埋点** | 用户交互事件 | 按钮点击、导航跳转 | 购买按钮点击统计 |
+| **曝光埋点** | 元素进入视口 | 广告展示、内容曝光 | 首屏广告曝光率统计 |
+| **停留埋点** | 时间阈值触发 | 页面停留时长、模块停留 | 详情页停留超过30秒 |
+| **错误埋点** | 异常捕获 | JS错误、API失败 | 接口500错误监控 |
+| **性能埋点** | 性能API | 页面加载速度、资源耗时 | FCP(首次内容渲染时间) |
+
+# XHR 和 Fetch 区别
+
+| 功能点 | XHR | Fetch
+|------|----------|----------
+| **基本的请求能力** | ✅ | ✅ |
+| **基本的获取响应能力** | ✅ | ✅ |
+| **监控请求进度** | ✅ | ✅ |
+| **监控响应进度** | ✅ | ✅ |
+
+# 前端性能指标
+
+以下是前端性能核心指标 **FCP（首次内容绘制）**、**LCP（最大内容绘制）** 和 **TTI（可交互时间）** 的详细解析：
+
+### **一、FCP（First Contentful Paint）**
+
+#### **定义**
+
+浏览器首次渲染 **任何文本、图片（包含背景图）、非白色 canvas/SVG** 的时间点。
+
+#### **测量方式**
+
+```javascript
+// 通过 PerformanceObserver 监听
+const observer = new PerformanceObserver((list) => {
+  for (const entry of list.getEntriesByName('first-contentful-paint')) {
+    console.log('FCP:', entry.startTime);
+  }
+});
+observer.observe({ type: 'paint', buffered: true });
+```
+
+#### **优化目标**
+
+- **良好**：≤1.8 秒
+- **需改进**：1.8~3 秒
+- **差**：>3 秒
+
+#### **优化策略**
+
+1. **关键资源预加载**
+
+   ```html
+   <link rel="preload" href="critical.css" as="style">
+   ```
+
+2. **消除渲染阻塞**
+   - 内联关键CSS
+   - 异步加载非关键CSS（media="print"）
+3. **服务端优化**
+   - 开启HTTP/2 Server Push
+   - 使用CDN边缘缓存
+
+### **二、LCP（Largest Contentful Paint）**
+
+#### **定义**
+
+视口内 **最大可见内容元素**（图片/视频/块级文本）完成渲染的时间。
+
+#### **元素权重**
+
+| 元素类型       | 权重系数 |
+|----------------|----------|
+| `<img>`        | 1.0      |
+| `<video>`      | 1.0      |
+| 文本块         | 0.8      |
+| 背景图         | 0.6      |
+
+#### **测量工具**
+
+```bash
+# WebPageTest 命令行
+webpagetest test https://example.com --key YOUR_API_KEY --lcp
+```
+
+#### **优化目标**
+
+- **良好**：≤2.5 秒
+- **需改进**：2.5~4 秒
+- **差**：>4 秒
+
+#### **优化策略**
+
+1. **优先级加载**
+
+   ```html
+   <img src="hero.jpg" loading="eager" fetchpriority="high">
+   ```
+
+2. **尺寸优化**
+   - 响应式图片（srcset）
+   - 新一代格式（WebP/AVIF）
+3. **字体优化**
+
+   ```css
+   @font-face {
+     font-display: swap;
+   }
+   ```
+
+#### **性能影响**
+
+- LCP每降低0.1秒 → 用户参与度提升0.6%
+- LCP达标网站比未达标的跳出率低35%
+
+### **三、TTI（Time to Interactive）**
+
+#### **定义**
+
+页面 **完全可交互** 的时间点，需满足：
+
+1. 已显示有用内容（FCP完成）
+2. 可见元素的事件绑定完成
+3. 主线程连续5秒无长任务（>50ms）
+
+#### **计算逻辑**
+
+```javascript
+TTI = FCP + 主线程安静窗口
+```
+
+#### **测量工具**
+
+- **Lighthouse** 实验室数据
+- **Chrome DevTools** Performance面板
+
+#### **优化目标**
+
+- **良好**：≤3.9 秒
+- **需改进**：3.9~7.3 秒
+- **差**：>7.3 秒
+
+#### **优化策略**
+
+1. **代码分割**
+
+   ```javascript
+   // 动态导入非关键模块
+   const module = await import('./non-critical.js');
+   ```
+
+2. **任务分解**
+
+   ```javascript
+   // 将长任务拆分为微任务
+   function chunkTask() {
+     requestIdleCallback(processChunk);
+   }
+   ```
+
+3. **预连接关键域名**
+
+   ```html
+   <link rel="preconnect" href="https://api.example.com">
+   ```
+
+### **四、指标关联分析**
+
+#### **1. 阶段关系**
+
+```plaintext
+FCP → LCP → TTI → FID（首次输入延迟）
+```
+
+#### **2. 瓶颈定位**
+
+| 问题现象                | 可能原因               | 解决方案               |
+|-------------------------|------------------------|------------------------|
+| FCP正常但LCP高          | 首屏大图加载慢         | 图片懒加载+尺寸优化    |
+| LCP达标但TTI差          | JavaScript执行过久     | 代码分割+任务调度      |
+| TTI正常但FID高          | 主线程被长任务阻塞     | 异步处理+Web Worker    |
+
+#### **3. 工具链推荐**
+
+| 工具类型       | 推荐方案                          |
+|----------------|-----------------------------------|
+| 实验室测试     | Lighthouse + WebPageTest          |
+| 真实用户监控   | Google Analytics + New Relic      |
+| 性能分析       | Chrome DevTools Performance面板   |
+| 自动化检测     | Puppeteer + CI/CD集成             |
+
+# 对象属性描述符
+
+在 JavaScript 中，对象属性描述符（Property Descriptors）是用于**精确控制对象属性行为**的元数据配置。每个对象属性都关联一个描述符对象，可通过 `Object.defineProperty()` 或 `Object.defineProperties()` 进行配置。
+
+---
+
+### **一、属性描述符类型**
+
+#### **1. 数据描述符（Data Descriptor）**
+
+```javascript
+const obj = {};
+Object.defineProperty(obj, 'name', {
+  value: 'John',        // 属性值
+  writable: true,       // 是否可修改
+  enumerable: true,     // 是否可枚举
+  configurable: true    // 是否可配置
+});
+```
+
+#### **2. 访问器描述符（Accessor Descriptor）**
+
+```javascript
+let _age = 0;
+Object.defineProperty(obj, 'age', {
+  get() { return _age },          // 取值器
+  set(value) { _age = value },    // 存值器
+  enumerable: true,
+  configurable: true
+});
+```
+
+---
+
+### **二、描述符属性详解**
+
+| 属性            | 类型      | 默认值    | 作用域               | 说明                                                                 |
+|-----------------|-----------|-----------|----------------------|----------------------------------------------------------------------|
+| `value`         | any       | undefined | 数据描述符           | 属性的值                                                             |
+| `writable`      | boolean   | false     | 数据描述符           | 是否允许通过赋值运算符修改属性值                                      |
+| `enumerable`    | boolean   | false     | 两者                 | 是否出现在 `for...in` 循环和 `Object.keys()` 中                      |
+| `configurable`  | boolean   | false     | 两者                 | 是否允许删除属性或修改属性描述符（除 `value` 和 `writable` 的修改）  |
+| `get`           | function  | undefined | 访问器描述符         | 属性访问时的回调函数                                                 |
+| `set`           | function  | undefined | 访问器描述符         | 属性赋值时的回调函数                                                 |
+
+---
+
+### **三、核心操作 API**
+
+#### **1. 定义属性**
+
+```javascript
+// 单个属性定义
+Object.defineProperty(obj, 'prop', descriptor);
+
+// 批量定义
+Object.defineProperties(obj, {
+  prop1: descriptor1,
+  prop2: descriptor2
+});
+```
+
+#### **2. 获取描述符**
+
+```javascript
+const descriptor = Object.getOwnPropertyDescriptor(obj, 'prop');
+
+// 获取所有属性描述符
+const descriptors = Object.getOwnPropertyDescriptors(obj);
+```
+
+#### **3. 限制修改**
+
+```javascript
+// 冻结对象（最高限制级别）
+Object.freeze(obj);
+
+// 密封对象（允许修改现有属性值）
+Object.seal(obj);
+
+// 阻止扩展（禁止添加新属性）
+Object.preventExtensions(obj);
+```
+
+---
+
+### **四、典型应用场景**
+
+#### **1. 创建不可变属性**
+
+```javascript
+Object.defineProperty(obj, 'PI', {
+  value: 3.1415926,
+  writable: false,
+  configurable: false
+});
+
+obj.PI = 3; // 严格模式下报错，非严格模式静默失败
+```
+
+#### **2. 隐藏私有属性**
+
+```javascript
+function createCounter() {
+  let _count = 0;
+  
+  return {
+    get count() { return _count },
+    increment() { _count++ }
+  };
+}
+
+const counter = createCounter();
+console.log(counter.count); // 0
+counter.increment();
+console.log(counter.count); // 1
+```
+
+#### **3. 数据验证**
+
+```javascript
+const user = {};
+Object.defineProperty(user, 'age', {
+  set(value) {
+    if (typeof value !== 'number' || value < 0) {
+      throw new Error('Invalid age');
+    }
+    this._age = value;
+  },
+  get() { return this._age }
+});
+
+user.age = 25;    // 正常
+user.age = -5;    // 抛出错误
+```
+
+---
+
+### **五、描述符特性关系**
+
+```mermaid
+graph TD
+    A[描述符类型] --> B{数据描述符}
+    A --> C{访问器描述符}
+    B --> D[必须包含 value]
+    B --> E[可选 writable]
+    C --> F[必须包含 get/set]
+    D & E & F --> G[共享 enumerable/configurable]
+```
+
+---
+
+### **六、兼容性注意事项**
+
+1. IE9+ 支持基本属性描述符操作
+2. `Object.getOwnPropertyDescriptors` 需要 ES2017+ 支持
+3. 严格模式下违反描述符限制会抛出错误，非严格模式静默失败
+
+---
+
+通过合理使用属性描述符，可以实现：
+
+- 属性访问控制 ✅
+- 数据验证机制 ✅  
+- 不可变数据结构 ✅  
+- 私有属性模拟 ✅  
+- 元编程能力增强 ✅

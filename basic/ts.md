@@ -47,7 +47,7 @@ message.toUperCase(); // 应该是 message.toUpperCase()
 ## 静态类型检查
 
 - 在代码运行前进行检查，发现代码的错误或不合理之处，减小运行时出现异常的几率，此种检查叫『**静态类型检查**』，`TypeScript` 核心就是『静态类型检查』，简言之就是**把运行时的错误前置**。
-- 同样的功能，`TypeScript` 的代码量要**大于** `JavaScript`，但由于` TypeScript` 的代码结构更加清晰，在后期代码的维护中 `TypeScript` 却**胜于** `JavaScript`。
+- 同样的功能，`TypeScript` 的代码量要**大于** `JavaScript`，但由于`TypeScript` 的代码结构更加清晰，在后期代码的维护中 `TypeScript` 却**胜于** `JavaScript`。
 
 # 编译 TS
 
@@ -941,9 +941,9 @@ src.forEach((el) => dst.push(el));
 ```js
 class Person {
     public name: string;
-	public age: number;
+ public age: number;
 
-	constructor(name: string, age: number) {
+ constructor(name: string, age: number) {
         this.name = name;
         this.age = age;
     }
@@ -955,7 +955,7 @@ class Person {
 ```js
 class Person {
     constructor(
-    	public name: string,
+     public name: string,
         public age: number
     ){}
 }
@@ -1413,6 +1413,157 @@ const y = mul(4, 5); // y 类型为 number
 
 console.log(x, y);
 ```
+
+## 关于是否要加 declear 声明的补充说明
+
+> [!TIP]
+>在 TypeScript 的 `.d.ts` 类型声明文件中，**并非所有类型定义都需要使用 `declare` 关键字**。是否需要使用 `declare` 取决于具体的声明场景：
+
+### **一、必须使用 `declare` 的场景**
+
+#### 1. **声明全局变量/函数**
+
+```typescript
+// 全局变量
+declare const VERSION: string;
+
+// 全局函数
+declare function log(message: string): void;
+```
+
+#### 2. **声明模块**
+
+```typescript
+declare module "*.png" {
+  const path: string;
+  export default path;
+}
+```
+
+#### 3. **声明命名空间**
+
+```typescript
+declare namespace MyLib {
+  interface Config {
+    timeout: number;
+  }
+}
+```
+
+---
+
+### **二、无需使用 `declare` 的场景**
+
+#### 1. **定义接口（Interface）**
+
+```typescript
+// 直接声明接口
+interface User {
+  id: number;
+  name: string;
+}
+```
+
+#### 2. **类型别名（Type Alias）**
+
+```typescript
+// 直接定义类型别名
+type Status = "pending" | "success" | "error";
+```
+
+#### 3. **模块导出类型**
+
+```typescript
+// 在模块内部导出类型时
+export interface Response<T> {
+  code: number;
+  data: T;
+}
+```
+
+---
+
+### **三、核心规则总结**
+
+| 场景                  | 是否需要 `declare` | 示例                          |
+|-----------------------|--------------------|-------------------------------|
+| **全局变量/函数**     | ✅ 必须            | `declare const PI: number;`   |
+| **模块声明**          | ✅ 必须            | `declare module "*.css";`     |
+| **命名空间**          | ✅ 必须            | `declare namespace Utils { ... }` |
+| **接口/类型别名**     | ❌ 不需要          | `interface User { ... }`      |
+| **模块导出类型**      | ❌ 不需要          | `export type { User };`       |
+
+---
+
+### **四、常见错误示例**
+
+#### 错误：在接口前误加 `declare`
+
+```typescript
+// ❌ 错误写法
+declare interface Point {
+  x: number;
+  y: number;
+}
+
+// ✅ 正确写法
+interface Point {
+  x: number;
+  y: number;
+}
+```
+
+#### 错误：模块导出未使用 `declare`
+
+```typescript
+// ❌ 错误写法（缺少 declare）
+module "*.svg" {
+  const content: string;
+  export default content;
+}
+
+// ✅ 正确写法
+declare module "*.svg" {
+  const content: string;
+  export default content;
+}
+```
+
+---
+
+### **五、最佳实践**
+
+1. **全局声明**：使用 `declare` + 显式作用域
+
+   ```typescript
+   declare global {
+     interface Window {
+       MY_APP: Record<string, any>;
+     }
+   }
+   ```
+
+2. **模块化声明**：优先使用 ES Module 语法
+
+   ```typescript
+   // types.d.ts
+   export interface ApiResponse<T> {
+     code: number;
+     data: T;
+   }
+   ```
+
+3. **避免污染全局**：非全局类型不要用 `declare`
+
+   ```typescript
+   // ❌ 污染全局
+   declare type Color = "red" | "blue";
+
+   // ✅ 模块内导出
+   export type Color = "red" | "blue";
+   ```
+
+通过合理使用 `declare` 关键字，可以确保类型声明文件的正确性和作用域清晰性。记住：**仅在需要声明全局存在但未实际实现的类型时使用 `declare`**。
 
 # 装饰器
 
@@ -2190,8 +2341,8 @@ type ReadonlyPerson = Readonly<Person>;
 
 // 相当于
 // interface ReadonlyPerson {
-//		readonly name: string;
-// 		readonly age: number;
+//  readonly name: string;
+//   readonly age: number;
 // }
 ```
 
@@ -2203,8 +2354,8 @@ type ReadonlyPerson = Readonly<Person>;
 type NewPerson = Pick<Person, "name" | "age">;
 // 相当于
 // interface NewPerson {
-//		name: string;
-// 		age: number;
+//  name: string;
+//   age: number;
 // }
 ```
 
@@ -2216,7 +2367,7 @@ type NewPerson = Pick<Person, "name" | "age">;
 type NewPerson = Omit<Person, "age">;
 // 相当于
 // interface NewPerson {
-// 		name: string;
+//   name: string;
 // }
 ```
 
@@ -2248,8 +2399,8 @@ type T = Extract<"a" | "b" | "c", "a">;
 type RecordType = Record<"a" | "b", string>;
 // 相当于
 // interface RecordType {
-// 		a: string;
-// 		b: string;
+//   a: string;
+//   b: string;
 // }
 ```
 
@@ -2278,25 +2429,4 @@ function bar(): { a: string } {
 type ReturnTypeBar = ReturnType<typeof bar>;
 // 相当于
 // type ReturnTypeBar = { a: string };
-```
-
-## 11. `XOR<T, U>`
-
-在 `TypeScript` 中实现 **XOR（异或）类型** 需要确保两个类型中**有且仅有一个属性存在**。例如：
-
-```tsx
-type UserCredentials = XOR<
-  { email: string; password: string },
-  { username: string; token: string }
->;
-
-// ✅ 合法
-const valid1: UserCredentials = { email: "a@b.com", password: "123" };
-const valid2: UserCredentials = { username: "john", token: "abc" };
-
-// ❌ 错误
-const invalid: UserCredentials = {
-  email: "a@b.com",
-  username: "john", // 同时存在互斥属性
-};
 ```
