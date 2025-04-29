@@ -977,7 +977,29 @@ var buildTree = function (preorder, inorder) {
     head.right = f(l1 + k - l2 + 1, r1, k + 1, r2);
     return head;
   };
-  return f(0, preorder.length - 1, 0, inorder.length);
+  return f(0, preorder.length - 1, 0, inorder.length - 1);
+};
+```
+
+## 从中序与后序遍历序列构造二叉树
+
+```js
+var buildTree = function (inorder, postorder) {
+  if (!inorder || !postorder || inorder.length !== postorder.length) return null;
+  let map = new Map();
+  for (let i = 0; i < inorder.length; i++) {
+    map.set(inorder[i], i);  
+  }
+  const f = (l1, r1, l2, r2) => {
+    if (l1 > r1) return null;
+    let head = new TreeNode(postorder[r2]);
+    if (l1 === r1) return head;
+    let k = map.get(postorder[r2]);
+    head.left = f(l1, k - 1, l2, l2 + k - l1 - 1);
+    head.right = f(k + 1, r1, l2 + k - l1, r2 - 1);
+    return head;
+  }
+  return f(0, inorder.length - 1, 0, postorder.length - 1);
 };
 ```
 
