@@ -1125,6 +1125,61 @@ console.log(getAllPermutationsWithDuplicates([1, 2, 2]));
 // 输出: [[1,2,2], [2,1,2], [2,2,1]]
 ```
 
+## 二叉树的直径
+
+> [!TIP]
+>
+> 思路：`dfs`，求二叉树的直径本质就是求**两个叶子节点之间的最长路径**，因为如果不是叶子节点的话，它还可以往外延申。
+
+```js
+var diameterOfBinaryTree = function (root) {
+    let res = 0;
+    const dfs = (node) => {
+        if (!node) return -1;
+        let leftLength = dfs(node.left) + 1;
+        let rightLength = dfs(node.right) + 1;
+        ans = Math.max(ans, leftLength + rightLength);
+        return Math.max(leftLength, rightLength);
+    }
+    dfs(root);
+    return res;
+}
+```
+
+## 二叉树的层序遍历
+
+> [!TIP]
+>
+> 思路：使用数组模拟队列，在遍历一层节点前，先计算出当前层的总节点数再遍历该层的每个节点。
+>
+> - 如果当前遍历节点有左子树，则让其左节点入队；
+> - 如果当前遍历节点有右子树，则让其右节点入队；
+
+```js
+const MAXN = 2001;
+let queue = Array.from({length: MAXN});
+let l, r;
+var levelOrder = function (root) {
+    let ans = [];
+    if (root) {
+        l = r = 0;
+        queue[r++] = root;
+        while (l < r) {
+            let size = r - l;
+            let list = [];
+            for (let i = 0; i < size; i++) {
+             let cur = queue[l++];
+                list.push(cur.val);
+                if (cur.left) queue[r++] = cur.left;
+                if (cur.right) queue[r++] = cur.right;
+         }
+        }
+        ans.push(list);
+    }
+    return ans;
+}
+```
+
 # bfs 及其拓展
 
 ## bfs 模板
