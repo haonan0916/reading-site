@@ -2350,6 +2350,28 @@ public class Code08_DistinctSubsequencesII {
 }
 ```
 
+## 最长递增子序列
+
+[最长递增子序列](https://leetcode.cn/problems/longest-increasing-subsequence/description/?envType=study-plan-v2&envId=top-100-liked)
+
+```js
+var lengthOfLIS = function(nums) {
+  let n = nums.length;
+  let dp = Array.from({length: n}, () => 0);
+  let max = 0;
+  for (let i = 0; i < n; i++) {
+    dp[i] = 1;
+    for (let j = 0; j < i; j++) {
+      if (dp[i] > dp[j]) {
+        dp[i] = Math.max(dp[i], dp[j] + 1);
+      }
+    }
+    max = Math.max(max, dp[i]);
+  }
+  return max;
+}
+```
+
 # 二维动态规划
 
 > [!IMPORTANT]

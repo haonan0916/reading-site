@@ -2296,6 +2296,15 @@ s1.speak(100, 200);
 
 `TypeScript` 类型工具是一系列预定义的类型，它们可以帮助开发者更方便地进行类型转换和操作。这些工具类型在全局作用域内可用，无需额外导入。
 
+> [!IMPORTANT]
+> `infer` 关键字可以用来推导出数据类型
+>
+> ```ts
+> type Return<T> = T extends (...args: any[]) => infer R ? R : T;
+> type sum = (a: number, b: number) => number;
+> let sumResult: Return<sum>; // number
+> ```
+
 ## 1. `Partical<T>`
 
 `Partial<T>` 类型工具可以将一个类型的所有属性变为可选的。这对于创建部分更新对象非常有用。例如，假设有一个 `Person` 接口：
