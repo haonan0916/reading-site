@@ -3501,7 +3501,7 @@ const list = document.getElementById("list");
 list.insertAdjacentHTML('beforebegin', '<h2>前端技能</h2>');
 ```
 
-结果：标题 <h2> 出现在列表外部的前面。
+结果：标题 `<h2>` 出现在列表外部的前面。
 ​​2. 动态生成列表项​​
 
 ```js
