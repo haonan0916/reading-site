@@ -3468,3 +3468,62 @@ graph TD
 应用系统拿到 `Token` 之后，还需要向认证中心确认下 `Token` 的合法性，防止用户伪造。确认无误后，应用系统记录用户的登录状态，并将 `Token` 写入 `Cookie`，然后给本次访问放行。（这个 `Cookie` 是当前应用系统的，其他应用系统是访问不到的）当用户再次访问当前应用系统时，就会自动带上这个 `Token`，应用系统验证 `Token` 发现用户已登录，于是就不会有认证中心什么事了。
 
 **总结：此种实现方式相对复杂，支持跨域，扩展性好，是单点登录的标准做法。**
+
+# 操作 DOM
+
+## insertAdjacentHTML
+
+> [!TIP]
+> `insertAdjacentHTML()` 是 `JavaScript` 中用于动态插入 `HTML` 字符串的 `DOM` 操作方法。它允许开发者在指定元素的特定位置插入解析后的 `HTML` 节点，而无需重新解析整个父元素，因此性能优于 `inerHTML`。
+
+### 参数详解
+
+1. `position` 参数​​
+  指定插入位置的字符串，支持以下四种模式：
+  ​​- '`beforebegin`'​​：插入到目标元素同级的前面（需目标元素有父节点）
+  ​​- '`afterbegin`'​​：插入到目标元素内部的第一个子元素前
+  ​- ​'`beforeend`'​​：插入到目标元素内部的最后一个子元素后
+  ​- ​'`afterend`'​​：插入到目标元素同级的后面（需目标元素有父节点）
+
+2. `text` 参数
+  需要被解析的 HTML/XML 字符串，例如：
+
+```js
+element.insertAdjacentHTML('beforeend', '<div class="new">内容</div>');
+```
+
+### 使用示例
+
+​1. ​在列表前插入标题​​
+
+```js
+const list = document.getElementById("list");
+list.insertAdjacentHTML('beforebegin', '<h2>前端技能</h2>');
+```
+
+结果：标题 <h2> 出现在列表外部的前面。
+​​2. 动态生成列表项​​
+
+```js
+const parent = document.querySelector(".root");
+let num = 1;
+parent.insertAdjacentHTML('afterbegin', `<div class="item-${num}">项目</div>`);
+```
+
+注意：使用 `afterbegin` 时，插入顺序会影响最终位置（类似栈结构）。
+​​
+3. 批量插入优化​​
+
+```js
+const fragment = [];
+for (let i = 0; i < 5; i++) {
+  fragment.push(`<div>元素 ${i}</div>`);
+}
+element.insertAdjacentHTML('beforeend', fragment.join(''));
+```
+
+`insertAdjacentHTML()` 是实现动态 `DOM` 操作的优选方案，特别适合以下场景：
+
+- 需要快速插入复杂 `HTML` 模板（如渲染用户评论、商品卡片）
+- 避免因频繁操作 `DOM` 导致的性能瓶颈
+- 精确控制元素插入位置（如实现瀑布流布局）
