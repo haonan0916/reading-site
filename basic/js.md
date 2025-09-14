@@ -175,6 +175,53 @@ Promise.race([promise1, timeOutPromise(5000)]).then((res) => {});
 
 所谓 `Promise`，简单说就是一个容器，里面保存着某个未来才会结束的事件（通常是一个**异步操作**）的**结果**。从语法上说，`Promise` 是一个对象，从它可以获取异步操作的消息。`Promise` 提供统一的 `API`，各种异步操作都可以用同样的方法进行处理。
 
+> [!TIP]
+> try catch 可以捕获一个 promise 的异常吗
+> 1. 直接调用 `Promise`（不使用 `await`）：`try-catch` 无法捕获
+> ```javascript
+> // 情况1：Promise 中调用 reject
+try {
+  new Promise((resolve, reject) => {
+    reject(new Error("Promise 出错了")); // 主动 reject
+  });
+} catch (err) {
+  console.log("捕获到异常：", err); // 不会执行！
+}
+
+// 情况2：Promise executor 中同步抛错（会被 Promise 转为 reject）
+try {
+  new Promise((resolve, reject) => {
+    throw new Error("executor 中抛错"); // 同步抛错
+  });
+} catch (err) {
+  console.log("捕获到异常：", err); // 不会执行！
+}
+
+// 正确处理方式：用 .catch()
+new Promise((resolve, reject) => {
+  reject(new Error("Promise 出错了"));
+})
+  .catch(err => {
+    console.log("Promise 自身捕获：", err); // 会执行
+  });
+> ```
+> 2. 使用 `await` 调用 Promise：`try-catch` 可以捕获
+> ```javascript
+> async function test() {
+  try {
+    // 用 await 等待一个 rejected 的 Promise
+    await new Promise((resolve, reject) => {
+      reject(new Error("Promise 出错了"));
+    });
+  } catch (err) {
+    console.log("try/catch 捕获到异常：", err); // 会执行！
+  }
+}
+
+test();
+> ```
+> 原理：await 会暂停异步函数的执行，直到 Promise 状态确定。如果 Promise 被 reject，await 会模拟 “同步抛错” 的行为，让异常进入当前的执行上下文，从而被 try/catch 捕获。这相当于将异步异常 “转化” 为了同步可捕获的异常。
+
 （1）`Promise`的实例有**三个状态**:
 
 - Pending（进行中）
@@ -3811,3 +3858,85 @@ window.addEventListener('beforeunload', closeSSE);
 > 服务器：获取所有渲染依赖的状态 → 存储到状态容器 → 序列化后嵌入 HTML；
 > 客户端：读取 HTML 中的初始状态 → 注入客户端状态容器 → 基于相同状态进行水合。
 > 核心目标是确保 “服务器渲染的 HTML” 与 “客户端虚拟 DOM” 完全匹配，避免水合错误，同时兼顾首屏性能和用户体验。
+
+# 一个函数是如何知道自己是以普通方式被调用的还是被 new 的方式调用的
+
+> [!TIP]
+> 在 JavaScript 中，函数可以通过两种方式判断自己是被**普通调用**（如 `fn()`）还是被**`new` 调用**（如 `new fn()`），核心是利用函数执行时的**内部状态**和**`this` 指向差异**。
+
+
+## 一、核心判断依据：`this` 指向与 `new.target` 属性
+### 1. 利用 `this instanceof 函数名` 判断（传统方式）
+当函数被 `new` 调用时，JavaScript 会自动执行以下步骤：  
+- 创建一个新的空对象（实例）；  
+- 将函数的 `this` 指向这个新实例；  
+- 执行函数体；  
+- 若函数没有返回对象，则默认返回这个实例。  
+
+因此，**`new` 调用时，函数内部的 `this` 是当前函数的实例**，可通过 `this instanceof 函数名` 判断：
+
+```javascript
+function MyFunc() {
+  // 判断是否通过 new 调用
+  if (this instanceof MyFunc) {
+    console.log('通过 new 调用');
+  } else {
+    console.log('普通调用');
+  }
+}
+
+// 测试
+MyFunc(); // 普通调用（this 指向全局对象/undefined）
+new MyFunc(); // 通过 new 调用（this 是 MyFunc 的实例）
+```
+
+**局限性**：  
+如果手动将 `this` 绑定到该函数的实例（如 `MyFunc.call(new MyFunc())`），会误判为 `new` 调用。
+
+
+### 2. 利用 `new.target` 属性判断（ES6+ 推荐方式）
+ES6 引入了 `new.target` 元属性，专门用于判断函数是否通过 `new` 调用：  
+- 当函数被 `new` 调用时，`new.target` 指向当前函数本身；  
+- 当函数被普通调用时，`new.target` 为 `undefined`。  
+
+```javascript
+function MyFunc() {
+  if (new.target) {
+    console.log('通过 new 调用（new.target 存在）');
+    console.log('new.target 指向：', new.target); // 输出 MyFunc
+  } else {
+    console.log('普通调用（new.target 为 undefined）');
+  }
+}
+
+// 测试
+MyFunc(); // 普通调用（new.target 为 undefined）
+new MyFunc(); // 通过 new 调用（new.target 为 MyFunc）
+```
+
+**优势**：  
+- 更精准，不受 `this` 手动绑定的影响；  
+- 可在构造函数中区分“正常实例化”和“子类继承调用”（如子类 `new` 调用时，`new.target` 指向子类）。
+
+**注意**：  
+- 箭头函数不能通过 `new` 调用（会报错），因此箭头函数中没有 `new.target`；  
+- 严格模式/非严格模式下均有效。
+
+
+## 二、两种方式的对比与最佳实践
+| 方式                | 原理                          | 优势                     | 局限性                                 |
+|---------------------|-------------------------------|--------------------------|----------------------------------------|
+| `this instanceof 函数名` | 基于 `this` 是否为函数实例    | 兼容 ES5 及更早环境      | 可能被 `this` 手动绑定干扰             |
+| `new.target`         | 基于 ES6 元属性直接判断       | 精准，不受 `this` 影响   | 不兼容 ES5 及更早环境（需转译）        |
+
+
+**最佳实践**：  
+- 现代环境（支持 ES6+）优先使用 `new.target`，语义更清晰，判断更准确；  
+- 如需兼容旧环境，可结合两种方式：  
+  ```javascript
+  function MyFunc() {
+    const isNewCall = new.target !== undefined || this instanceof MyFunc;
+    console.log(isNewCall ? 'new 调用' : '普通调用');
+  }
+  ```
+
