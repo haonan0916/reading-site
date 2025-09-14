@@ -179,46 +179,34 @@ Promise.race([promise1, timeOutPromise(5000)]).then((res) => {});
 > try catch 可以捕获一个 promise 的异常吗
 > 1. 直接调用 `Promise`（不使用 `await`）：`try-catch` 无法捕获
 > ```javascript
-> // 情况1：Promise 中调用 reject
-try {
-  new Promise((resolve, reject) => {
-    reject(new Error("Promise 出错了")); // 主动 reject
-  });
-} catch (err) {
-  console.log("捕获到异常：", err); // 不会执行！
-}
-
-// 情况2：Promise executor 中同步抛错（会被 Promise 转为 reject）
-try {
-  new Promise((resolve, reject) => {
-    throw new Error("executor 中抛错"); // 同步抛错
-  });
-} catch (err) {
-  console.log("捕获到异常：", err); // 不会执行！
-}
-
-// 正确处理方式：用 .catch()
-new Promise((resolve, reject) => {
-  reject(new Error("Promise 出错了"));
-})
-  .catch(err => {
-    console.log("Promise 自身捕获：", err); // 会执行
-  });
+> try {
+>  new Promise((resolve, reject) => {
+>     reject(new Error("Promise 出错了")); // 主动 reject
+>  });
+> } catch (err) {
+>   console.log("捕获到异常：", err); // 不会执行！
+> }
+> // 正确处理方式：用 .catch()
+> new Promise((resolve, reject) => {
+>   reject(new Error("Promise 出错了"));
+> })
+> .catch(err => {
+>   console.log("Promise 自身捕获：", err); // 会执行
+> });
 > ```
 > 2. 使用 `await` 调用 Promise：`try-catch` 可以捕获
 > ```javascript
 > async function test() {
-  try {
-    // 用 await 等待一个 rejected 的 Promise
-    await new Promise((resolve, reject) => {
-      reject(new Error("Promise 出错了"));
-    });
-  } catch (err) {
-    console.log("try/catch 捕获到异常：", err); // 会执行！
-  }
-}
-
-test();
+>   try {
+>       // 用 await 等待一个 rejected 的 Promise
+>       await new Promise((resolve, reject) => {
+>       reject(new Error("Promise 出错了"));
+>     });
+>   } catch (err) {
+>     console.log("try/catch 捕获到异常：", err); // 会执行！
+>   }
+> }
+> test();
 > ```
 > 原理：await 会暂停异步函数的执行，直到 Promise 状态确定。如果 Promise 被 reject，await 会模拟 “同步抛错” 的行为，让异常进入当前的执行上下文，从而被 try/catch 捕获。这相当于将异步异常 “转化” 为了同步可捕获的异常。
 
