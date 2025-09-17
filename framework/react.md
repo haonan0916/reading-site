@@ -3899,6 +3899,131 @@ export const Counter: React.FC = () => {
 };
 ```
 
+## 闭包陷阱（新）
+
+> [!TIP]
+> 在 React 函数组件中，**闭包陷阱**是指因 Hooks 依赖的变量被闭包“捕获”，导致回调函数（如 `useEffect`、事件处理函数）访问到的是**旧版本的状态/属性**，而非最新值，从而引发不符合预期的行为。这是 React 中使用 Hooks 时的常见问题，核心原因与 JavaScript 闭包的特性和 React 的渲染机制有关。
+
+
+### 为什么会出现闭包陷阱？
+React 函数组件的每次渲染都是一个**独立的函数调用**，会创建独立的变量（状态、属性）和回调函数。闭包会“记住”创建时所在的渲染上下文，因此：  
+- 若回调函数（如 `useEffect` 的回调、`setTimeout` 中的函数）在某次渲染时创建，它捕获的状态/属性就是**该次渲染时的值**；  
+- 后续即使状态更新触发新的渲染，旧回调函数仍会引用旧渲染上下文中的变量，导致“访问不到最新值”。  
+
+
+### 典型场景与示例
+#### 场景 1：`useEffect` 中依赖未正确声明
+```jsx
+function Counter() {
+  const [count, setCount] = React.useState(0);
+
+  React.useEffect(() => {
+    // 定时器回调在初始渲染时创建，闭包捕获的是初始 count（0）
+    const timer = setInterval(() => {
+      console.log("当前 count：", count); // 始终打印 0，而非最新值
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []); // 依赖为空，useEffect 仅执行一次
+
+  return <button onClick={() => setCount(c => c + 1)}>count: {count}</button>;
+}
+```
+**问题**：`useEffect` 依赖为空，回调只在初始渲染时执行，定时器回调捕获的是初始 `count`（0）。即使点击按钮更新 `count`，定时器仍打印旧值。  
+
+
+#### 场景 2：事件处理函数中访问旧状态
+```jsx
+function User() {
+  const [name, setName] = React.useState("");
+
+  const handleClick = () => {
+    // 模拟异步操作（如接口请求）
+    setTimeout(() => {
+      console.log("提交的名字：", name); // 可能打印空值或旧值
+    }, 1000);
+  };
+
+  return (
+    <div>
+      <input onChange={(e) => setName(e.target.value)} />
+      <button onClick={handleClick}>提交</button>
+    </div>
+  );
+}
+```
+**问题**：若用户输入“张三”后立即点击按钮，`handleClick` 在点击时创建，闭包捕获的是当时的 `name`（可能为空或未完全输入的值）。即使输入框继续输入，定时器仍会打印点击瞬间的旧值。  
+
+
+### 如何解决闭包陷阱？
+核心思路是：**让回调函数能访问到最新的状态/属性**，或**在依赖变化时重新创建回调函数**。
+
+#### 方案 1：正确设置 Hooks 依赖数组
+对于 `useEffect`、`useCallback` 等依赖特定变量的 Hooks，需在依赖数组中声明所有用到的状态/属性，确保依赖变化时回调函数重新创建（捕获最新值）。  
+```jsx
+// 修复场景 1：将 count 加入依赖数组
+React.useEffect(() => {
+  const timer = setInterval(() => {
+    console.log("当前 count：", count); // 依赖更新后，回调重新创建，捕获最新 count
+  }, 1000);
+  return () => clearInterval(timer);
+}, [count]); // 依赖 count，count 变化时重新执行 useEffect
+```
+
+
+#### 方案 2：用 `useRef` 存储最新值
+`useRef` 的 `current` 属性是**可变的**，且不会随渲染重新创建，可用于存储“最新状态”，供闭包访问。  
+```jsx
+// 修复场景 2：用 ref 存储最新 name
+function User() {
+  const [name, setName] = React.useState("");
+  const nameRef = React.useRef(""); // 用 ref 存最新值
+
+  // 每次 name 更新时，同步到 ref
+  React.useEffect(() => {
+    nameRef.current = name;
+  }, [name]);
+
+  const handleClick = () => {
+    setTimeout(() => {
+      console.log("提交的名字：", nameRef.current); // 访问 ref，获取最新值
+    }, 1000);
+  };
+
+  return (
+    <div>
+      <input onChange={(e) => setName(e.target.value)} />
+      <button onClick={handleClick}>提交</button>
+    </div>
+  );
+}
+```
+
+
+#### 方案 3：使用函数式更新获取最新状态
+对于 `setState`，可通过**函数式更新**（接收上一状态作为参数）获取最新值，避免依赖闭包中的旧状态。  
+```jsx
+function Counter() {
+  const [count, setCount] = React.useState(0);
+
+  const handleIncrement = () => {
+    setTimeout(() => {
+      // 函数式更新：c 是最新状态
+      setCount(c => c + 1);
+    }, 1000);
+  };
+
+  return <button onClick={handleIncrement}>count: {count}</button>;
+}
+```
+
+
+### 总结
+React 闭包陷阱的本质是：**回调函数捕获了旧渲染上下文的变量**。解决关键是：  
+1. 对 `useEffect`/`useCallback` 等，**正确声明依赖数组**，确保依赖变化时回调重新创建；  
+2. 对异步场景，用 `useRef` 存储最新值，或用函数式更新获取最新状态；  
+3. 避免在回调中依赖“可能变化的状态/属性”而不处理依赖。  
+
+
 ## 7. CSS-in-JS
 
 > [!TIP]
@@ -5412,4 +5537,88 @@ export default App;
 - **水合不重新渲染**：水合不会重新生成 HTML，而是复用服务器已输出的静态节点，只附加交互逻辑（避免重复渲染浪费性能）。  
 - **水合必须“匹配”**：服务器渲染的 HTML 结构必须与客户端组件渲染的虚拟 DOM 完全一致（如标签、属性、层级），否则会触发“水合不匹配”错误（React 会在控制台报错，严重时可能导致交互异常）。  
 - **性能优化重点**：大型应用的水合过程可能耗时较长（需要遍历整个 DOM 树绑定事件），React 18+ 引入了“选择性水合”“流式水合”等优化，优先激活用户可见区域的组件，提升交互响应速度。  
+
+# React 的 Error Boundary
+
+React 的 **Error Boundary（错误边界）** 是一种特殊的组件，用于 **捕获子组件树中抛出的 JavaScript 错误**，并在出错时展示备用 UI，避免错误扩散导致整个应用崩溃。它是 React 16 引入的特性，解决了“单个组件出错导致全局应用白屏”的问题。
+
+
+## 核心作用
+- **捕获错误**：捕获子组件在 **渲染、生命周期方法、构造函数** 中抛出的同步错误（注意：有局限性，见下文）。  
+- **隔离错误**：防止错误从一个组件扩散到整个应用，仅影响出错的子树。  
+- **优雅降级**：出错时显示预设的“出错提示 UI”（如“加载失败，请重试”），而非空白页或浏览器默认错误。  
+
+
+## 如何实现 Error Boundary？
+任何类组件只要定义了以下两个生命周期方法中的一个或两个，就能成为 Error Boundary：  
+
+1. `static getDerivedStateFromError(error)`：  
+   - 静态方法，接收错误对象。
+   - 返回一个对象，用于更新组件的 `state`（通常用于标记“已出错”状态）。  
+   - 触发时机：子组件抛出错误后，在渲染备用 UI 前调用。  
+
+2. `componentDidCatch(error, errorInfo)`：  
+   - 实例方法，接收错误对象和错误信息（如调用栈）。  
+   - 用于记录错误日志（如发送到监控系统）。  
+   - 触发时机：子组件抛出错误后，在备用 UI 渲染完成后调用。  
+
+
+## 示例代码
+```jsx
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false }; // 初始状态：无错误
+  }
+
+  // 捕获错误后更新状态，触发备用 UI 渲染
+  static getDerivedStateFromError(error) {
+    return { hasError: true };
+  }
+
+  // 记录错误日志
+  componentDidCatch(error, errorInfo) {
+    console.error("Error Boundary 捕获到错误：", error, errorInfo);
+    // 可在此处将错误发送到监控平台（如 Sentry）
+  }
+
+  render() {
+    if (this.state.hasError) {
+      // 出错时展示的备用 UI（可自定义）
+      return this.props.fallback || <h2>抱歉，该内容加载失败，请刷新重试。</h2>;
+    }
+
+    // 无错误时，渲染子组件
+    return this.props.children;
+  }
+}
+```
+
+
+## 如何使用？
+用 Error Boundary 包裹可能出错的子组件（通常是页面、路由或独立功能模块）：  
+```jsx
+// 使用示例：包裹一个可能出错的列表组件
+function App() {
+  return (
+    <div>
+      <h1>我的应用</h1>
+      {/* 用 Error Boundary 包裹可能出错的组件 */}
+      <ErrorBoundary fallback={<h2>列表加载失败</h2>}>
+        <ProductList /> {/* 假设这个组件可能因数据异常出错 */}
+      </ErrorBoundary>
+      {/* 其他组件不受影响 */}
+      <Footer />
+    </div>
+  );
+}
+```
+
+
+## 局限性（重要！）
+Error Boundary **不能捕获以下错误**：  
+1. 自身组件抛出的错误（只能捕获子组件树的错误）。  
+2. 异步代码中的错误（如 `setTimeout`、`Promise` 回调）。  
+3. 事件处理函数中的错误（如 `onClick` 中的错误，React 认为事件处理是“可预期的用户交互”，应手动 `try/catch`）。  
+4. 服务端渲染（SSR）中的错误。  
 
