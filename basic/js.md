@@ -880,6 +880,75 @@ function throttle(fn, delay) {
 > a.call(undefined); // undefined
 > ```
 
+## call 手写
+```js
+Function.property._call = function(ctx, ...args) {
+  ctx = ctx === null || ctx === undefined ? globalThis : Object(ctx);
+  const key = Symbol();
+  Object.defineProperty(ctx, key, {
+    value: this,
+    enumable: false,
+  });
+  const r = ctx[key](...args);
+  delete ctx[key];
+  return r;
+}
+
+function method(a, b) {
+  console.log('args:', a, b);
+  console.log('this:', this);
+}
+
+method._call(1, 2, 3);
+```
+
+## apply 手写
+```js
+Function.property._apply = function(ctx, argsArray) {
+  ctx = ctx === null || ctx === undefined ? globalThis : Object(ctx);
+  const key = Symbol();
+  Object.defineProperty(ctx, key, {
+    value: this,
+    enumable: false,
+  });
+  const args = argsArray === null || argsArray === undefined ? [] : argsArray;
+  const result = ctx[key](...args);
+  delete ctx[key];
+  return result;
+}
+
+function method(a, b) {
+  console.log('args:', a, b);
+  console.log('this:', this);
+}
+
+method._apply(1, [2, 3]);
+```
+
+## bind 手写
+```js
+Function.property._bind = function(ctx, ...args) {
+  const fn = this;
+  return function(...subArgs) {
+    const allArgs = [...args, ...subArgs];
+    if (new.target) {
+      return new fn(...allArgs);
+    } else { 
+      return fn.apply(ctx, allArgs);
+    }
+  }
+}
+
+function fn(a, b, c, d) {
+  console.log("fn called");
+  console.log("args", a, b, c, d);
+  console.log("this", this);
+}
+
+const newFn = fn._bind("ctx", 1, 2);
+console.log(newFn(3, 4));
+```
+
 # 异步编程
 
 ## 1. 异步编程的实现方式？
