@@ -2675,6 +2675,64 @@ export default {
 - `WebSocket` 是一种网络传输协议，可在单个 `TCP` 连接上进行全双工通信，位于 `OSI` 模型的**应用层**。
 - `WebSocket` 使得客户端和服务器之间的数据交换变得更加简单，允许服务端主动向客户端推送数据。客户端和服务器只需要完成**一次握手**，两者之间就可以创建**持久性**的连接，并进行双向数据传输。
 
+WebSocket 是一种在单个 TCP 连接上实现**全双工通信**的网络协议，能让客户端和服务器之间建立持久连接，实现双向实时数据传输（如聊天应用、实时通知、股票行情等场景）。与 HTTP 协议的“请求-响应”模式不同，WebSocket 允许服务器主动向客户端推送数据，无需客户端频繁轮询。
+
+
+## 一、WebSocket 建立连接的 3 步核心流程
+WebSocket 连接建立基于 **HTTP 握手**（借助 HTTP 协议完成初始协商），最终升级为 WebSocket 协议，具体步骤如下：
+
+### 1. 客户端发起“协议升级请求”（HTTP GET 请求）
+客户端（浏览器）向服务器发送特殊的 HTTP GET 请求，表明想要将连接从 HTTP 升级为 WebSocket。  
+请求头包含关键字段：
+- `Connection: Upgrade`：告诉服务器“想要升级协议”；
+- `Upgrade: websocket`：指定升级目标为 WebSocket 协议；
+- `Sec-WebSocket-Key`：客户端生成的随机字符串（Base64 编码），用于服务器验证和加密；
+- `Sec-WebSocket-Version: 13`：指定 WebSocket 版本（目前主流为 13）。
+
+**示例请求头**：
+```http
+GET /ws HTTP/1.1
+Host: example.com
+Connection: Upgrade
+Upgrade: websocket
+Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==
+Sec-WebSocket-Version: 13
+```
+
+
+### 2. 服务器响应“协议升级成功”
+服务器收到请求后，若支持 WebSocket 协议，会返回 HTTP 101（Switching Protocols）响应，表示同意升级。  
+响应头包含关键字段：
+- `Connection: Upgrade` 和 `Upgrade: websocket`：确认协议升级；
+- `Sec-WebSocket-Accept`：服务器对客户端 `Sec-WebSocket-Key` 的加密结果（通过固定算法计算，确保双方都理解 WebSocket 协议）。
+
+**示例响应头**：
+```http
+HTTP/1.1 101 Switching Protocols
+Connection: Upgrade
+Upgrade: websocket
+Sec-WebSocket-Accept: s3pPLMBiTxaQ9kYGzzhZRbK+xOo=
+```
+
+
+### 3. 建立持久连接，开始双向通信
+握手成功后，HTTP 连接正式升级为 WebSocket 连接，底层 TCP 连接保持打开状态，客户端和服务器可通过以下方式双向传输数据：
+- 数据帧格式：WebSocket 数据以“帧”为单位传输，包含操作码（如文本帧、二进制帧）、 payload 数据等；
+- 实时性：无需重新建立连接，服务器可随时向客户端推送数据，客户端也可随时发送数据。
+
+
+## 二、从 HTTP 到 WebSocket 的转换关键
+1. **协议标识变化**：  
+   连接升级后，URL 协议从 `http://`/`https://` 变为 `ws://`（非加密）/`wss://`（加密，基于 TLS），例如 `ws://example.com/ws`。
+
+2. **通信模式变化**：  
+   - HTTP：单向请求-响应，客户端主动发起，服务器被动响应，无状态；
+   - WebSocket：双向全双工，连接建立后双方可随时发送数据，持久化状态。
+
+3. **底层连接复用**：  
+   升级过程复用初始 HTTP 连接的 TCP 通道，避免重新建立 TCP 连接的开销（三次握手），提升效率。
+
+
 ## WebSocket 优缺点
 
 ### 优点
