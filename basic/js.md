@@ -26,6 +26,9 @@
 > [!IMPORTANT]
 >
 > 立即执行匿名函数表达式是由 `window` 调用的，`this` 指向 `window` 。
+> 立即执行函数（`IIFE`）在定义后会立即执行且仅执行一次。
+> 若 `IIFE` 返回一个函数，可通过返回值多次调用。
+> `IIFE` 本身执行一次，但返回的闭包函数可多次调用。
 
 ## this 的代码输出题
 
@@ -734,6 +737,38 @@ doIt();
 > - `Promise` 传递中间值⾮常麻烦，⽽ `async/await` ⼏乎是同步的**写法**，⾮常优雅
 > - 错误处理友好，`async/await` 可以⽤成熟的 `try/catch`，`Promise` 的错误捕获⾮常冗余
 > - 调试友好，`Promise` 的调试很差，由于没有代码块，你**不能在⼀个返回表达式的箭头函数中设置断点**，如果你在⼀个 `.then` 代码块中使⽤调试器的步进(`step-over`)功能，调试器并不会进⼊后续的 `.then` 代码块，因为调试器只能跟踪同步代码的每⼀步。
+
+## 8. thenable 执行时机
+
+```js
+new Promise((resolve, reject) => {
+  resolve(2);
+  new Promise((resolve, reject) => {
+    resolve(5);
+  }).then(v => console.log(v));
+}).then(v => console.log(v));
+
+// 5
+// 2
+
+new Promise((resolve, reject) => {
+  setTimeout(() => {
+      resolve(2);
+      new Promise((resolve, reject) => {
+        resolve(5);
+      }).then(v => console.log(v));
+  });
+}).then(v => console.log(v));
+
+// 2
+// 5
+```
+
+> [!IMPORTANT]
+>
+> **thenable** 的执行需要两个前置条件：注册和完成，这两者先后顺序随意，但要保证两者都完成，才会把 **thenable** 推入微队列中。
+> - 注册：当语句执行到 `then(xxx)` 时，即为注册
+> - 完成：当状态变为 `fulfilled / rejected` 时，即为完成
 
 # 防抖与节流
 
@@ -3527,3 +3562,127 @@ element.insertAdjacentHTML('beforeend', fragment.join(''));
 - 需要快速插入复杂 `HTML` 模板（如渲染用户评论、商品卡片）
 - 避免因频繁操作 `DOM` 导致的性能瓶颈
 - 精确控制元素插入位置（如实现瀑布流布局）
+
+# 如何获取注释的元素
+
+在 `JavaScript` 中，可以通过 `DOM` 操作获取 `HTML` 文档中的注释节点（即 `<!-- 注释内容 -->`）
+
+## 获取 HTML 注释的核心方法
+
+1. **遍历 `childNodes` 并筛选注释节点**  
+通过遍历父元素的子节点列表，筛选出 `nodeType` 为 `8` 的注释节点：
+
+```js
+const parent = document.body; // 可以是任意父元素
+const childNodes = parent.childNodes;
+const comments = [];
+
+for (let node of childNodes) {
+  if (node.nodeType === Node.COMMENT_NODE) { // 8 表示注释节点类型
+    comments.push(node.nodeValue); // 获取注释内容
+  }
+}
+console.log(comments); // 输出所有注释内容
+```
+
+关键点：  
+
+- `nodeType === 8` 是注释节点的标识符  
+- `nodeValue` 属性返回注释文本内容（不含 `<!--` 和 `-->`）
+
+2. **使用 `TreeWalker` 遍历注释节点**  
+针对复杂 `DOM` 结构，可用 `TreeWalker` 高效筛选注释：
+
+```javascript
+const walker = document.createTreeWalker(
+  document.body,
+  NodeFilter.SHOW_COMMENT, // 仅遍历注释节点
+  null,
+  false
+);
+const comments = [];
+let node;
+while (node = walker.nextNode()) {
+  comments.push(node.nodeValue);
+}
+console.log(comments);
+```
+
+优势：  
+
+- 自动遍历所有层级，无需递归
+- 性能优于手动遍历，适合大型文档
+
+## 兼容性注意事项
+
+1. 浏览器差异  
+
+- 传统 `IE` 方法：`document.getElementsByTagName('!')` 可获取注释节点，但仅限 `IE`
+- 现代浏览器：必须通过 `nodeType` 或 `TreeWalker` 实现
+
+2. 框架限制  
+`jQuery` 等框架的 `DOM` 操作方法（如 `children()`）会忽略注释节点，需直接使用原生 `API`。
+
+## 动态解析字符串中的注释
+
+若需从 `HTML` 字符串（而非现有文档）中提取注释，可用 `DOMParser`：
+
+```javascript
+const htmlString = '<!-- 注释1 --><div>内容</div><!-- 注释2 -->';
+const parser = new DOMParser();
+const doc = parser.parseFromString(htmlString, 'text/html');
+
+const comments = [];
+doc.body.childNodes.forEach(node => {
+  if (node.nodeType === Node.COMMENT_NODE) {
+    comments.push(node.nodeValue);
+  }
+});
+console.log(comments); // [" 注释1 ", " 注释2 "]
+```
+
+适用场景：解析 `AJAX` 返回的 `HTML` 片段或模板中的注释。
+
+四、常见问题与解决方案
+
+1. 注释内容包含特殊符号  
+
+- 若注释中存在 `<!--` 或 `-->` 符号（如 `<!-- 嵌套 <!-- 注释 -->`），需用正则表达式精确匹配：
+
+     ```javascript
+     const comment = "<!--some <!--text-->";
+     const content = comment.replace(/<!--(.*?)-->/g, "$1");
+     console.log(content); // "some <!--text"
+     ```
+
+  此方法可避免错误截断内容。
+
+2. 移除注释节点  
+
+   ```javascript
+   const parent = document.body;
+   parent.childNodes.forEach(node => {
+     if (node.nodeType === Node.COMMENT_NODE) {
+       node.remove(); // 删除注释节点
+     }
+   });
+   ```
+
+## 总结
+
+| 方法                  | 适用场景               | 兼容性         | 性能   |
+|-----------------------|------------------------|----------------|--------|
+| `childNodes` 遍历     | 简单文档、少量注释     | 全浏览器支持   | 中     |
+| `TreeWalker`          | 复杂文档、批量处理     | 现代浏览器     | 高     |
+| `DOMParser` 解析      | 动态解析 HTML 字符串   | IE10+          | 中     |
+
+推荐实践：  
+
+- 现代项目优先使用 `TreeWalker`  
+- 兼容旧项目时使用 `childNodes` 遍历  
+- 避免在注释中存储关键数据（XSS 风险）
+
+# DNS 的优化
+
+> [!TIP]
+> 我们能做的就是让不同的域名提前进行 `DNS` 解析，主要思路是使用 `link` 的 `rel` 赋值为 `rel="dns-prefetch"`，`href` 赋值为 `href=xxxx` 相应的域名，这样的话就可以实现提前进行 `DNS` 解析来进行优化。

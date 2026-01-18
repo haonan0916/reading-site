@@ -2439,3 +2439,261 @@ type ReturnTypeBar = ReturnType<typeof bar>;
 // 相当于
 // type ReturnTypeBar = { a: string };
 ```
+
+# Zod
+Zod 是一个**TypeScript 优先的声明式数据验证库**，核心特点是「**单一数据源定义（Schema）→ 同时满足类型校验和类型推导**」，既可以在运行时验证数据合法性（如接口返回、表单输入），又能为 TypeScript 提供精确的类型提示，无需手动编写重复的类型定义。
+
+广泛用于前端表单验证、后端接口参数校验、配置文件验证等场景，相比传统的 Joi、Yup，Zod 的 TypeScript 集成更友好，API 更简洁。
+
+## 一、 核心优势
+1.  **TypeScript 深度集成**：基于 Schema 自动推导 TypeScript 类型，无需手动写 `interface`/`type`。
+2.  **链式调用 API**：语法简洁直观，支持复杂的嵌套结构、联合类型、交叉类型验证。
+3.  **运行时验证**：在 Node.js/浏览器环境均可运行，捕获运行时数据异常（如后端返回的脏数据）。
+4.  **不可变 Schema**：Schema 一旦定义就不可修改，支持复用和组合。
+5.  **轻量无依赖**：体积小，无第三方依赖，适合前端工程集成。
+
+## 二、 快速上手
+### 1. 安装
+```bash
+# npm
+npm install zod
+
+# yarn
+yarn add zod
+
+# pnpm
+pnpm add zod
+```
+
+### 2. 基础使用（定义 Schema + 验证数据）
+```typescript
+import { z } from "zod";
+
+// 1. 定义 Schema：用户信息校验规则
+const UserSchema = z.object({
+  // 必选字符串，非空
+  name: z.string().min(1, "姓名不能为空"),
+  // 必选数字，大于等于 18
+  age: z.number().int().min(18, "年龄必须大于等于18"),
+  // 可选字符串，必须是合法邮箱格式
+  email: z.string().email("邮箱格式错误").optional(),
+  // 数组，元素为字符串，至少 1 个元素
+  hobbies: z.array(z.string()).min(1, "至少选择一个爱好"),
+});
+
+// 2. 自动推导 TypeScript 类型（无需手动写 interface）
+type User = z.infer<typeof UserSchema>;
+// 推导结果：
+// type User = {
+//   name: string;
+//   age: number;
+//   email?: string | undefined;
+//   hobbies: string[];
+// }
+
+// 3. 验证合法数据
+const validUser = {
+  name: "张三",
+  age: 25,
+  email: "zhangsan@example.com",
+  hobbies: ["篮球", "编程"],
+};
+const parsedUser = UserSchema.parse(validUser); // 验证通过，返回符合 User 类型的数据
+
+// 4. 验证非法数据
+const invalidUser = {
+  name: "",
+  age: 17,
+  email: "invalid-email",
+  hobbies: [],
+};
+try {
+  UserSchema.parse(invalidUser); // 验证失败，抛出 ZodError
+} catch (error) {
+  if (error instanceof z.ZodError) {
+    console.log(error.errors); // 输出详细的错误信息
+    // 错误示例：
+    // [
+    //   { code: 'too_small', minimum: 1, type: 'string', path: ['name'], message: '姓名不能为空' },
+    //   { code: 'too_small', minimum: 18, type: 'number', path: ['age'], message: '年龄必须大于等于18' },
+    //   ...
+    // ]
+  }
+}
+```
+
+## 三、 核心 API 与常用 Schema 类型
+### 1. 基础类型 Schema
+Zod 支持所有 JavaScript/TypeScript 基础类型，链式调用添加校验规则：
+
+| Zod Schema | 作用 | 常用方法 |
+|------------|------|----------|
+| `z.string()` | 字符串类型 | `.min(len, msg)`、`.max(len, msg)`、`.email()`、`.url()`、`.regex(regex, msg)` |
+| `z.number()` | 数字类型 | `.int()`（整数）、`.min(val)`、`.max(val)`、`.positive()`、`.negative()` |
+| `z.boolean()` | 布尔类型 | - |
+| `z.date()` | 日期类型 | `.min(date)`、`.max(date)` |
+| `z.null()` | null 类型 | - |
+| `z.undefined()` | undefined 类型 | - |
+
+### 2. 复合类型 Schema
+#### （1）对象 Schema：`z.object()`
+用于验证复杂对象结构，支持嵌套对象：
+```typescript
+const AddressSchema = z.object({
+  province: z.string(),
+  city: z.string(),
+});
+
+const UserWithAddressSchema = z.object({
+  name: z.string(),
+  address: AddressSchema, // 嵌套对象 Schema
+});
+
+// 验证
+UserWithAddressSchema.parse({
+  name: "李四",
+  address: { province: "广东省", city: "深圳市" },
+});
+```
+
+#### （2）数组 Schema：`z.array()`
+验证数组，指定元素类型：
+```typescript
+// 字符串数组
+const StringArraySchema = z.array(z.string());
+// 数字数组，每个元素大于 0
+const PositiveNumberArraySchema = z.array(z.number().positive());
+```
+
+#### （3）联合类型 Schema：`z.union()` / `z.enum()`
+- `z.union()`：支持多个 Schema 的联合（类似 TypeScript `|`）
+- `z.enum()`：枚举类型，限制值为固定集合
+
+```typescript
+// 联合类型：字符串 或 数字
+const StringOrNumberSchema = z.union([z.string(), z.number()]);
+
+// 枚举类型
+const GenderSchema = z.enum(["male", "female", "other"]);
+GenderSchema.parse("male"); // 合法
+GenderSchema.parse("unknown"); // 报错
+```
+
+#### （4）可选字段与默认值
+- `.optional()`：字段可选（允许 `undefined`）
+- `.default(value)`：字段缺失时，使用默认值填充
+```typescript
+const UserWithDefaultSchema = z.object({
+  name: z.string(),
+  age: z.number().default(18), // 缺失时默认 18
+  gender: z.enum(["male", "female"]).optional(), // 可选字段
+});
+
+const user = UserWithDefaultSchema.parse({ name: "王五" });
+// user: { name: "王五", age: 18, gender: undefined }
+```
+
+### 3. 高级特性
+#### （1）Schema 复用与组合
+- `.extend()`：基于已有 Schema 扩展字段
+- `.omit()`：移除已有 Schema 的指定字段
+- `.pick()`：选取已有 Schema 的指定字段
+
+```typescript
+const BaseUserSchema = z.object({ name: z.string(), age: z.number() });
+
+// 扩展字段
+const UserWithIdSchema = BaseUserSchema.extend({ id: z.string().uuid() });
+
+// 选取部分字段
+const UserNameSchema = BaseUserSchema.pick({ name: true });
+
+// 移除部分字段
+const UserWithoutAgeSchema = BaseUserSchema.omit({ age: true });
+```
+
+#### （2）转换数据：`.transform()`
+验证通过后，对数据进行转换（如类型转换、格式处理）：
+```typescript
+const StringToNumberSchema = z.string().transform((val) => parseInt(val, 10));
+
+const num = StringToNumberSchema.parse("123"); // num = 123（number 类型）
+```
+
+#### （3）安全解析：`.safeParse()`
+避免使用 `try/catch`，返回一个包含验证结果的对象：
+```typescript
+const result = UserSchema.safeParse(invalidUser);
+if (result.success) {
+  // 验证通过，result.data 为符合类型的数据
+  console.log(result.data);
+} else {
+  // 验证失败，result.error 为 ZodError
+  console.log(result.error.errors);
+}
+```
+
+## 四、 典型应用场景
+### 1. 前端表单验证
+结合 React/Vue 等框架，验证表单提交数据：
+```typescript
+// React 表单提交示例
+const handleSubmit = (formData: unknown) => {
+  const result = UserSchema.safeParse(formData);
+  if (!result.success) {
+    // 显示错误信息给用户
+    setErrors(result.error.errors);
+    return;
+  }
+  // 表单数据合法，提交到后端
+  api.submitUser(result.data);
+};
+```
+
+### 2. 后端接口响应验证
+验证后端返回的数据，避免脏数据导致前端崩溃：
+```typescript
+// 接口请求函数
+const fetchUser = async () => {
+  const res = await fetch("/api/user");
+  const data = await res.json();
+  // 验证接口返回数据
+  const user = UserSchema.parse(data);
+  return user; // 保证 user 符合 User 类型
+};
+```
+
+### 3. 环境变量验证
+在 Next.js/Vite 等项目中，验证 `.env` 文件中的环境变量：
+```typescript
+const EnvSchema = z.object({
+  VITE_API_URL: z.string().url(),
+  VITE_API_KEY: z.string().min(1),
+});
+
+// 验证 import.meta.env
+const env = EnvSchema.parse(import.meta.env);
+// 后续使用 env.VITE_API_URL，保证其为合法 URL
+```
+
+## 五、 与 TypeScript 深度集成
+Zod 的核心优势是「Schema 即类型」，通过 `z.infer<typeof Schema>` 自动推导 TypeScript 类型，实现「一次定义，两处使用」，避免类型重复编写和不一致问题。
+
+例如：
+```typescript
+const ProductSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string(),
+  price: z.number().positive(),
+});
+
+// 自动推导类型
+type Product = z.infer<typeof ProductSchema>;
+// 等价于手动编写：
+// type Product = {
+//   id: string;
+//   name: string;
+//   price: number;
+// }
+```
+

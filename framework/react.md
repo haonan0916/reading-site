@@ -5355,3 +5355,614 @@ export default App;
 
 > [!IMPORTANT]
 > `React` 的响应式原理通过​​状态驱动、虚拟 `DOM` 差异对比、任务分片调度与编译优化​​实现高效 `UI` 更新。核心流程为：当组件状态（`state`）或属性（`props`）变化时，`React` 会重新生成虚拟 `DOM` 树，并通过 `Diff` 算法快速定位差异部分，仅更新必要的真实 `DOM` 节点。这一过程由 `Fiber` 架构支持，利用时间切片将渲染任务拆分为可中断的小单元（如优先处理用户交互），利用调度器动态分配优先级，避免主线程阻塞。同时，`React` 通过批处理合并多次状态更新，减少重复渲染，并结合编译时优化（如 `React Compiler`）实现细粒度依赖追踪和热更新，最终在保证开发灵活性的同时提升性能。
+
+# React19
+
+React 19 是一次聚焦「简化开发流程、提升用户体验、自动化性能优化」的里程碑式版本，兼容现有 React 18 代码，支持渐进式迁移，核心围绕「异步逻辑简化」「表单体系升级」「状态/事件优化」「自动性能兜底」四大方向展开，以下是所有新特性的完整、详细梳理（含核心作用、用法示例、底层价值）。
+
+## 一、 异步数据处理：统一简化异步逻辑，内置缓存与优雅容错
+这一类特性核心解决传统 React 中「异步请求需要手动管理 loading/error/数据状态」「重复请求无法自动缓存」的痛点，让异步数据消费更简洁。
+
+### 1.  核心 Hook：`use` —— 直接消费 Promise，替代 `useEffect` + 状态管理
+`use` 是 React 19 的异步 API，**支持在组件、自定义 Hook、甚至 render 阶段直接消费 Promise/异步数据**，无需手动编写 `useState` + `useEffect` 的组合，同时内置缓存机制，完美搭配 `Suspense` 实现优雅的加载状态处理。
+
+#### （1） 核心作用
+-  一行代码消费异步数据，无需手动管理「加载中/加载完成/加载失败」的状态变量；
+-  内置请求缓存，相同参数的异步请求自动复用结果，避免重复发起请求；
+-  与 `Suspense` 和 `ErrorBoundary` 无缝协同，实现优雅的加载/错误兜底；
+-  支持资源预加载，提升首屏渲染速度；
+-  可在自定义 Hook 中复用，简化异步逻辑的抽离。
+
+#### （2） 完整用法示例
+```jsx
+import { use, Suspense } from 'react';
+import ErrorBoundary from './ErrorBoundary'; // 自定义的错误边界组件
+
+// 1. 定义异步请求函数
+async function fetchUser(userId) {
+  const res = await fetch(`/api/users/${userId}`);
+  if (!res.ok) throw new Error('用户数据加载失败，请刷新重试');
+  return res.json();
+}
+
+// 2. 缓存请求（可选，实现相同 userId 复用结果）
+const cachedFetchUser = cache(fetchUser);
+
+// 3. 组件中直接使用 use 消费 Promise
+function UserProfile({ userId }) {
+  // 直接消费 Promise，无需 useEffect/useState
+  const user = use(cachedFetchUser(userId));
+
+  // 4. 渲染用户数据
+  return (
+    <div style={{ padding: '20px' }}>
+      <h3>{user.name}</h3>
+      <p>邮箱：{user.email}</p>
+      <p>年龄：{user.age}</p>
+    </div>
+  );
+}
+
+// 5. 搭配 Suspense + ErrorBoundary 处理加载/错误状态
+function UserPage({ userId }) {
+  return (
+    <div>
+      <h2>用户详情页</h2>
+      <Suspense fallback={<div>🔄 正在加载用户数据...</div>}>
+        <ErrorBoundary fallback={<div>❌ 页面加载失败，请稍后再试</div>}>
+          <UserProfile userId={userId} />
+        </ErrorBoundary>
+      </Suspense>
+    </div>
+  );
+}
+```
+
+#### （3） 关键注意事项
+-  `use` 必须在「组件渲染阶段」或「自定义 Hook 中」调用，不能在事件处理函数（如点击回调）中使用；
+-  `use` 消费的 Promise 抛出的错误，可被 `ErrorBoundary` 捕获，无需手动 `try/catch`；
+-  缓存功能依赖 `cache` 函数包装异步请求，适合无实时性要求的场景，实时数据可放弃缓存；
+-  相比 `React Query/SWR`，`use` 是内置能力，无需额外安装第三方库，适合简单异步场景，复杂场景仍可搭配第三方库使用。
+
+## 二、 表单与操作状态：重构表单体系，减少样板代码
+React 19 对表单系统进行了大幅升级，解决了传统表单「状态同步繁琐」「提交状态传递复杂」「重置逻辑不灵活」的痛点，同时新增专门管理操作状态的 Hook，让表单开发更高效。
+
+### 1.  表单 `action` 属性增强：直接传入异步函数，替代 `onSubmit`
+#### （1） 核心作用
+-  表单 `action` 属性支持直接接收异步函数，无需手动绑定 `onSubmit` 且调用 `preventDefault` 阻止默认行为；
+-  自动收集表单数据（`FormData` 格式），无需手动从 `input` 中提取值，简化表单提交逻辑；
+-  与 `useFormStatus`/`useActionState` 无缝衔接，自动关联表单提交状态。
+
+#### （2） 用法示例
+```jsx
+function SimpleUserForm() {
+  // 异步提交函数，直接接收 FormData 格式的表单数据
+  async function handleSubmit(formData) {
+    const userData = {
+      name: formData.get('name'),
+      email: formData.get('email'),
+    };
+    // 提交到后端
+    await fetch('/api/users', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(userData),
+    });
+    alert('表单提交成功！');
+  }
+
+  // 表单 action 直接传入异步函数
+  return (
+    <form action={handleSubmit} style={{ padding: '20px' }}>
+      <div>
+        <label>姓名：</label>
+        <input type="text" name="name" required />
+      </div>
+      <div style={{ margin: '10px 0' }}>
+        <label>邮箱：</label>
+        <input type="email" name="email" required />
+      </div>
+      <button type="submit">提交</button>
+    </form>
+  );
+}
+```
+
+### 2.  `useFormStatus` —— 表单内部组件获取提交状态
+#### （1） 核心作用
+-  在表单内部的子组件中，无需通过 props 传递，即可直接获取当前表单的提交状态（是否正在提交、提交数据等）；
+-  简化表单提交按钮的「加载状态禁用」「文本切换」逻辑，无需手动传递 `isPending` 状态。
+
+#### （2） 完整用法示例
+```jsx
+import { useFormStatus } from 'react-dom';
+
+// 表单内部的提交按钮组件（无需接收 props）
+function SubmitButton() {
+  // 获取当前表单的提交状态
+  const { pending, data } = useFormStatus();
+
+  return (
+    <button type="submit" disabled={pending} style={{ cursor: pending ? 'not-allowed' : 'pointer' }}>
+      {pending ? '📤 提交中...' : '✅ 提交表单'}
+    </button>
+  );
+}
+
+// 父表单组件
+function FormWithStatus() {
+  async function handleSubmit(formData) {
+    await new Promise(resolve => setTimeout(resolve, 2000)); // 模拟异步请求
+    console.log('表单数据：', Object.fromEntries(formData));
+  }
+
+  return (
+    <form action={handleSubmit} style={{ padding: '20px' }}>
+      <input type="text" name="username" placeholder="请输入用户名" required />
+      {/* 直接使用 SubmitButton，自动关联表单状态 */}
+      <SubmitButton />
+    </form>
+  );
+}
+```
+
+### 3.  `useActionState` —— 一站式管理异步操作/表单提交状态
+#### （1） 核心作用
+-  一站式管理异步操作（如表单提交）的「初始状态、执行状态、错误信息、返回结果」，无需手动声明多个 `useState`；
+-  自动提供 `isPending` 状态，标识异步操作是否正在执行，简化加载状态处理；
+-  操作失败后自动保留表单输入数据，方便用户修改重试，提升交互体验；
+-  无需手动 `try/catch`，通过返回状态的方式处理错误，更优雅。
+
+#### （2） 完整用法示例
+```jsx
+import { useActionState } from 'react';
+
+// 1. 定义异步操作函数：接收「前一次状态」和「表单数据」，返回新状态
+async function submitUser(prevState, formData) {
+  await new Promise(resolve => setTimeout(resolve, 1500)); // 模拟接口延迟
+
+  const user = {
+    name: formData.get('name'),
+    email: formData.get('email'),
+  };
+
+  // 模拟错误场景：姓名为空则返回错误状态
+  if (!user.name.trim()) {
+    return {
+      success: false,
+      error: '❌ 姓名不能为空，请填写',
+      data: null,
+    };
+  }
+
+  // 模拟成功场景：返回用户数据
+  return {
+    success: true,
+    error: null,
+    data: user,
+  };
+}
+
+// 2. 表单组件中使用 useActionState
+function UserFormWithActionState() {
+  // 初始化 useActionState：参数1=异步操作函数，参数2=初始状态
+  const [state, formAction, isPending] = useActionState(
+    submitUser,
+    { success: null, error: null, data: null } // 自定义初始状态结构
+  );
+
+  return (
+    <div style={{ padding: '20px' }}>
+      <form action={formAction}>
+        <div>
+          <label>姓名：</label>
+          <input type="text" name="name" placeholder="请输入姓名" />
+        </div>
+        <div style={{ margin: '10px 0' }}>
+          <label>邮箱：</label>
+          <input type="email" name="email" placeholder="请输入邮箱" />
+        </div>
+        <button type="submit" disabled={isPending}>
+          {isPending ? '提交中...' : '提交用户'}
+        </button>
+      </form>
+
+      {/* 展示错误信息 */}
+      {state.error && <p style={{ color: 'red', marginTop: '10px' }}>{state.error}</p>}
+
+      {/* 展示成功结果 */}
+      {state.success && state.data && (
+        <div style={{ color: 'green', marginTop: '10px', border: '1px solid #d4edda', padding: '10px' }}>
+          <p>提交成功！</p>
+          <p>姓名：{state.data.name}</p>
+          <p>邮箱：{state.data.email}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+```
+
+#### （3） 函数签名与返回值解析
+```typescript
+const [state, actionFn, isPending] = useActionState(action, initialState, permalink?);
+```
+-  `action`：异步操作函数，必须接收 `prevState`（前一次状态）和 `payload`（操作负载，如表单 `FormData`）两个参数，返回新状态；
+-  `initialState`：初始状态，自定义结构（通常包含 `success`/`error`/`data`）；
+-  `state`：当前操作状态，与 `initialState` 结构一致，存储异步操作的结果/错误；
+-  `actionFn`：包装后的操作函数，可直接传入表单 `action` 或手动调用（如 `onClick={actionFn}`）；
+-  `isPending`：布尔值，标识异步操作是否正在执行，替代手动声明的 `isLoading`。
+
+### 4.  表单重置增强：`defaultValue` 动态更新与 `reset` 优化
+#### （1） 核心作用
+-  解决传统 React 表单中「`defaultValue` 一旦设置无法动态更新」的痛点，`defaultValue` 支持跟随 props/state 动态变化；
+-  调用表单 `reset()` 方法时，会自动恢复到**最新的 `defaultValue`**，而非初始渲染时的默认值，简化编辑类表单的重置逻辑。
+
+#### （2） 用法示例
+```jsx
+import { useState } from 'react';
+
+function EditableProfileForm() {
+  // 初始用户数据（可来自接口/父组件 props）
+  const [initialUser, setInitialUser] = useState({
+    name: '张三',
+    email: 'zhangsan@example.com',
+  });
+
+  // 模拟更新初始数据（模拟从接口获取最新用户信息）
+  const refreshInitialData = () => {
+    setInitialUser({
+      name: '李四',
+      email: 'lisi@example.com',
+    });
+  };
+
+  return (
+    <div style={{ padding: '20px' }}>
+      <button onClick={refreshInitialData} style={{ marginBottom: '10px' }}>
+        刷新初始用户数据
+      </button>
+
+      <form>
+        <div>
+          <label>姓名：</label>
+          <input type="text" name="name" defaultValue={initialUser.name} />
+        </div>
+        <div style={{ margin: '10px 0' }}>
+          <label>邮箱：</label>
+          <input type="email" name="email" defaultValue={initialUser.email} />
+        </div>
+        <button type="reset">重置为最新初始值</button>
+      </form>
+    </div>
+  );
+}
+```
+
+#### （3） 关键说明
+-  该特性仅对「非受控组件」生效（使用 `defaultValue`/`defaultChecked`），受控组件（使用 `value`/`checked`）仍需手动管理重置逻辑；
+-  表单重置时，会保留用户未修改的字段的最新默认值，提升编辑类表单的用户体验。
+
+## 三、 状态与事件优化：简化状态管理，稳定函数引用，提升交互体验
+这一类特性核心解决「函数引用不稳定导致的不必要重渲染」「乐观更新需要手动管理状态回滚」的痛点，同时强化服务器组件的能力。
+
+### 1.  `useEvent` —— 生成稳定引用的事件处理函数
+#### （1） 核心作用
+-  生成一个「在组件生命周期内引用永远稳定」的事件处理函数，解决传统 React 中「函数引用变化导致 `useEffect`/`useCallback`/`React.memo` 频繁重新执行」的问题；
+-  函数内部可以访问最新的 `props` 和 `state`，无需将其添加到依赖数组，减少心智负担；
+-  简化依赖数组的编写，避免因遗漏依赖导致的 Bug。
+
+#### （2） 完整用法示例
+```jsx
+import { useEvent, useState, useEffect } from 'react';
+
+function ChatInput() {
+  const [message, setMessage] = useState('');
+
+  // 用 useEvent 包裹事件处理函数，引用永远稳定
+  const sendMessage = useEvent(async (e) => {
+    e.preventDefault();
+    if (!message.trim()) return;
+
+    // 模拟发送消息到后端
+    await fetch('/api/chat', {
+      method: 'POST',
+      body: JSON.stringify({ message }),
+    });
+
+    // 清空输入框
+    setMessage('');
+  });
+
+  // useEffect 依赖 sendMessage，但不会因 message 变化而重新执行
+  useEffect(() => {
+    console.log('发送消息函数已绑定，仅组件挂载时执行一次');
+    // 模拟绑定键盘回车事件
+    const handleKeyDown = (e) => {
+      if (e.key === 'Enter') sendMessage(e);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [sendMessage]); // sendMessage 引用稳定，仅组件挂载/卸载时执行
+
+  return (
+    <form onSubmit={sendMessage} style={{ padding: '20px' }}>
+      <input
+        type="text"
+        value={message}
+        onChange={(e) => setMessage(e.target.value)}
+        placeholder="请输入消息..."
+        style={{ padding: '5px', width: '300px' }}
+      />
+      <button type="submit" style={{ marginLeft: '10px' }}>发送</button>
+    </form>
+  );
+}
+```
+
+#### （3） 核心优势与注意事项
+-  优势：减少不必要的重渲染和 `useEffect` 执行，简化依赖管理，避免因函数引用变化导致的 Bug；
+-  注意事项：`useEvent` 仅用于「事件处理函数」（如点击、提交、键盘事件等），不适合用于渲染阶段的函数（如 `map` 中的回调）。
+
+### 2.  `useOptimistic` —— 实现乐观更新，提升用户交互体验
+#### （1） 核心作用
+-  实现「乐观更新」：用户操作后立即更新 UI，无需等待服务器响应，大幅提升交互流畅度；
+-  操作失败后自动回滚 UI 到真实状态，无需手动编写回滚逻辑；
+-  适用于点赞、收藏、提交表单等「对实时性要求不高，注重交互体验」的场景。
+
+#### （2） 完整用法示例
+```jsx
+import { useOptimistic, useState } from 'react';
+
+function LikeButton({ postId, initialLikes }) {
+  const [realLikes, setRealLikes] = useState(initialLikes);
+
+  // 初始化 useOptimistic：参数1=真实状态，参数2=乐观更新函数
+  const [optimisticLikes, addOptimisticLike] = useOptimistic(
+    realLikes,
+    (currentLikes, _) => currentLikes + 1 // 乐观更新逻辑：立即加 1
+  );
+
+  // 处理点赞操作
+  async function handleLike() {
+    // 1. 立即更新 UI（乐观更新）
+    addOptimisticLike();
+
+    try {
+      // 2. 发送请求到服务器（模拟异步请求）
+      const res = await fetch(`/api/posts/${postId}/like`, { method: 'POST' });
+      if (!res.ok) throw new Error('点赞失败');
+
+      // 3. 请求成功，更新真实状态
+      setRealLikes(prev => prev + 1);
+    } catch (e) {
+      // 4. 请求失败，提示用户（UI 会自动回滚到 realLikes）
+      alert('点赞失败，请稍后再试');
+    }
+  }
+
+  return (
+    <button onClick={handleLike} style={{ padding: '8px 16px', cursor: 'pointer' }}>
+      👍 点赞数：{optimisticLikes}
+    </button>
+  );
+}
+```
+
+#### （3） 关键说明
+-  `optimisticLikes`：乐观状态，用于渲染 UI，用户操作后立即更新；
+-  `realLikes`：真实状态，来自服务器，用于存储最终的正确数据；
+-  当异步请求失败时，`optimisticLikes` 会自动回滚到 `realLikes`，无需手动处理；
+-  乐观更新函数的第二个参数可以接收额外数据，用于复杂场景的状态更新（如表单提交的临时数据）。
+
+### 3.  服务器组件（Server Components，RSC）能力升级
+#### （1） 核心升级点
+-  「服务器组件 ↔ 客户端组件」协同更流畅：支持在服务器组件中直接导入客户端组件，无需额外包装，简化组件拆分与复用；
+-  服务器组件 `async/await` 与客户端组件 `use` 钩子无缝衔接：服务器组件获取数据后，可直接传递给客户端组件，无需额外的状态传递逻辑；
+-  新增 `server-only` 和 `client-only` 包：强制区分组件类型，避免将客户端代码误导入服务器组件（或反之），提前暴露跨环境错误，简化调试；
+-  优化服务器组件的序列化与传输：减少服务端与客户端之间的数据传输体积，提升渲染速度；
+-  支持服务器组件中的表单操作：与客户端表单 `action` 属性协同，实现「服务端处理表单提交」，减少客户端请求逻辑。
+
+#### （2） 核心价值
+-  进一步降低服务端数据获取与客户端渲染的耦合度，简化现代化 React 应用的架构设计；
+-  提升首屏加载速度，减少客户端 JavaScript 体积，优化低性能设备的用户体验；
+-  强化「服务端处理复杂逻辑，客户端处理交互」的分工，提升应用的可维护性和安全性。
+
+## 四、 底层性能优化：自动化兜底，减少手动优化成本
+React 19 注重「降低性能优化的心智负担」，通过底层特性实现自动化性能兜底，让开发者无需手动编写大量优化代码，也能写出高性能的 React 应用。
+
+### 1.  React Compiler（原名 React Forget）—— 自动渲染优化，无需手动 `memo`/`useMemo`
+#### （1） 核心背景
+传统 React 开发中，为了优化性能，开发者需要手动使用 `React.memo`（缓存组件）、`useMemo`（缓存计算结果）、`useCallback`（缓存函数引用），存在「心智负担重」「代码冗余」「容易遗漏」的痛点。React Compiler 的出现，就是为了**自动完成这些优化，让开发者专注于业务逻辑**。
+
+#### （2） 核心作用
+-  编译时自动分析组件的 `props`、`state` 和函数，识别「纯组件/纯计算/稳定函数」；
+-  自动缓存纯组件，避免因无关 `props`/`state` 变化导致的不必要重渲染；
+-  自动缓存复杂计算结果（如列表过滤、数据格式化），仅在依赖变化时重新计算；
+-  自动稳定函数引用，避免因函数引用变化导致子组件重渲染；
+-  无侵入性：无需修改现有业务代码，编译阶段自动完成优化，兼容现有 React 语法。
+
+#### （3） 用法示例（无需手动优化）
+```jsx
+import { useState } from 'react';
+
+// 子组件：无需手动用 React.memo 包裹，Compiler 自动缓存
+const TodoItem = ({ todo, onToggle }) => {
+  console.log(`渲染待办事项：${todo.text}`);
+  return (
+    <div>
+      <input
+        type="checkbox"
+        checked={todo.completed}
+        onChange={() => onToggle(todo.id)}
+      />
+      <span style={{ marginLeft: '10px', textDecoration: todo.completed ? 'line-through' : 'none' }}>
+        {todo.text}
+      </span>
+    </div>
+  );
+};
+
+// 父组件：无需手动用 useCallback 包裹函数，Compiler 自动稳定引用
+function TodoList() {
+  const [todos, setTodos] = useState([
+    { id: 1, text: '学习 React 19', completed: false },
+    { id: 2, text: '掌握 React Compiler', completed: false },
+  ]);
+  const [filter, setFilter] = useState('all');
+
+  // 无需 useCallback，Compiler 自动稳定函数引用
+  const handleToggle = (todoId) => {
+    setTodos(prev =>
+      prev.map(todo =>
+        todo.id === todoId ? { ...todo, completed: !todo.completed } : todo
+      )
+    );
+  };
+
+  // 无需 useMemo，Compiler 自动缓存过滤结果
+  const filteredTodos = todos.filter(todo => {
+    if (filter === 'all') return true;
+    if (filter === 'completed') return todo.completed;
+    return !todo.completed;
+  });
+
+  return (
+    <div style={{ padding: '20px' }}>
+      <div>
+        <button onClick={() => setFilter('all')}>全部</button>
+        <button onClick={() => setFilter('completed')} style={{ margin: '0 10px' }}>
+          已完成
+        </button>
+        <button onClick={() => setFilter('active')}>未完成</button>
+      </div>
+      <div style={{ marginTop: '20px' }}>
+        {filteredTodos.map(todo => (
+          <TodoItem key={todo.id} todo={todo} onToggle={handleToggle} />
+        ))}
+      </div>
+    </div>
+  );
+}
+```
+
+#### （4） 启用方式与注意事项
+-  启用方式：需配套构建工具支持，以 Next.js 15+ 为例，在 `next.config.js` 中开启 `reactCompiler: true` 即可；
+-  注意事项：
+  1.  目前处于「稳定可用但部分场景受限」状态，默认不开启，复杂场景（如动态生成组件）可能优化效果不佳；
+  2.  并非完全替代 `memo`/`useMemo`：超大型列表、高频更新组件等极端场景，仍可能需要手动辅助优化；
+  3.  兼容 React 19+，对类组件的优化效果有限，优先支持函数组件 + Hooks。
+
+### 2.  自动批处理更新（Automatic Batching）增强
+#### （1） 核心作用
+React 18 已支持部分场景的批处理更新（将多个 `setState` 合并为一次重渲染），React 19 则**将批处理扩展到所有场景**（包括 `Promise`、`setTimeout`、原生事件回调、异步函数回调等），进一步减少不必要的重渲染次数，提升应用性能。
+
+#### （2） 用法示例（自动合并更新）
+```jsx
+import { useState, useEffect } from 'react';
+
+function BatchUpdateExample() {
+  const [a, setA] = useState(0);
+  const [b, setB] = useState(0);
+  const [renderCount, setRenderCount] = useState(0);
+
+  // 每次重渲染，渲染次数 + 1
+  useEffect(() => {
+    setRenderCount(prev => prev + 1);
+  });
+
+  // 异步回调中的两次 setState，React 19 自动合并为一次重渲染
+  const handleBatchUpdate = async () => {
+    await fetch('/api/data'); // 模拟异步请求
+    setA(1);
+    setB(1);
+  };
+
+  return (
+    <div style={{ padding: '20px' }}>
+      <p>a: {a}</p>
+      <p>b: {b}</p>
+      <p>重渲染次数：{renderCount}</p>
+      <button onClick={handleBatchUpdate}>触发批量更新</button>
+    </div>
+  );
+}
+```
+
+#### （3） 关键说明
+-  点击按钮后，`setA` 和 `setB` 会被合并为一次重渲染，`renderCount` 仅增加 1；
+-  若需取消批处理（强制立即重渲染），可使用 `flushSync` 包裹 `setState`；
+-  该特性无需手动配置，开箱即用，兼容所有 React 组件。
+
+## 五、 其他实用小特性：提升开发效率，优化细节体验
+### 1.  `ref` 属性支持函数简写
+#### （1） 核心作用
+简化 `ref` 绑定逻辑，无需手动声明 `useRef` 并访问 `current` 属性，适合简单场景（如组件挂载后自动聚焦输入框）。
+
+#### （2） 用法示例
+```jsx
+// React 19 简写方式（无需 useRef）
+function AutoFocusInput() {
+  return (
+    <input
+      type="text"
+      ref={(el) => el?.focus()} // 组件挂载后自动聚焦
+      placeholder="挂载后自动聚焦..."
+      style={{ padding: '5px' }}
+    />
+  );
+}
+
+// 传统方式（需要 useRef）
+// function AutoFocusInput() {
+//   const inputRef = useRef(null);
+//   useEffect(() => {
+//     inputRef.current?.focus();
+//   }, []);
+//   return <input ref={inputRef} placeholder="挂载后自动聚焦..." />;
+// }
+```
+
+### 2.  `style` 属性支持 CSS 变量
+#### （1） 核心作用
+直接在 `style` 属性中使用 CSS 变量，无需拼接字符串，简化动态样式的编写，提升代码可读性。
+
+#### （2） 用法示例
+```jsx
+function CssVariableExample() {
+  const [textColor, setTextColor] = useState('red');
+
+  return (
+    <div
+      style={{
+        '--text-color': textColor, // 定义 CSS 变量
+        '--font-size': '18px',
+        color: 'var(--text-color)', // 使用 CSS 变量
+        fontSize: 'var(--font-size)',
+        margin: '20px',
+      }}
+    >
+      <p>使用 CSS 变量的文本</p>
+      <button onClick={() => setTextColor(textColor === 'red' ? 'blue' : 'red')}>
+        切换文本颜色
+      </button>
+    </div>
+  );
+}
+```
+
+### 3.  更好的 TypeScript 支持
+#### （1） 核心升级点
+-  所有新 Hook（`use`/`useEvent`/`useActionState`/`useOptimistic`）都提供了完善的类型定义，类型推导更精准；
+-  表单 `action` 属性、`FormData` 自动收集等特性，提供了更清晰的类型提示；
+-  服务器组件与客户端组件的类型区分更明确，减少跨环境类型错误。
+
+## 六、 React 19 新特性核心总结（分类梳理）
+| 特性分类                | 核心特性                                                                 | 核心价值                                                                 |
+|-------------------------|--------------------------------------------------------------------------|--------------------------------------------------------------------------|
+| 异步数据处理            | `use` 钩子（消费 Promise + 内置缓存）                                   | 简化异步逻辑，减少样板代码，优雅处理加载/错误状态                         |
+| 表单与操作状态          | 表单 `action` 增强、`useFormStatus`、`useActionState`、表单重置优化       | 重构表单体系，一站式管理提交状态，提升表单开发效率和用户体验             |
+| 状态与事件优化          | `useEvent`（稳定函数引用）、`useOptimistic`（乐观更新）、RSC 能力升级     | 减少不必要重渲染，简化状态管理，提升交互体验，强化服务端与客户端协同     |
+| 底层性能优化            | React Compiler（自动渲染优化）、自动批处理更新增强                       | 自动化性能兜底，降低手动优化心智负担，提升应用性能下限                   |
+| 实用小特性              | `ref` 函数简写、`style` 支持 CSS 变量、更好的 TypeScript 支持             | 提升开发效率，优化细节体验，减少代码冗余                                 |
+
