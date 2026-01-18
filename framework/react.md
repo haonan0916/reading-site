@@ -3899,6 +3899,131 @@ export const Counter: React.FC = () => {
 };
 ```
 
+## 闭包陷阱（新）
+
+> [!TIP]
+> 在 React 函数组件中，**闭包陷阱**是指因 Hooks 依赖的变量被闭包“捕获”，导致回调函数（如 `useEffect`、事件处理函数）访问到的是**旧版本的状态/属性**，而非最新值，从而引发不符合预期的行为。这是 React 中使用 Hooks 时的常见问题，核心原因与 JavaScript 闭包的特性和 React 的渲染机制有关。
+
+
+### 为什么会出现闭包陷阱？
+React 函数组件的每次渲染都是一个**独立的函数调用**，会创建独立的变量（状态、属性）和回调函数。闭包会“记住”创建时所在的渲染上下文，因此：  
+- 若回调函数（如 `useEffect` 的回调、`setTimeout` 中的函数）在某次渲染时创建，它捕获的状态/属性就是**该次渲染时的值**；  
+- 后续即使状态更新触发新的渲染，旧回调函数仍会引用旧渲染上下文中的变量，导致“访问不到最新值”。  
+
+
+### 典型场景与示例
+#### 场景 1：`useEffect` 中依赖未正确声明
+```jsx
+function Counter() {
+  const [count, setCount] = React.useState(0);
+
+  React.useEffect(() => {
+    // 定时器回调在初始渲染时创建，闭包捕获的是初始 count（0）
+    const timer = setInterval(() => {
+      console.log("当前 count：", count); // 始终打印 0，而非最新值
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []); // 依赖为空，useEffect 仅执行一次
+
+  return <button onClick={() => setCount(c => c + 1)}>count: {count}</button>;
+}
+```
+**问题**：`useEffect` 依赖为空，回调只在初始渲染时执行，定时器回调捕获的是初始 `count`（0）。即使点击按钮更新 `count`，定时器仍打印旧值。  
+
+
+#### 场景 2：事件处理函数中访问旧状态
+```jsx
+function User() {
+  const [name, setName] = React.useState("");
+
+  const handleClick = () => {
+    // 模拟异步操作（如接口请求）
+    setTimeout(() => {
+      console.log("提交的名字：", name); // 可能打印空值或旧值
+    }, 1000);
+  };
+
+  return (
+    <div>
+      <input onChange={(e) => setName(e.target.value)} />
+      <button onClick={handleClick}>提交</button>
+    </div>
+  );
+}
+```
+**问题**：若用户输入“张三”后立即点击按钮，`handleClick` 在点击时创建，闭包捕获的是当时的 `name`（可能为空或未完全输入的值）。即使输入框继续输入，定时器仍会打印点击瞬间的旧值。  
+
+
+### 如何解决闭包陷阱？
+核心思路是：**让回调函数能访问到最新的状态/属性**，或**在依赖变化时重新创建回调函数**。
+
+#### 方案 1：正确设置 Hooks 依赖数组
+对于 `useEffect`、`useCallback` 等依赖特定变量的 Hooks，需在依赖数组中声明所有用到的状态/属性，确保依赖变化时回调函数重新创建（捕获最新值）。  
+```jsx
+// 修复场景 1：将 count 加入依赖数组
+React.useEffect(() => {
+  const timer = setInterval(() => {
+    console.log("当前 count：", count); // 依赖更新后，回调重新创建，捕获最新 count
+  }, 1000);
+  return () => clearInterval(timer);
+}, [count]); // 依赖 count，count 变化时重新执行 useEffect
+```
+
+
+#### 方案 2：用 `useRef` 存储最新值
+`useRef` 的 `current` 属性是**可变的**，且不会随渲染重新创建，可用于存储“最新状态”，供闭包访问。  
+```jsx
+// 修复场景 2：用 ref 存储最新 name
+function User() {
+  const [name, setName] = React.useState("");
+  const nameRef = React.useRef(""); // 用 ref 存最新值
+
+  // 每次 name 更新时，同步到 ref
+  React.useEffect(() => {
+    nameRef.current = name;
+  }, [name]);
+
+  const handleClick = () => {
+    setTimeout(() => {
+      console.log("提交的名字：", nameRef.current); // 访问 ref，获取最新值
+    }, 1000);
+  };
+
+  return (
+    <div>
+      <input onChange={(e) => setName(e.target.value)} />
+      <button onClick={handleClick}>提交</button>
+    </div>
+  );
+}
+```
+
+
+#### 方案 3：使用函数式更新获取最新状态
+对于 `setState`，可通过**函数式更新**（接收上一状态作为参数）获取最新值，避免依赖闭包中的旧状态。  
+```jsx
+function Counter() {
+  const [count, setCount] = React.useState(0);
+
+  const handleIncrement = () => {
+    setTimeout(() => {
+      // 函数式更新：c 是最新状态
+      setCount(c => c + 1);
+    }, 1000);
+  };
+
+  return <button onClick={handleIncrement}>count: {count}</button>;
+}
+```
+
+
+### 总结
+React 闭包陷阱的本质是：**回调函数捕获了旧渲染上下文的变量**。解决关键是：  
+1. 对 `useEffect`/`useCallback` 等，**正确声明依赖数组**，确保依赖变化时回调重新创建；  
+2. 对异步场景，用 `useRef` 存储最新值，或用函数式更新获取最新状态；  
+3. 避免在回调中依赖“可能变化的状态/属性”而不处理依赖。  
+
+
 ## 7. CSS-in-JS
 
 > [!TIP]
@@ -5354,6 +5479,149 @@ export default App;
 # React 响应式原理
 
 > [!IMPORTANT]
+> `React` 的响应式原理通过​​状态驱动、虚拟 `DOM` 差异对比、任务分片调度与编译优化​​实现高效 `UI` 更新。核心流程为：当组件状态（`state`）或属性（`props`）变化时，`React` 会重新生成虚拟 `DOM` 树，并通过 `Diff` 算法快速定位差异部分，仅更新必要的真实 `DOM` 节点。这一过程由 `Fiber` 架构支持，利用时间切片将渲染任务拆分为可中断的小单元（如优先处理用户交互），利用调度器动态分配优先级，避免主线程阻塞。同时，`React` 通过批处理合并多次状态更新，减少重复渲染，并结合编译时优化（如 `React Cosmpiler`）实现细粒度依赖追踪和热更新，最终在保证开发灵活性的同时提升性能。
+
+# React16、17、18、19 相对于前一版本有什么更新
+
+## 1. React16：架构重构与基础能力扩展
+相较于 React 15，核心更新是重构了协调引擎（Fiber 架构），为后续并发特性奠定基础，同时新增多个关键能力：
+- Fiber 架构：将渲染工作拆分为可中断、可恢复的小单元，解决了大型应用中同步渲染导致的页面卡顿问题。
+- 错误边界（Error Boundaries）：允许组件捕获子树中的 JavaScript 错误，避免整个应用崩溃（通过 componentDidCatch 实现）。
+- createPortal：支持将组件渲染到 DOM 树的任意位置（如 body 下），解决模态框、弹窗等场景的样式 / 事件冒泡问题。
+- Fragment：允许组件返回多个子节点而无需包裹在额外的 div 中（<></> 语法），减少冗余 DOM。
+- 生命周期调整：标记 componentWillMount、componentWillReceiveProps 等为 “不安全”，推荐使用 constructor、getDerivedStateFromProps 等替代。
+
+## 2. React17：过渡版本，为升级铺路
+作为 “不引入新特性，专注兼容与过渡” 的版本，核心变化是调整事件系统，降低多版本共存成本：
+- 事件委托机制调整：事件不再绑定到 document，而是绑定到 React 渲染的根节点（root）。这使得多个 React 版本（如 17 和 18）可以在同一页面共存，互不干扰（解决了旧版本事件冒泡冲突问题）。
+- 移除不安全生命周期：正式移除 componentWillMount 等被标记为 “不安全” 的生命周期，严格模式下会报错。
+- 原生事件对齐：部分事件行为与浏览器原生对齐（如 onScroll 不再冒泡、onChange 触发时机更接近原生输入事件）。
+- 自动批处理基础：在合成事件中默认启用状态更新批处理（多个 setState 合并为一次渲染），为 18 的增强批处理铺垫。
+
+## 3. React18：并发渲染与用户体验升级
+相较于 17，核心突破是引入并发渲染（Concurrent Rendering），允许 React 中断 / 暂停 / 恢复渲染，大幅提升复杂交互的流畅度：
+- 并发渲染：渲染不再是同步不可中断的过程，React 可以根据优先级（如用户输入 > 列表渲染）调整工作顺序，避免高优先级操作（如输入框打字）被低优先级任务阻塞。
+- 新的根 API：createRoot 替代 ReactDOM.render，明确启用并发特性；root.unmount() 替代 unmountComponentAtNode。
+- 自动批处理增强：17 仅在合成事件中批处理更新，18 扩展到 setTimeout、Promise、fetch 等异步场景（多个 setState 合并为一次渲染），减少不必要的重绘。
+- useTransition 与 useDeferredValue：区分 “紧急更新”（如输入框内容）和 “非紧急更新”（如搜索结果渲染），非紧急更新可被中断，避免页面卡顿。
+- 服务器组件（实验性）：支持组件在服务器端渲染，减少客户端 JavaScript 体积（无需下载未使用的组件代码）。
+- Strict Mode 增强：模拟组件 “卸载 - 重新挂载” 过程，检测未清理的副作用（如未取消的订阅）。
+
+## 4. React19：简化开发与生态适配
+相较于 18，聚焦开发体验优化和生态兼容性提升，目前处于测试阶段，核心更新包括：
+- useEffect 清理函数简化：不再强制要求清理函数返回 “函数或 undefined”（如允许返回 null），减少开发中的 “不必要报错”。
+- useActionState：新增 Hook，简化表单提交等 “动作型状态” 管理（替代部分 useState + useCallback 场景），自动处理加载状态和错误。
+- 服务器组件与客户端组件分离：通过 'use client' 指令明确标记客户端组件，解决服务器组件中意外使用浏览器 API 的问题。
+- Suspense 增强：支持在服务器端流式渲染中 “选择性水合”（只优先水合可见区域组件），提升首屏交互速度。
+- CSS-in-JS 友好：优化对 styled-components 等库的支持，减少因样式插入导致的渲染阻塞。
+
+# 水合
+
+> [!IMPORTANT]
+> 在 React 等现代前端框架中，**水合（Hydration）** 是服务器端渲染（SSR）或静态站点生成（SSG）后的关键步骤，核心作用是**将服务器生成的静态 HTML“激活”为可交互的动态组件**。
+
+## 为什么需要水合？
+服务器端渲染（或静态生成）能让浏览器快速展示完整的 HTML 内容（提升首屏加载速度和 SEO），但这些 HTML 是“死”的——没有绑定事件处理（如点击、输入），也没有组件状态。  
+
+水合的目的就是让这些静态内容“活”起来：客户端加载 JavaScript 后，框架（如 React）会将静态 HTML 与客户端的组件逻辑关联，最终形成可交互的页面。
+
+
+## 水合的具体过程
+以 React 为例，水合步骤大致如下：  
+1. **服务器先行渲染**：服务器将 React 组件渲染为静态 HTML 字符串，发送给浏览器，浏览器快速展示这些内容（用户能立即看到页面结构）。  
+2. **客户端加载 JavaScript**：浏览器同时下载对应的 React 组件代码（JS bundle）。  
+3. **对比与绑定**：客户端 React 会“接管”服务器生成的 HTML，通过虚拟 DOM 对比（确保服务器和客户端渲染结果一致），为元素绑定事件处理程序（如 `onClick`），恢复组件状态（如 `useState` 的初始值），最终让页面具备交互能力。  
+
+
+## 关键特点与注意事项
+- **水合不重新渲染**：水合不会重新生成 HTML，而是复用服务器已输出的静态节点，只附加交互逻辑（避免重复渲染浪费性能）。  
+- **水合必须“匹配”**：服务器渲染的 HTML 结构必须与客户端组件渲染的虚拟 DOM 完全一致（如标签、属性、层级），否则会触发“水合不匹配”错误（React 会在控制台报错，严重时可能导致交互异常）。  
+- **性能优化重点**：大型应用的水合过程可能耗时较长（需要遍历整个 DOM 树绑定事件），React 18+ 引入了“选择性水合”“流式水合”等优化，优先激活用户可见区域的组件，提升交互响应速度。  
+
+# React 的 Error Boundary
+
+React 的 **Error Boundary（错误边界）** 是一种特殊的组件，用于 **捕获子组件树中抛出的 JavaScript 错误**，并在出错时展示备用 UI，避免错误扩散导致整个应用崩溃。它是 React 16 引入的特性，解决了“单个组件出错导致全局应用白屏”的问题。
+
+
+## 核心作用
+- **捕获错误**：捕获子组件在 **渲染、生命周期方法、构造函数** 中抛出的同步错误（注意：有局限性，见下文）。  
+- **隔离错误**：防止错误从一个组件扩散到整个应用，仅影响出错的子树。  
+- **优雅降级**：出错时显示预设的“出错提示 UI”（如“加载失败，请重试”），而非空白页或浏览器默认错误。  
+
+
+## 如何实现 Error Boundary？
+任何类组件只要定义了以下两个生命周期方法中的一个或两个，就能成为 Error Boundary：  
+
+1. `static getDerivedStateFromError(error)`：  
+   - 静态方法，接收错误对象。
+   - 返回一个对象，用于更新组件的 `state`（通常用于标记“已出错”状态）。  
+   - 触发时机：子组件抛出错误后，在渲染备用 UI 前调用。  
+
+2. `componentDidCatch(error, errorInfo)`：  
+   - 实例方法，接收错误对象和错误信息（如调用栈）。  
+   - 用于记录错误日志（如发送到监控系统）。  
+   - 触发时机：子组件抛出错误后，在备用 UI 渲染完成后调用。  
+
+
+## 示例代码
+```jsx
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false }; // 初始状态：无错误
+  }
+
+  // 捕获错误后更新状态，触发备用 UI 渲染
+  static getDerivedStateFromError(error) {
+    return { hasError: true };
+  }
+
+  // 记录错误日志
+  componentDidCatch(error, errorInfo) {
+    console.error("Error Boundary 捕获到错误：", error, errorInfo);
+    // 可在此处将错误发送到监控平台（如 Sentry）
+  }
+
+  render() {
+    if (this.state.hasError) {
+      // 出错时展示的备用 UI（可自定义）
+      return this.props.fallback || <h2>抱歉，该内容加载失败，请刷新重试。</h2>;
+    }
+
+    // 无错误时，渲染子组件
+    return this.props.children;
+  }
+}
+```
+
+
+## 如何使用？
+用 Error Boundary 包裹可能出错的子组件（通常是页面、路由或独立功能模块）：  
+```jsx
+// 使用示例：包裹一个可能出错的列表组件
+function App() {
+  return (
+    <div>
+      <h1>我的应用</h1>
+      {/* 用 Error Boundary 包裹可能出错的组件 */}
+      <ErrorBoundary fallback={<h2>列表加载失败</h2>}>
+        <ProductList /> {/* 假设这个组件可能因数据异常出错 */}
+      </ErrorBoundary>
+      {/* 其他组件不受影响 */}
+      <Footer />
+    </div>
+  );
+}
+```
+
+
+## 局限性（重要！）
+Error Boundary **不能捕获以下错误**：  
+1. 自身组件抛出的错误（只能捕获子组件树的错误）。  
+2. 异步代码中的错误（如 `setTimeout`、`Promise` 回调）。  
+3. 事件处理函数中的错误（如 `onClick` 中的错误，React 认为事件处理是“可预期的用户交互”，应手动 `try/catch`）。  
+4. 服务端渲染（SSR）中的错误。  
+
 > `React` 的响应式原理通过​​状态驱动、虚拟 `DOM` 差异对比、任务分片调度与编译优化​​实现高效 `UI` 更新。核心流程为：当组件状态（`state`）或属性（`props`）变化时，`React` 会重新生成虚拟 `DOM` 树，并通过 `Diff` 算法快速定位差异部分，仅更新必要的真实 `DOM` 节点。这一过程由 `Fiber` 架构支持，利用时间切片将渲染任务拆分为可中断的小单元（如优先处理用户交互），利用调度器动态分配优先级，避免主线程阻塞。同时，`React` 通过批处理合并多次状态更新，减少重复渲染，并结合编译时优化（如 `React Compiler`）实现细粒度依赖追踪和热更新，最终在保证开发灵活性的同时提升性能。
 
 # React19

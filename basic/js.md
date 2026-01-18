@@ -178,6 +178,41 @@ Promise.race([promise1, timeOutPromise(5000)]).then((res) => {});
 
 所谓 `Promise`，简单说就是一个容器，里面保存着某个未来才会结束的事件（通常是一个**异步操作**）的**结果**。从语法上说，`Promise` 是一个对象，从它可以获取异步操作的消息。`Promise` 提供统一的 `API`，各种异步操作都可以用同样的方法进行处理。
 
+> [!TIP]
+> try catch 可以捕获一个 promise 的异常吗
+> 1. 直接调用 `Promise`（不使用 `await`）：`try-catch` 无法捕获
+> ```javascript
+> try {
+>  new Promise((resolve, reject) => {
+>     reject(new Error("Promise 出错了")); // 主动 reject
+>  });
+> } catch (err) {
+>   console.log("捕获到异常：", err); // 不会执行！
+> }
+> // 正确处理方式：用 .catch()
+> new Promise((resolve, reject) => {
+>   reject(new Error("Promise 出错了"));
+> })
+> .catch(err => {
+>   console.log("Promise 自身捕获：", err); // 会执行
+> });
+> ```
+> 2. 使用 `await` 调用 Promise：`try-catch` 可以捕获
+> ```javascript
+> async function test() {
+>   try {
+>       // 用 await 等待一个 rejected 的 Promise
+>       await new Promise((resolve, reject) => {
+>       reject(new Error("Promise 出错了"));
+>     });
+>   } catch (err) {
+>     console.log("try/catch 捕获到异常：", err); // 会执行！
+>   }
+> }
+> test();
+> ```
+> 原理：await 会暂停异步函数的执行，直到 Promise 状态确定。如果 Promise 被 reject，await 会模拟 “同步抛错” 的行为，让异常进入当前的执行上下文，从而被 try/catch 捕获。这相当于将异步异常 “转化” 为了同步可捕获的异常。
+
 （1）`Promise`的实例有**三个状态**:
 
 - Pending（进行中）
@@ -879,6 +914,75 @@ function throttle(fn, delay) {
 > a.call(null); // null
 > a.call(undefined); // undefined
 > ```
+
+## call 手写
+```js
+Function.property._call = function(ctx, ...args) {
+  ctx = ctx === null || ctx === undefined ? globalThis : Object(ctx);
+  const key = Symbol();
+  Object.defineProperty(ctx, key, {
+    value: this,
+    enumable: false,
+  });
+  const r = ctx[key](...args);
+  delete ctx[key];
+  return r;
+}
+
+function method(a, b) {
+  console.log('args:', a, b);
+  console.log('this:', this);
+}
+
+method._call(1, 2, 3);
+```
+
+## apply 手写
+```js
+Function.property._apply = function(ctx, argsArray) {
+  ctx = ctx === null || ctx === undefined ? globalThis : Object(ctx);
+  const key = Symbol();
+  Object.defineProperty(ctx, key, {
+    value: this,
+    enumable: false,
+  });
+  const args = argsArray === null || argsArray === undefined ? [] : argsArray;
+  const result = ctx[key](...args);
+  delete ctx[key];
+  return result;
+}
+
+function method(a, b) {
+  console.log('args:', a, b);
+  console.log('this:', this);
+}
+
+method._apply(1, [2, 3]);
+```
+
+## bind 手写
+```js
+Function.property._bind = function(ctx, ...args) {
+  const fn = this;
+  return function(...subArgs) {
+    const allArgs = [...args, ...subArgs];
+    if (new.target) {
+      return new fn(...allArgs);
+    } else { 
+      return fn.apply(ctx, allArgs);
+    }
+  }
+}
+
+function fn(a, b, c, d) {
+  console.log("fn called");
+  console.log("args", a, b, c, d);
+  console.log("this", this);
+}
+
+const newFn = fn._bind("ctx", 1, 2);
+console.log(newFn(3, 4));
+```
 
 # 异步编程
 
@@ -1972,6 +2076,9 @@ console.log(copy.hidden); // undefined
 
 在浏览器中，"深储存"和"浅储存"通常指的是将数据保存到浏览器的存储机制中，这些机制包括 `localStorage`、`sessionStorage` 和 `IndexedDB`。这些存储机制可以用来保存不同类型的数据，以便在用户会话之间或跨页面访问时使用。
 
+> [!TIP]
+> 当 storage 存满后再 setItem 会抛出 `QuotaExceededError` 异常！
+
 ### 1. 浅储存
 
 **浅储存**通常指的是将简单的、扁平化的数据（如字符串、数字、布尔值等）直接存储到浏览器的存储机制中。这些数据通常是不可变的，或者不需要复杂的结构。
@@ -2346,6 +2453,11 @@ console.log(MY_CONSTANT_OBJECT.key1); // 输出 "value1"
 3. **冒泡阶段（Bubbling Phase）**：
    - 事件从目标元素开始，逐级向上传递，直到到达最顶层的节点。在这个阶段，如果在某个节点上绑定了冒泡阶段的事件处理器，那么该处理器会被执行。
 
+> [!TIP]
+> 怎么让事件冒泡先执行？
+> 1. 利用事件委托。事件委托通过将事件监听器绑定到父元素，利用冒泡机制实现子元素事件的统一处理。由于事件冒泡的特性，父元素的事件处理函数会在子元素事件触发后执行，从而实现“冒泡后处理”的效果。
+> 2. 使用`setTimeout`延迟处理。通过将事件处理逻辑放入`setTimeout`中，利用异步执行特性，确保事件传播（包括冒泡）完成后再执行代码。
+
 ### 事件传播的顺序
 
 根据 W3C 标准，事件传播的顺序如下：
@@ -2597,6 +2709,64 @@ export default {
 
 - `WebSocket` 是一种网络传输协议，可在单个 `TCP` 连接上进行全双工通信，位于 `OSI` 模型的**应用层**。
 - `WebSocket` 使得客户端和服务器之间的数据交换变得更加简单，允许服务端主动向客户端推送数据。客户端和服务器只需要完成**一次握手**，两者之间就可以创建**持久性**的连接，并进行双向数据传输。
+
+WebSocket 是一种在单个 TCP 连接上实现**全双工通信**的网络协议，能让客户端和服务器之间建立持久连接，实现双向实时数据传输（如聊天应用、实时通知、股票行情等场景）。与 HTTP 协议的“请求-响应”模式不同，WebSocket 允许服务器主动向客户端推送数据，无需客户端频繁轮询。
+
+
+## 一、WebSocket 建立连接的 3 步核心流程
+WebSocket 连接建立基于 **HTTP 握手**（借助 HTTP 协议完成初始协商），最终升级为 WebSocket 协议，具体步骤如下：
+
+### 1. 客户端发起“协议升级请求”（HTTP GET 请求）
+客户端（浏览器）向服务器发送特殊的 HTTP GET 请求，表明想要将连接从 HTTP 升级为 WebSocket。  
+请求头包含关键字段：
+- `Connection: Upgrade`：告诉服务器“想要升级协议”；
+- `Upgrade: websocket`：指定升级目标为 WebSocket 协议；
+- `Sec-WebSocket-Key`：客户端生成的随机字符串（Base64 编码），用于服务器验证和加密；
+- `Sec-WebSocket-Version: 13`：指定 WebSocket 版本（目前主流为 13）。
+
+**示例请求头**：
+```http
+GET /ws HTTP/1.1
+Host: example.com
+Connection: Upgrade
+Upgrade: websocket
+Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==
+Sec-WebSocket-Version: 13
+```
+
+
+### 2. 服务器响应“协议升级成功”
+服务器收到请求后，若支持 WebSocket 协议，会返回 HTTP 101（Switching Protocols）响应，表示同意升级。  
+响应头包含关键字段：
+- `Connection: Upgrade` 和 `Upgrade: websocket`：确认协议升级；
+- `Sec-WebSocket-Accept`：服务器对客户端 `Sec-WebSocket-Key` 的加密结果（通过固定算法计算，确保双方都理解 WebSocket 协议）。
+
+**示例响应头**：
+```http
+HTTP/1.1 101 Switching Protocols
+Connection: Upgrade
+Upgrade: websocket
+Sec-WebSocket-Accept: s3pPLMBiTxaQ9kYGzzhZRbK+xOo=
+```
+
+
+### 3. 建立持久连接，开始双向通信
+握手成功后，HTTP 连接正式升级为 WebSocket 连接，底层 TCP 连接保持打开状态，客户端和服务器可通过以下方式双向传输数据：
+- 数据帧格式：WebSocket 数据以“帧”为单位传输，包含操作码（如文本帧、二进制帧）、 payload 数据等；
+- 实时性：无需重新建立连接，服务器可随时向客户端推送数据，客户端也可随时发送数据。
+
+
+## 二、从 HTTP 到 WebSocket 的转换关键
+1. **协议标识变化**：  
+   连接升级后，URL 协议从 `http://`/`https://` 变为 `ws://`（非加密）/`wss://`（加密，基于 TLS），例如 `ws://example.com/ws`。
+
+2. **通信模式变化**：  
+   - HTTP：单向请求-响应，客户端主动发起，服务器被动响应，无状态；
+   - WebSocket：双向全双工，连接建立后双方可随时发送数据，持久化状态。
+
+3. **底层连接复用**：  
+   升级过程复用初始 HTTP 连接的 TCP 通道，避免重新建立 TCP 连接的开销（三次握手），提升效率。
+
 
 ## WebSocket 优缺点
 
@@ -3118,8 +3288,16 @@ Reflect 的核心价值：
 |------|----------|----------
 | **基本的请求能力** | ✅ | ✅ |
 | **基本的获取响应能力** | ✅ | ✅ |
-| **监控请求进度** | ✅ | ✅ |
+| **监控请求进度** | ✅ | ❌ |
 | **监控响应进度** | ✅ | ✅ |
+| **Service Worker中是否可用** | ❌ | ✅ |
+| **控制cookie的携带** | ❌ | ✅ |
+| **控制重定向** | ❌ | ✅ |
+| **请求取消** | ✅ | ✅ |
+| **自定义referrer** | ❌ | ✅ |
+| **流** | ❌ | ✅ |
+| **API风格** | Event | Promise |
+| **活跃度** | 停止更新 | 不断更新 |
 
 # 前端性能指标
 
@@ -3562,6 +3740,466 @@ element.insertAdjacentHTML('beforeend', fragment.join(''));
 - 需要快速插入复杂 `HTML` 模板（如渲染用户评论、商品卡片）
 - 避免因频繁操作 `DOM` 导致的性能瓶颈
 - 精确控制元素插入位置（如实现瀑布流布局）
+- 
+
+# SSE 
+
+> [!IMPORTANT]
+> SSE（Server-Sent Events，服务器发送事件）是一种基于 HTTP 的单向通信协议，用于服务器向客户端持续推送实时数据。其返回的数据格式有严格规范，客户端（如浏览器）会按照固定格式解析数据，核心要求如下：
+
+
+## 一、基础响应头要求
+服务器返回的响应必须包含以下 HTTP 头，否则客户端无法识别为 SSE 流：
+```http
+Content-Type: text/event-stream  # 必须，声明为 SSE 格式
+Cache-Control: no-cache          # 禁止缓存，确保数据实时性
+Connection: keep-alive           # 保持长连接，持续推送数据
+```
+
+
+## 二、数据格式规范
+SSE 数据以**文本流**形式传输，每条消息由一个或多个「字段行」组成，字段行格式为：`字段名: 值\n`（字段名小写，冒号后必须有空格，以换行符结尾）。  
+消息之间以**两个连续的换行符**（`\n\n`）分隔。
+
+### 核心字段说明：
+1. **`data`**：消息主体内容（必填，最核心的字段）  
+   - 用于传输实际数据，可单行或多行（多行时每行都需以 `data:` 开头）。  
+   - 示例：  
+     ```text
+     data: 这是一条单行消息\n
+     \n  # 消息结束（两个换行符）
+     ```
+     多行数据：  
+     ```text
+     data: 这是第一行\n
+     data: 这是第二行\n
+     \n  # 消息结束，客户端会将多行合并为 "这是第一行\n这是第二行"
+     ```
+
+2. **`event`**：事件类型（可选）  
+   - 用于给消息定义类型，客户端可通过 `addEventListener(eventType, callback)` 监听特定类型的事件（默认事件类型为 `message`）。  
+   - 示例：  
+     ```text
+     event: update\n
+     data: 新数据更新了\n
+     \n  # 客户端需用 addEventListener('update', ...) 接收
+     ```
+
+3. **`id`**：消息唯一标识（可选）  
+   - 用于标记消息序号，客户端会自动记录最后接收的 `id` 到 `lastEventId` 属性中。  
+   - 若连接中断，客户端重连时会在请求头中携带 `Last-Event-ID: [id]`，服务器可根据此 `id` 恢复数据推送（避免重复或丢失）。  
+   - 示例：  
+     ```text
+     id: 1001\n
+     data: 带ID的消息\n
+     \n
+     ```
+
+4. **`retry`**：重连时间（可选）  
+   - 告诉客户端连接中断后，多少毫秒后重试连接（默认约 3 秒）。  
+   - 示例：  
+     ```text
+     retry: 5000\n  # 客户端5秒后重试
+     data: 连接可能中断，请重试\n
+     \n
+     ```
+
+
+## 三、特殊规则
+- **注释行**：以 `:` 开头的行（无字段名），客户端会忽略（用于心跳检测或调试）：  
+  ```text
+  : 这是一条注释，客户端不会处理\n
+  \n
+  ```
+- **空字段**：若字段值为空，可省略值（但冒号和空格仍需保留），例如 `data: \n` 表示空数据。  
+- **编码**：所有数据必须使用 UTF-8 编码。  
+
+
+## 四、完整示例（服务器推送的数据流）
+```text
+# 第一条消息：默认事件类型，带ID
+id: 1\n
+data: 第一条消息内容\n
+\n
+
+# 第二条消息：自定义事件类型，多行数据
+event: progress\n
+id: 2\n
+data: 处理进度：30%\n
+data: 剩余时间：10秒\n
+\n
+
+# 第三条消息：设置重连时间
+retry: 3000\n
+data: 连接将在3秒后重试（如果断开）\n
+\n
+
+# 注释行（心跳）
+: 保持连接活跃...\n
+\n
+```
+
+
+## 五、客户端解析逻辑
+浏览器原生 `EventSource` 对象会自动解析上述格式：
+- 单行 `data` 直接作为 `event.data`；  
+- 多行 `data` 会合并为包含换行符的字符串；  
+- 带 `event` 字段的消息，触发对应事件类型的回调；  
+- 自动记录 `id` 到 `lastEventId`，重连时携带。
+
+如果是自定义客户端（如 Node.js），则需要按上述规则手动解析文本流。
+
+
+## 总结
+SSE 数据格式的核心是「`text/event-stream` 类型 + 字段行 + `\n\n` 分隔」，通过 `data` 传内容、`event` 分类型、`id` 保序、`retry` 控重连，结构简单且易于实现，适合服务器单向推送实时数据（如监控日志、实时通知等场景）。
+
+# 前端如何发请求获取 SSE 数据
+
+> [!IMPORTANT]
+> 前端获取 SSE（Server-Sent Events）数据主要通过浏览器原生的 **`EventSource` API** 实现，这是专门为接收服务器发送事件设计的接口，使用简单且无需额外依赖。以下是具体实现步骤、示例代码及注意事项：
+
+## 一、核心 API：`EventSource`
+`EventSource` 会建立一个与服务器的持久化 HTTP 连接，自动监听服务器发送的 SSE 事件流，并在接收数据时触发对应的事件回调。
+
+
+## 二、基本使用步骤
+### 1. 创建 `EventSource` 实例（建立连接）
+通过 `new EventSource(url)` 创建实例，参数为服务器 SSE 接口的 URL（必须是 `GET` 请求）：
+```javascript
+// 连接到服务器的 SSE 端点
+const eventSource = new EventSource('/api/sse-stream');
+```
+
+### 2. 监听默认事件（`message` 事件）
+服务器发送的未指定 `event` 字段的消息（默认事件类型），会触发 `message` 事件：
+```javascript
+// 监听默认事件（服务器未指定 event 字段时）
+eventSource.onmessage = (event) => {
+  // event.data 是服务器发送的 data 字段内容（字符串）
+  console.log('收到默认事件数据：', event.data);
+  
+  // 实际场景中可能需要解析 JSON（如果服务器发送的是 JSON 字符串）
+  try {
+    const data = JSON.parse(event.data);
+    console.log('解析后的数据：', data);
+    // 处理数据：如更新 DOM、存储状态等
+    // document.getElementById('content').textContent = data.message;
+  } catch (e) {
+    console.error('数据解析失败：', e);
+  }
+};
+```
+
+### 3. 监听自定义事件（服务器指定 `event` 字段）
+如果服务器发送的消息包含 `event: 事件名` 字段，客户端需通过 `addEventListener` 监听对应事件：
+```javascript
+// 监听服务器定义的 "progress" 事件（需与服务器 event 字段一致）
+eventSource.addEventListener('progress', (event) => {
+  console.log('收到进度事件：', event.data);
+  // 处理进度数据：如更新进度条
+  // updateProgressBar(event.data);
+});
+
+// 监听 "error" 类型的自定义事件（示例）
+eventSource.addEventListener('error', (event) => {
+  console.log('收到错误通知：', event.data);
+});
+```
+
+### 4. 监听连接状态变化
+`EventSource` 有三个状态，可通过 `readyState` 属性获取：
+- `0`（`CONNECTING`）：连接中  
+- `1`（`OPEN`）：连接已建立  
+- `2`（`CLOSED`）：连接已关闭  
+
+可监听 `open` 和 `error` 事件判断连接状态：
+```javascript
+// 连接成功建立时触发
+eventSource.onopen = () => {
+  console.log('SSE 连接已建立');
+};
+
+// 连接出错时触发（如网络中断、服务器错误）
+eventSource.onerror = (error) => {
+  console.error('SSE 连接错误：', error);
+  // 可在此处处理重连逻辑（如检查 readyState 后重新创建实例）
+  if (eventSource.readyState === EventSource.CLOSED) {
+    console.log('连接已关闭，尝试重连...');
+    // 重连逻辑
+  }
+};
+```
+
+### 5. 关闭连接
+不需要接收数据时，需手动关闭连接释放资源：
+```javascript
+// 关闭连接（如页面卸载、用户退出）
+const closeSSE = () => {
+  eventSource.close();
+  console.log('SSE 连接已关闭');
+};
+
+// 页面离开时关闭连接
+window.addEventListener('beforeunload', closeSSE);
+```
+
+
+## 三、完整示例代码
+```html
+<!DOCTYPE html>
+<html>
+<body>
+  <div id="sse-content"></div>
+  <button onclick="closeSSE()">关闭连接</button>
+
+  <script>
+    // 建立 SSE 连接
+    const eventSource = new EventSource('/api/sse-stream');
+    const contentDiv = document.getElementById('sse-content');
+
+    // 监听默认消息事件
+    eventSource.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        contentDiv.innerHTML += `<p>默认消息：${data.message}</p>`;
+      } catch (e) {
+        contentDiv.innerHTML += `<p>收到数据：${event.data}</p>`;
+      }
+    };
+
+    // 监听自定义 "progress" 事件
+    eventSource.addEventListener('progress', (event) => {
+      contentDiv.innerHTML += `<p>进度更新：${event.data}</p>`;
+    });
+
+    // 连接成功
+    eventSource.onopen = () => {
+      contentDiv.innerHTML += '<p>✅ SSE 连接已建立</p>';
+    };
+
+    // 连接错误
+    eventSource.onerror = (error) => {
+      contentDiv.innerHTML += `<p>❌ 连接错误：${error.type}</p>`;
+      if (eventSource.readyState === EventSource.CLOSED) {
+        contentDiv.innerHTML += '<p>🔌 连接已关闭，尝试重连...</p>';
+        // 简单重连逻辑（实际需控制重连频率，避免无限重试）
+        setTimeout(() => window.location.reload(), 3000);
+      }
+    };
+
+    // 关闭连接函数
+    function closeSSE() {
+      eventSource.close();
+      contentDiv.innerHTML += '<p>🔒 SSE 连接已手动关闭</p>';
+    }
+  </script>
+</body>
+</html>
+```
+
+
+## 四、注意事项
+1. **请求方法限制**：SSE 仅支持 `GET` 请求，服务器端需处理 `GET` 方式的 SSE 连接。  
+2. **跨域处理**：如果 SSE 接口与前端页面不同域，服务器需在响应头中设置 `Access-Control-Allow-Origin: *`（或指定域名），允许跨域请求。  
+3. **数据格式**：客户端 `event.data` 接收的是字符串，若服务器发送 JSON 数据，需手动用 `JSON.parse()` 解析。  
+4. **浏览器兼容性**：现代浏览器（Chrome、Firefox、Edge、Safari）均支持 `EventSource`，但 **IE 完全不支持**（需用 polyfill 兼容，如 `event-source-polyfill`）。  
+5. **自动重连机制**：`EventSource` 有内置重连机制（默认约 3 秒后重试），若服务器发送 `retry: 时间` 字段，会按指定时间重连；连接关闭后需手动重新创建实例。  
+
+
+## 总结
+前端通过 `EventSource` API 即可轻松获取 SSE 数据，核心步骤是：建立连接 → 监听事件（默认/自定义）→ 处理数据 → 关闭连接。相比 WebSocket，SSE 实现更简单，适合服务器单向推送实时数据的场景（如监控日志、实时通知）。
+
+# SSE 打字机效果实现
+
+## 一、核心流程
+1. **建立SSE连接**：用原生 `EventSource` 对接后端SSE接口，监听数据推送事件；  
+2. **缓冲与节奏控制**：用队列缓存接收的字符，避免后端推送速度波动影响渲染，再通过固定定时器匀速消费队列；  
+3. **渲染与体验优化**：逐字更新DOM，配合光标动画和状态提示，确保打字流畅自然。  
+
+
+## 二、关键代码实现
+
+### 1. 初始化SSE连接，监听数据推送
+```javascript
+// 1. 建立SSE连接（对接后端接口）
+const sse = new EventSource('/api/stream/typewriter'); // 后端SSE接口
+const outputEl = document.getElementById('typewriter-output'); // 渲染容器
+const bufferQueue = []; // 缓冲队列：存储待渲染的字符
+const TYPE_SPEED = 100; // 固定打字速度（100ms/字符）
+let renderTimer = null; // 匀速渲染定时器
+
+// 2. 监听SSE推送的数据
+sse.addEventListener('message', (event) => {
+  try {
+    const data = JSON.parse(event.data);
+    // 后端推送格式约定：{ char: '单个字符' } 或 { complete: true }
+    if (data.char) {
+      bufferQueue.push(data.char); // 存入缓冲队列
+      updateStatus(`缓冲中（待渲染：${bufferQueue.length}）`);
+      startRender(); // 启动/恢复渲染
+    } else if (data.complete) {
+      updateStatus('打字完成');
+    }
+  } catch (err) {
+    console.error('SSE数据解析失败：', err);
+  }
+});
+```
+
+
+### 2. 匀速渲染逻辑
+```javascript
+// 启动/恢复匀速渲染（按固定速度消费队列）
+function startRender() {
+  if (renderTimer) return; // 避免重复创建定时器
+
+  renderTimer = setInterval(() => {
+    if (bufferQueue.length === 0) {
+      // 队列空了，暂停定时器（等待新数据）
+      clearInterval(renderTimer);
+      renderTimer = null;
+      updateStatus('等待新数据...');
+      return;
+    }
+
+    // 从队列取一个字符渲染
+    const char = bufferQueue.shift();
+    outputEl.textContent += char; // 逐字追加到DOM
+    outputEl.scrollTop = outputEl.scrollHeight; // 自动滚动到底部
+    updateStatus(`打字中（剩余：${bufferQueue.length}）`);
+  }, TYPE_SPEED);
+}
+```
+
+
+#### 3. 连接状态与体验优化
+```javascript
+// 处理SSE连接状态
+sse.addEventListener('open', () => {
+  updateStatus('SSE连接已建立，准备接收数据');
+});
+
+sse.addEventListener('error', (err) => {
+  updateStatus('连接异常，正在重试...');
+  console.error('SSE错误：', err);
+});
+
+// 光标动画（CSS）
+/*
+.cursor {
+  display: inline-block;
+  width: 8px;
+  height: 1.2em;
+  background: #333;
+  animation: blink 1s step-end infinite;
+}
+@keyframes blink { 50% { opacity: 0; } }
+*/
+```
+
+
+## 三、亮点
+1. **解耦“接收”与“渲染”**：用缓冲队列隔离后端推送速度（可能波动）和前端渲染速度（固定），确保打字节奏稳定，避免忽快忽慢；  
+2. **健壮性处理**：包含数据解析错误捕获、连接异常提示、自动重连（`EventSource` 原生支持），保证极端场景下的可用性；  
+3. **用户体验细节**：通过状态提示（如“缓冲中”“等待数据”）和光标动画，让用户清晰感知打字进度，避免“卡顿误解”。  
+
+
+## 总结话术
+“前端对接后端SSE实现打字机效果，核心是三步：  
+1. 用 `EventSource` 建立SSE连接，监听后端推送的字符数据；  
+2. 收到数据后先存入缓冲队列，再通过固定定时器（如100ms/次）匀速消费队列，确保打字速度稳定，不受后端推送波动影响；  
+3. 逐字更新DOM，配合光标动画和状态提示，提升用户体验。  
+关键是通过队列解耦接收和渲染，既兼容后端的流式推送，又保证前端展示的流畅性。”
+
+# SSR是怎么状态同步的
+
+> [!IMPORTANT]
+> SSR 状态同步的本质是 “状态复用”，关键步骤可概括为：
+> 服务器：获取所有渲染依赖的状态 → 存储到状态容器 → 序列化后嵌入 HTML；
+> 客户端：读取 HTML 中的初始状态 → 注入客户端状态容器 → 基于相同状态进行水合。
+> 核心目标是确保 “服务器渲染的 HTML” 与 “客户端虚拟 DOM” 完全匹配，避免水合错误，同时兼顾首屏性能和用户体验。
+
+# 一个函数是如何知道自己是以普通方式被调用的还是被 new 的方式调用的
+
+> [!TIP]
+> 在 JavaScript 中，函数可以通过两种方式判断自己是被**普通调用**（如 `fn()`）还是被**`new` 调用**（如 `new fn()`），核心是利用函数执行时的**内部状态**和**`this` 指向差异**。
+
+
+## 一、核心判断依据：`this` 指向与 `new.target` 属性
+### 1. 利用 `this instanceof 函数名` 判断（传统方式）
+当函数被 `new` 调用时，JavaScript 会自动执行以下步骤：  
+- 创建一个新的空对象（实例）；  
+- 将函数的 `this` 指向这个新实例；  
+- 执行函数体；  
+- 若函数没有返回对象，则默认返回这个实例。  
+
+因此，**`new` 调用时，函数内部的 `this` 是当前函数的实例**，可通过 `this instanceof 函数名` 判断：
+
+```javascript
+function MyFunc() {
+  // 判断是否通过 new 调用
+  if (this instanceof MyFunc) {
+    console.log('通过 new 调用');
+  } else {
+    console.log('普通调用');
+  }
+}
+
+// 测试
+MyFunc(); // 普通调用（this 指向全局对象/undefined）
+new MyFunc(); // 通过 new 调用（this 是 MyFunc 的实例）
+```
+
+**局限性**：  
+如果手动将 `this` 绑定到该函数的实例（如 `MyFunc.call(new MyFunc())`），会误判为 `new` 调用。
+
+
+### 2. 利用 `new.target` 属性判断（ES6+ 推荐方式）
+ES6 引入了 `new.target` 元属性，专门用于判断函数是否通过 `new` 调用：  
+- 当函数被 `new` 调用时，`new.target` 指向当前函数本身；  
+- 当函数被普通调用时，`new.target` 为 `undefined`。  
+
+```javascript
+function MyFunc() {
+  if (new.target) {
+    console.log('通过 new 调用（new.target 存在）');
+    console.log('new.target 指向：', new.target); // 输出 MyFunc
+  } else {
+    console.log('普通调用（new.target 为 undefined）');
+  }
+}
+
+// 测试
+MyFunc(); // 普通调用（new.target 为 undefined）
+new MyFunc(); // 通过 new 调用（new.target 为 MyFunc）
+```
+
+**优势**：  
+- 更精准，不受 `this` 手动绑定的影响；  
+- 可在构造函数中区分“正常实例化”和“子类继承调用”（如子类 `new` 调用时，`new.target` 指向子类）。
+
+**注意**：  
+- 箭头函数不能通过 `new` 调用（会报错），因此箭头函数中没有 `new.target`；  
+- 严格模式/非严格模式下均有效。
+
+
+## 二、两种方式的对比与最佳实践
+| 方式                | 原理                          | 优势                     | 局限性                                 |
+|---------------------|-------------------------------|--------------------------|----------------------------------------|
+| `this instanceof 函数名` | 基于 `this` 是否为函数实例    | 兼容 ES5 及更早环境      | 可能被 `this` 手动绑定干扰             |
+| `new.target`         | 基于 ES6 元属性直接判断       | 精准，不受 `this` 影响   | 不兼容 ES5 及更早环境（需转译）        |
+
+
+**最佳实践**：  
+- 现代环境（支持 ES6+）优先使用 `new.target`，语义更清晰，判断更准确；  
+- 如需兼容旧环境，可结合两种方式：  
+  ```javascript
+  function MyFunc() {
+    const isNewCall = new.target !== undefined || this instanceof MyFunc;
+    console.log(isNewCall ? 'new 调用' : '普通调用');
+  }
+  ```
+
 
 # 如何获取注释的元素
 
